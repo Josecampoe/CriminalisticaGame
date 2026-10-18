@@ -65,6 +65,7 @@ namespace Caso404.EditorTools
                 Password = "LUCERO",
                 ResultText = "Carpeta directiva_404: el código de la directiva y una lista de casos donde se activó, entre ellos \"Mirador / Apto 404\".",
                 SetsFlags = new[] { fDirectiva }
+                , AlexGlitch = true
             };
             Fill(tarjeta, "c2_s2", "Registro de accesos del piso 12", "El registro de tarjetas de acceso del piso 12.", "Tarjeta de V. Duarte, 11:30 PM.");
             Fill(consola, "c2_s2", "Consola de Valeria", "La consola de la oficina de Valeria Duarte.", "Historial borrado a mano a las 11:52 PM.");
