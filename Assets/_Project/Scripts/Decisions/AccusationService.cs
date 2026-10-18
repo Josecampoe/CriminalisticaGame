@@ -40,11 +40,7 @@ namespace Caso404.Decisions
                 endingId = result.Ending != null ? result.Ending.Id : "",
                 variantId = result.Variant != null ? result.Variant.Id : ""
             });
-            if (result.Ending != null)
-            {
-                _state.AddFlag(result.Ending.Id); // los end_c1_* pasan al caso 2 como flags
-                _state.LearnFacts(result.Ending.RevealsFactIds);
-            }
+            if (result.Ending != null) _state.AddFlag(result.Ending.Id); // los end_c1_* pasan al caso 2 como flags
             return result;
         }
     }
