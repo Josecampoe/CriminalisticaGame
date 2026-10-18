@@ -42,17 +42,6 @@ MonoBehaviour:
       _text: 
       _revealsFactIds: []
   _attitudeVariants: []
-  _extraTopics: []
-  _refusesUnless:
-    _allEvidenceAnalyzed: []
-    _anyEvidenceAnalyzed: []
-    _allFlags: []
-    _anyFlags: []
-    _noneFlags: []
-    _exposedLies: []
-    _knownFactIds: []
-  _cooperatesAfterSeeing: {fileID: 0}
-  _refusalLine: 
   _startTrust: 60
   _highTrustThreshold: 60
   _lowTrustThreshold: 30

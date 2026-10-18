@@ -45,28 +45,3 @@ MonoBehaviour:
       _text: "Me fui un ratico a la tienda. Y antes de irme vi a Andr\xE9s, el de mantenimiento, en overol. A esa hora no ten\xEDa nada que hacer aqu\xED."
       _revealsFactIds: []
   _attitudeVariants: []
-  _extraTopics:
-  - _id: llave_maestra
-    _label: Preguntar por la llave maestra
-    _condition:
-      _allEvidenceAnalyzed: []
-      _anyEvidenceAnalyzed: []
-      _allFlags:
-      - {fileID: 11400000, guid: b1ea9debfe2b3d44e84e271fa06fde81, type: 2}
-      _anyFlags: []
-      _noneFlags: []
-      _exposedLies: []
-      _knownFactIds: []
-    _line:
-      _text: "\xBFLa llave maestra? Esa est\xE1 en el llavero de mantenimiento, en el s\xF3tano. Ah\xED queda anotado qui\xE9n la saca y a qu\xE9 hora."
-      _revealsFactIds: []
-  _refusesUnless:
-    _allEvidenceAnalyzed: []
-    _anyEvidenceAnalyzed: []
-    _allFlags: []
-    _anyFlags: []
-    _noneFlags: []
-    _exposedLies: []
-    _knownFactIds: []
-  _cooperatesAfterSeeing: {fileID: 0}
-  _refusalLine: 
