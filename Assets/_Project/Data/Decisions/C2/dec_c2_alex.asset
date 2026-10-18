@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dec343f0efddaf742832f9dde88f5d1e, type: 3}
+  m_Name: dec_c2_alex
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.DecisionData
+  _id: dec_c2_alex
+  _prompt: "\xBFQu\xE9 haces con ALEX?"
+  _irreversible: 1
+  _alexRecommendedOptionId: 
+  _alexRecommendationText: 
+  _options:
+  - _id: A
+    _text: "Desconectar a ALEX y entregar su c\xF3digo a la Fiscal\xEDa"
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+    _setsFlags: []
+    _alexTrustDelta: 0
+    _nextSceneId: 
+    _letPlayerChooseNextScene: 0
+    _resultText: "Desconexi\xF3n. La pantalla se apaga. \xDAltimo mensaje de ALEX: \"\xBFY qui\xE9n te va a ayudar ahora?\" Ep\xEDlogo: juicio a Nexo Analytics."
+    _resultSpokenByAlex: 0
+    _grantsEvidence: []
+  - _id: B
+    _text: Publicar todo con Elena, incluido el interrogatorio a ALEX
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+    _setsFlags: []
+    _alexTrustDelta: 0
+    _nextSceneId: 
+    _letPlayerChooseNextScene: 0
+    _resultText: "Archivo encontrado. El art\xEDculo de Elena se vuelve viral, Nexo pierde el contrato con la polic\xEDa y Valdora debate si se puede confiar en una IA. Rivera cierra su libreta: \"La verdad no estaba perdida. Solo la hab\xEDan escondido.\""
+    _resultSpokenByAlex: 0
+    _grantsEvidence: []
