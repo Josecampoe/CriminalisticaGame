@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70e0dbe3dfe44da4f98693d99eab3bfc, type: 3}
   m_Name: AiSettings
   m_EditorClassIdentifier: Caso404.Runtime::Caso404.AI.AiSettings
-  _useOffline: 0
-  _proxyUrl: http://127.0.0.1:8790/dialogue
+  _useOffline: 1
+  _proxyUrl: http://localhost:8787/dialogue
   _model: 
   _timeoutSeconds: 15
   _maxQuestionLength: 200
