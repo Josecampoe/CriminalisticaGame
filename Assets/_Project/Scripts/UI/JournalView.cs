@@ -41,7 +41,7 @@ namespace Caso404.UI
             UIFactory.Place((RectTransform)close.transform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-60, -36), new Vector2(200, 48));
 
             var listBg = UIFactory.Panel(rt, "ListBg", UITheme.WithAlpha(_theme.Paper, 0.06f));
-            UIFactory.Stretch(UIFactory.Region(listBg.rectTransform, new Vector2(0.03f, 0.06f), new Vector2(0.38f, 0.86f)));
+            UIFactory.Region(listBg.rectTransform, new Vector2(0.03f, 0.06f), new Vector2(0.38f, 0.86f));
             _list = UIFactory.ScrollList(listBg.transform, "Cards", 10, 12);
             UIFactory.Stretch((RectTransform)_list.parent.parent);
 
