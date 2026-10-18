@@ -16,6 +16,9 @@ namespace Caso404.UI
 
         readonly List<UIPanel> _stack = new();
 
+        /// <summary>Frame en el que se cerró el último panel (para que Escape no cierre un panel y abra la pausa a la vez).</summary>
+        public int LastCloseFrame { get; private set; } = -1;
+
         public UIPanel Top => _stack.Count > 0 ? _stack[^1] : null;
         public bool AnyModalOpen => _stack.Exists(p => p.BlocksGameplay);
 
@@ -45,6 +48,7 @@ namespace Caso404.UI
         public void Remove(UIPanel panel)
         {
             if (panel == null || !_stack.Remove(panel)) return;
+            LastCloseFrame = Time.frameCount;
             panel.HideInternal();
             NotifyModal();
         }
