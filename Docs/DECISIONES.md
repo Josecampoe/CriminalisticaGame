@@ -180,3 +180,13 @@ Registro de decisiones tomadas durante el desarrollo, con su motivo. Cuando el g
 | L12 | La Comisaría es una sola escena de Unity para los dos casos. `GameContext` elige `c1_s4` o `c2_s4` según el caso en curso (`_alternativeScenes`), y cada personaje solo aparece si el `SceneData` activo lo lista. El elenco del caso 2 (Sebastián, Valeria, Inés y Elena) ya está colocado. | GUION §2: espacio compartido. |
 | L13 | En el final secreto, después del texto del interrogatorio a ALEX se abre `dec_c2_alex`. Su resultado ("Desconexión" o "Archivo encontrado") se muestra antes de los créditos "ERROR 404: CONFIANZA NO ENCONTRADA.". El flujo está listo, pero solo se podrá jugar cuando existan c2_s2 y c2_s3. | GUION §4.6. |
 | L14 | La prueba del final verdadero del caso 1 sigue hasta el caso 2: comprueba que pasan los flags, el final y `alexTrust`, recorre c2_s1 (5 evidencias, 2 contradicciones de ALEX, hipótesis) y toma `dec_c2_s1`. | Así se comprueba la conexión entre casos. |
+
+## Fase L (continuación) — c2_s2, c2_s3 y caso 2 jugable completo
+
+| # | Decisión | Motivo |
+|---|---|---|
+| L15 | c2_s2 "Piso ejecutivo": tres oficinas con frente de vidrio (Tomás, Valeria y Sebastián), un ventanal con luces de la ciudad y el lector de accesos junto al ascensor (registro de la tarjeta). Valeria está de pie en su oficina; Sebastián, sentado en su escritorio (no aparece si hay `flag_c2_tiempo_perdido`). | GUION §4.4. |
+| L16 | c2_s3 "Caseta y parqueadero": caseta con monitores, termo, el servidor de copias espejo y el casillero de Inés (con el sobre), y la cámara en el parqueadero. La copia espejo no es un objeto de la escena: la entrega Inés si la proteges y aún existe. | GUION §4.4: la consigue `dec_c2_ines` A. |
+| L17 | Las actitudes de Elena salen como saludo al hablarle. Si guardaste el cuaderno fuera del sistema, su frase baja `alexTrust` en 5 una sola vez (se marca con un flag `att_elena_n`). Las actitudes que no son frases del guion van entre paréntesis, como indicación. | GUION §4.3. |
+| L18 | Nuevas pruebas PlayMode del caso 2: **final secreto** (con `flag_c1_pista_nx`, hasta `dec_c2_alex`, el resultado y los créditos) y **engaño con tiempo perdido** (Sebastián no está en su oficina y la copia espejo ya no existe). Empiezan desde una partida guardada al terminar el caso 1, con *Continuar*. | Comprueba el caso 2 completo sin repetir el caso 1. |
+| L19 | Pendiente: Elena "solo coopera si le muestras `ev_c2_usb_elena`" cuando el caso 1 terminó en engaño. Hoy solo cambia su saludo. | Hace falta una regla de diálogo nueva (bloquear temas hasta presentar una evidencia). |
