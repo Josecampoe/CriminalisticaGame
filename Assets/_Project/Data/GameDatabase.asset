@@ -14,5 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.GameDatabase
   _cases:
   - {fileID: 11400000, guid: 95dd3c1c595c80b42a3c5a02386aaaab, type: 2}
+  - {fileID: 11400000, guid: 0147611183cc35b4e93ee5217378b0c7, type: 2}
   _alex: {fileID: 11400000, guid: 272c2b67e9720664fa13eb21a094de7e, type: 2}
   _introText: "Valdora, 2031. La Unidad de Criminal\xEDstica estrena compa\xF1ero: ALEX, una inteligencia artificial que nunca duerme, nunca olvida y nunca se equivoca. O eso dice el folleto."
