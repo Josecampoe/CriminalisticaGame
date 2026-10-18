@@ -110,17 +110,44 @@ namespace Caso404.Dialogue
         {
             var lie = c.Lies.FirstOrDefault(l => l != null && !_state.IsLieExposed(l.Id) &&
                 ((item.Evidence != null && l.IsRefutedBy(item.Evidence)) || (item.FactId != null && l.IsRefutedByFact(item.FactId))));
+            bool granted = item.Evidence != null && GrantEvidenceFor(c, item.Evidence);
             if (lie == null)
-                return Remember(new DialogueLine { Speaker = c.DisplayName, Text = c.Fallback.Evidence.Text, Emotion = "defensivo" }, item.Label);
+            {
+                var reply = granted ? c.Lies.First(l => l != null && l.IsRefutedBy(item.Evidence)).ExposedResponse : c.Fallback.Evidence.Text;
+                return Remember(new DialogueLine { Speaker = c.DisplayName, Text = reply, Emotion = granted ? "nervioso" : "defensivo" }, item.Label);
+            }
 
             _state.ExposeLie(lie.Id);
             _state.LearnFacts(lie.RevealsFactIdsOnExposed);
             _state.AddFlags(lie.SetsFlagsOnExposed);
-            if (item.Evidence != null)
-                foreach (var granted in lie.GrantsEvidenceOnExposed) _evidence.Grant(granted);
             LieExposed?.Invoke(c, lie);
             var text = $"«{lie.Statement}»... {lie.ExposedResponse}";
             return Remember(new DialogueLine { Speaker = c.DisplayName, Text = text, Emotion = "nervioso", ExposedLie = true }, item.Label);
+        }
+
+        /// <summary>
+        /// Entrega las evidencias que el personaje da al refutarle una mentira con una evidencia (ej. el celular de Andrés).
+        /// Solo en la escena donde esa evidencia aparece según el guion (el celular, en la Comisaría).
+        /// </summary>
+        bool GrantEvidenceFor(CharacterProfile c, EvidenceData presented)
+        {
+            bool any = false;
+            foreach (var l in c.Lies.Where(l => l != null && l.IsRefutedBy(presented)))
+                foreach (var g in l.GrantsEvidenceOnExposed)
+                    if (g != null && !_evidence.IsFound(g) && (string.IsNullOrEmpty(g.SceneId) || g.SceneId == _state.State.currentSceneId))
+                        any |= _evidence.Grant(g);
+            return any;
+        }
+
+        /// <summary>Temas extra disponibles ahora con este personaje (ej. la llave maestra).</summary>
+        public IEnumerable<ExtraTopic> AvailableExtraTopics(CharacterProfile c) =>
+            c == null ? Enumerable.Empty<ExtraTopic>() : c.ExtraTopics.Where(t => t.Condition.Evaluate(_state));
+
+        /// <summary>Pregunta por un tema extra (respuesta fija de los datos).</summary>
+        public DialogueLine AskExtra(CharacterProfile c, ExtraTopic topic)
+        {
+            _state.LearnFacts(topic.Line.RevealsFactIds);
+            return Remember(new DialogueLine { Speaker = c.DisplayName, Text = topic.Line.Text, Emotion = "neutral" }, topic.Label);
         }
 
         DialogueLine Press(CharacterProfile c)
