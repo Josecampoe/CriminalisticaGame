@@ -35,6 +35,7 @@ MonoBehaviour:
     _letPlayerChooseNextScene: 1
     _resultText: "Carlos queda detenido. Lo interrogar\xE1s en la Comisar\xEDa."
     _resultSpokenByAlex: 0
+    _grantsEvidence: []
   - _id: B
     _text: Hablar con Carlos antes de actuar
     _condition:
@@ -51,6 +52,7 @@ MonoBehaviour:
     _letPlayerChooseNextScene: 0
     _resultText: 
     _resultSpokenByAlex: 0
+    _grantsEvidence: []
   - _id: C
     _text: "Revisar primero la porter\xEDa y el s\xF3tano"
     _condition:
@@ -67,3 +69,4 @@ MonoBehaviour:
     _letPlayerChooseNextScene: 0
     _resultText: 
     _resultSpokenByAlex: 0
+    _grantsEvidence: []
