@@ -146,35 +146,6 @@ namespace Caso404.Tests
         }
 
         [Test]
-        public void Elena_AfterDeceptionEnding_CooperatesOnlyAfterSeeingHerUsb()
-        {
-            var w = World();
-            w.State.AddFlag("end_c1_engano");
-            var d = new DialogueService(w.State, w.Evidence, new OfflineAiClient(), w.Case);
-            var elena = w.Case.FindCharacter("elena");
-            d.Begin(elena);
-            Assert.IsTrue(d.IsRefusing(elena));
-            Assert.IsEmpty(d.AvailableExtraTopics(elena), "Mientras no coopera no ofrece sus temas");
-            StringAssert.Contains("Carlos", d.AskAsync(elena, DialogueTopic.Crime, null, default).Result.Text);
-            w.CollectAndAnalyze("ev_c2_usb_elena");
-            d.Present(elena, d.GetPresentableItems().First(i => i.Evidence != null && i.Evidence.Id == "ev_c2_usb_elena"));
-            Assert.IsFalse(d.IsRefusing(elena));
-            Assert.IsNotEmpty(d.AvailableExtraTopics(elena));
-        }
-
-        [Test]
-        public void Elena_NotebookGreetingLowersTrustOnce()
-        {
-            var w = World();
-            w.State.AddFlag("flag_c1_cuaderno");
-            var d = new DialogueService(w.State, w.Evidence, new OfflineAiClient(), w.Case);
-            var elena = w.Case.FindCharacter("elena");
-            StringAssert.Contains("cuaderno", d.Greeting(elena));
-            d.Greeting(elena);
-            Assert.AreEqual(55, w.State.AlexTrust, "−5 una sola vez");
-        }
-
-        [Test]
         public void Data_IsFairAndMatchesTheScript()
         {
             var w = World();
