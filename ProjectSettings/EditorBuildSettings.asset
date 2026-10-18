@@ -6,8 +6,20 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/_Project/Scenes/MainMenu.unity
+    guid: cfc19a9c21be8ce44be370065984e50d
+  - enabled: 1
     path: Assets/_Project/Scenes/Apartamento404.unity
     guid: 71b6ccc7d7dfb7748a4ae2583a246152
+  - enabled: 1
+    path: Assets/_Project/Scenes/CafeLaEsquina.unity
+    guid: 742d839963ff7cc4e9833bd42d1aa384
+  - enabled: 1
+    path: Assets/_Project/Scenes/PorteriaSotano.unity
+    guid: 2a1d4ba052b298043b65a61fbcbefcd8
+  - enabled: 1
+    path: Assets/_Project/Scenes/Comisaria.unity
+    guid: 63e85174958fae84c80e7c42644aaf94
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
