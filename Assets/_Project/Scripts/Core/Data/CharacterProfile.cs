@@ -69,6 +69,22 @@ namespace Caso404.Data
         public DecisionData TriggersDecision { get => _triggersDecision; internal set => _triggersDecision = value; }
     }
 
+    /// <summary>Tema extra de conversación que aparece al cumplirse una condición (ej. "Preguntar por la llave maestra").</summary>
+    [Serializable]
+    public class ExtraTopic
+    {
+        [SerializeField] private string _id;
+        [SerializeField] private string _label;
+        [SerializeField] private Condition _condition = new();
+        [SerializeField] private FallbackLine _line = new();
+
+        public string Id { get => _id; internal set => _id = value; }
+        /// <summary>Texto del botón.</summary>
+        public string Label { get => _label; internal set => _label = value; }
+        public Condition Condition { get => _condition; internal set => _condition = value; }
+        public FallbackLine Line { get => _line; internal set => _line = value; }
+    }
+
     /// <summary>Variante de actitud según el estado (ej. Elena según el final del caso 1).</summary>
     [Serializable]
     public class AttitudeVariant
@@ -97,6 +113,7 @@ namespace Caso404.Data
         [SerializeField] private List<SecretEntry> _secrets = new();
         [SerializeField] private FallbackLines _fallback = new();
         [SerializeField] private List<AttitudeVariant> _attitudeVariants = new();
+        [SerializeField] private List<ExtraTopic> _extraTopics = new();
 
         public string Id { get => _id; internal set => _id = value; }
         public string DisplayName { get => _displayName; internal set => _displayName = value; }
@@ -112,6 +129,7 @@ namespace Caso404.Data
         public IReadOnlyList<SecretEntry> Secrets { get => _secrets; internal set => _secrets = new(value); }
         public FallbackLines Fallback { get => _fallback; internal set => _fallback = value; }
         public IReadOnlyList<AttitudeVariant> AttitudeVariants { get => _attitudeVariants; internal set => _attitudeVariants = new(value); }
+        public IReadOnlyList<ExtraTopic> ExtraTopics { get => _extraTopics; internal set => _extraTopics = new(value); }
 
         /// <summary>Busca el texto de un hecho propio por id (null si no lo conoce).</summary>
         public FactEntry FindFact(string factId) => _knownFacts.Find(f => f.Id == factId);

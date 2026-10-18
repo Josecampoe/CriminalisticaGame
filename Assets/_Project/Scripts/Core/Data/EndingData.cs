@@ -61,6 +61,7 @@ namespace Caso404.Data
         [SerializeField] private List<EndingVariant> _variants = new();
         [SerializeField, TextArea] private string _closingText;
         [SerializeField] private DecisionData _followUpDecision;
+        [SerializeField] private List<string> _revealsFactIds = new();
 
         public string Id { get => _id; internal set => _id = value; }
         public string CaseId { get => _caseId; internal set => _caseId = value; }
@@ -74,5 +75,7 @@ namespace Caso404.Data
         public string ClosingText { get => _closingText; internal set => _closingText = value; }
         /// <summary>Decisión que se abre tras este final (ej. dec_c2_alex).</summary>
         public DecisionData FollowUpDecision { get => _followUpDecision; internal set => _followUpDecision = value; }
+        /// <summary>Hechos que se conocen en este final (ej. la confesión de Andrés).</summary>
+        public IReadOnlyList<string> RevealsFactIds { get => _revealsFactIds; internal set => _revealsFactIds = new(value); }
     }
 }
