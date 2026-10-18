@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8dac0d6a92d79142a22c279081ae8dd, type: 3}
+  m_Name: chr_carlos
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.CharacterProfile
+  _id: carlos
+  _displayName: "Carlos M\xE9ndez"
+  _age: 36
+  _role: Chef, ex pareja de Elena
+  _caseId: c1
+  _personality: "Impulsivo, orgulloso, se pone a la defensiva r\xE1pido. Cuando se calma, se nota que todav\xEDa quiere a Elena."
+  _portrait: {fileID: 0}
+  _placeholderColor: {r: 0.55, g: 0.27, b: 0.2, a: 1}
+  _knownFacts:
+  - _id: f_c1_carlos_visita
+    _text: Fue a devolverle una caja con cosas, discutieron y se fue a las 9:40.
+  - _id: f_c1_carlos_cafe
+    _text: "Despu\xE9s estuvo en el Caf\xE9 La Esquina hasta las 11:05."
+  - _id: f_c1_carlos_balcon
+    _text: "Fum\xF3 en el balc\xF3n durante la visita."
+  _lies:
+  - {fileID: 11400000, guid: ca68f41514012a24cae7b9aeb3eafe56, type: 2}
+  _secrets: []
+  _fallback:
+    _crime:
+      _text: "Yo jam\xE1s le har\xEDa da\xF1o a Elena. Jam\xE1s."
+      _revealsFactIds: []
+    _otherPerson:
+      _text: "La vecina, Laura, siempre est\xE1 pendiente de todo. Preg\xFAntele a ella."
+      _revealsFactIds: []
+    _evidence:
+      _text: Eso no prueba nada. Mucha gente usa esos zapatos.
+      _revealsFactIds: []
+    _press:
+      _text: "\xA1Est\xE1 bien! S\xED fui. Discutimos y me fui. A las diez y media yo estaba tomando caf\xE9, \xA1revise!"
+      _revealsFactIds: []
+  _attitudeVariants: []

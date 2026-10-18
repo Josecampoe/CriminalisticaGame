@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ae49f3db5a70314dbf28f152a69aa23, type: 3}
+  m_Name: lie_c1_alex_ventana
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.LieData
+  _id: lie_c1_alex_ventana
+  _caseId: c1
+  _ownerId: alex
+  _isAlexLie: 1
+  _statement: "El agresor entr\xF3 por el balc\xF3n. La huella de Carlos est\xE1 justo debajo de la ventana. Es bastante claro."
+  _refutedByEvidence:
+  - {fileID: 11400000, guid: 7f5125a108b64f14c823d0deda87b1c1, type: 2}
+  - {fileID: 11400000, guid: 804ecff1b46873647bd4803bd26fef3e, type: 2}
+  _refutedByFactIds: []
+  _exposedResponse: 
+  _revealsFactIdsOnExposed: []
+  _setsFlagsOnExposed: []
+  _grantsEvidenceOnExposed: []
+  _alexTrigger: 2
+  _alexTriggerEvidence: {fileID: 11400000, guid: b304430acb25b41439500cde97db3e2c, type: 2}

@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ae49f3db5a70314dbf28f152a69aa23, type: 3}
+  m_Name: lie_c1_carlos_nofui
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.LieData
+  _id: lie_c1_carlos_nofui
+  _caseId: c1
+  _ownerId: carlos
+  _isAlexLie: 0
+  _statement: No fui al edificio esa noche.
+  _refutedByEvidence:
+  - {fileID: 11400000, guid: 302a7cefa57bd86478aea1c75cc3c10d, type: 2}
+  - {fileID: 11400000, guid: b304430acb25b41439500cde97db3e2c, type: 2}
+  - {fileID: 11400000, guid: aa4ce633b72e7c448a12b64229401f93, type: 2}
+  _refutedByFactIds:
+  - f_c1_laura_gritos
+  _exposedResponse: "\xA1Est\xE1 bien! S\xED fui. Discutimos y me fui. A las diez y media yo estaba tomando caf\xE9, \xA1revise!"
+  _revealsFactIdsOnExposed:
+  - f_c1_carlos_visita
+  - f_c1_carlos_cafe
+  - f_c1_carlos_balcon
+  _setsFlagsOnExposed: []
+  _grantsEvidenceOnExposed: []
+  _alexTrigger: 0
+  _alexTriggerEvidence: {fileID: 0}
