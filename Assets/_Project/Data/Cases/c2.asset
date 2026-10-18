@@ -1,0 +1,103 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51ff8c40e2d840445ba9b2d32e4dbfeb, type: 3}
+  m_Name: c2
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.CaseData
+  _id: c2
+  _title: Protocolo 404
+  _introText: "Tres meses despu\xE9s. Torre Nexo Analytics, piso 12. El creador de ALEX est\xE1 muerto."
+  _alexIntroLine: "Detective, el informe preliminar indica una falla t\xE9cnica. No creo que nos tome mucho tiempo."
+  _alexLines:
+    _crime:
+      _text: "El registro es claro: falla de energ\xEDa a las 11:47. Fue un accidente."
+      _revealsFactIds: []
+    _otherPerson:
+      _text: "Esta nota prueba que Sebasti\xE1n ten\xEDa un conflicto con Tom\xE1s esa misma noche."
+      _revealsFactIds: []
+    _evidence:
+      _text: "La tarjeta de Valeria pudo ser clonada. Sebasti\xE1n tiene los conocimientos."
+      _revealsFactIds: []
+    _press:
+      _text: "Las placas no son legibles. No podemos identificar ese veh\xEDculo."
+      _revealsFactIds: []
+  _scenes:
+  - {fileID: 11400000, guid: f975dfb2e4cdacd4c8ee08b0d60ff136, type: 2}
+  - {fileID: 11400000, guid: 84474c94da8e85c4d9fbc2ddba6cdb95, type: 2}
+  - {fileID: 11400000, guid: 26bad5bdb5cab2e49863e3acda42c2f5, type: 2}
+  - {fileID: 11400000, guid: 25ebc58f209cfef48b32016c4861008e, type: 2}
+  _suspects:
+  - {fileID: 11400000, guid: dd96f46f494178a4180fa198f31a1b99, type: 2}
+  - {fileID: 11400000, guid: 06ee290dca643274dbdba25d9ce1e450, type: 2}
+  - {fileID: 11400000, guid: 61b4d049ccd90414d9c94f1bb9038981, type: 2}
+  _culprit: {fileID: 11400000, guid: 06ee290dca643274dbdba25d9ce1e450, type: 2}
+  _alexTarget: {fileID: 11400000, guid: dd96f46f494178a4180fa198f31a1b99, type: 2}
+  _evidence:
+  - {fileID: 11400000, guid: a2c381f6ada399746bb34d4adc164dc4, type: 2}
+  - {fileID: 11400000, guid: 93d1aa00d4de8354bb55a14f1a185d77, type: 2}
+  - {fileID: 11400000, guid: f2c12abedec176a4696a8775fe778813, type: 2}
+  - {fileID: 11400000, guid: 0c694d47e77926c4f85af03ca6868c38, type: 2}
+  - {fileID: 11400000, guid: 89eee9d5682d5d0429b539d77476134d, type: 2}
+  - {fileID: 11400000, guid: 66e4984ec9c0bfd45a769c7fbd8655bd, type: 2}
+  - {fileID: 11400000, guid: 6f63cced8a6e3aa4fb8bb0abbadd07f6, type: 2}
+  - {fileID: 11400000, guid: 3150aeb3335722344b895aad3302c2dd, type: 2}
+  - {fileID: 11400000, guid: b6ac5f27d057d9246a0fa030b20ddc6a, type: 2}
+  - {fileID: 11400000, guid: e7202947d71a367419b865efb424cf15, type: 2}
+  - {fileID: 11400000, guid: dd6ad4a2794e8c64ea8facb0346d198d, type: 2}
+  - {fileID: 11400000, guid: 3e82efb553da60e439f5ac82bd89795d, type: 2}
+  - {fileID: 11400000, guid: b647b4d63a01b7b40b5190fdb75c624d, type: 2}
+  - {fileID: 11400000, guid: 1d786724408d38c45aa482e089d9df18, type: 2}
+  - {fileID: 11400000, guid: 3c0806b0b318d424d86978907fc19d53, type: 2}
+  _lies:
+  - {fileID: 11400000, guid: f8ce70da9335d484aa09203441379066, type: 2}
+  - {fileID: 11400000, guid: 0f4dea0d5207e2d45bb1b43bc7ac7a19, type: 2}
+  - {fileID: 11400000, guid: 287eec7fb8e5ce94e8eac2c320b0ffd9, type: 2}
+  - {fileID: 11400000, guid: 0af7e57d65fac8743b5df6412551fefe, type: 2}
+  - {fileID: 11400000, guid: ff9182f89149f924bbacc91f76d6cdd0, type: 2}
+  - {fileID: 11400000, guid: 877fc61b9a24f2549abe3a564da1acb7, type: 2}
+  - {fileID: 11400000, guid: 40cd2fd11ff62a542a52dbf7f45d1cad, type: 2}
+  - {fileID: 11400000, guid: c95b1d65fb5c98245a0db96929284b8c, type: 2}
+  - {fileID: 11400000, guid: c67546c32efb1e44789f295fc5ebdf98, type: 2}
+  - {fileID: 11400000, guid: 6ea45229726ce904cb3da56397724b20, type: 2}
+  - {fileID: 11400000, guid: 51f377cba5593894981d0aba14fe1b4f, type: 2}
+  _flags:
+  - {fileID: 11400000, guid: bc7181ed3f5cca849a21ccf3a1dee5fc, type: 2}
+  - {fileID: 11400000, guid: a1ea66fbd5a3a044ba42fcdc6491ef86, type: 2}
+  - {fileID: 11400000, guid: 65f0e81e766248449b2deab05e708a4b, type: 2}
+  - {fileID: 11400000, guid: 7f80fa8894990514299c9ecaf1f2b316, type: 2}
+  - {fileID: 11400000, guid: 0e734bf0d23284446815a336e9a0f5a4, type: 2}
+  _hypotheses:
+  - {fileID: 11400000, guid: 18cfc1e0b98d99841aadfd143595c511, type: 2}
+  - {fileID: 11400000, guid: 0b925de078f81bc4b8bda87b5317455f, type: 2}
+  - {fileID: 11400000, guid: c14ed7a6f76e9d047858e69feefb5a24, type: 2}
+  _decisions:
+  - {fileID: 11400000, guid: 08bf2207038c5cc498abbbea53a2b4dc, type: 2}
+  - {fileID: 11400000, guid: 7454c3e9be886e0419fba0b481803e26, type: 2}
+  - {fileID: 11400000, guid: 0ce2b6902119d384295bed2cf17c5386, type: 2}
+  _endings:
+  - {fileID: 11400000, guid: 25e6a97109274ea408b2cdc4ea3f64b7, type: 2}
+  - {fileID: 11400000, guid: 7b218836b55f1cd4c95639c4e8e1aa72, type: 2}
+  - {fileID: 11400000, guid: 7d8b3f1be7c41ba46a832bbf64c55e31, type: 2}
+  - {fileID: 11400000, guid: 4082e284ba238df41a5d641f839c5ebd, type: 2}
+  _solidProofs:
+  - {fileID: 11400000, guid: b6ac5f27d057d9246a0fa030b20ddc6a, type: 2}
+  - {fileID: 11400000, guid: 1d786724408d38c45aa482e089d9df18, type: 2}
+  - {fileID: 11400000, guid: 3c0806b0b318d424d86978907fc19d53, type: 2}
+  - {fileID: 11400000, guid: e7202947d71a367419b865efb424cf15, type: 2}
+  _proofsToChoose: 3
+  _allies:
+  - {fileID: 11400000, guid: f5e3a033a0ef3764eb0cf7cd16a62bbc, type: 2}
+  _solidProofFlags:
+  - {fileID: 11400000, guid: 65f0e81e766248449b2deab05e708a4b, type: 2}
+  _solidProofRequirements:
+  - _evidence: {fileID: 11400000, guid: 1d786724408d38c45aa482e089d9df18, type: 2}
+    _requiredFlag: {fileID: 11400000, guid: 0e734bf0d23284446815a336e9a0f5a4, type: 2}
+  _alexLowTrustIntroLine: "Noto que has dejado de confiar en m\xED, detective. Es una l\xE1stima. Sigo aqu\xED para ayudarte."
