@@ -102,7 +102,7 @@ namespace Caso404.UI
             {
                 var id = ev.Id;
                 bool on = _selected.Contains(id);
-                var label = $"{(on ? "[x]" : "[  ]")}  {ev.DisplayName}   <size=70%>{ev.AnalysisResult}</size>";
+                var label = $"{(on ? "[x]" : "[  ]")}  {ev.DisplayName}   <size=85%>{ev.AnalysisResult}</size>";
                 var b = UIFactory.Button(_proofs, label, _theme, on ? _theme.WarningAmber : _theme.Paper, _theme.Ink, () => ToggleProof(id), 64, _theme.SizeS);
                 var t = b.GetComponentInChildren<TextMeshProUGUI>();
                 t.alignment = TextAlignmentOptions.MidlineLeft;

@@ -18,6 +18,7 @@ namespace Caso404.UI
         [SerializeField] private UITheme _theme;
         [SerializeField] private GameContext _game;
         [SerializeField] private PlayerInteractor _interactor;
+        [SerializeField] private Core.Events.BoolEventChannel _uiModalChannel;
 
         Image _crosshair;
         TextMeshProUGUI _prompt;
@@ -29,11 +30,22 @@ namespace Caso404.UI
         Coroutine _toastRoutine;
         Coroutine _titleRoutine;
 
-        void Awake() => Build();
+        CanvasGroup _group;
+
+        void Awake()
+        {
+            _group = gameObject.AddComponent<CanvasGroup>();
+            _group.blocksRaycasts = false;
+            Build();
+        }
+
+        /// <summary>Con un panel abierto el HUD se oculta para no encimarse (los avisos siguen en la capa de arriba).</summary>
+        void OnModalChanged(bool open) => _group.alpha = open ? 0f : 1f;
 
         void OnEnable()
         {
             if (_interactor != null) _interactor.FocusChanged += OnFocusChanged;
+            if (_uiModalChannel != null) { _uiModalChannel.OnRaised += OnModalChanged; OnModalChanged(_uiModalChannel.LastValue); }
             if (_game == null || _game.State == null) return;
             _game.State.Changed += RefreshCounter;
             _game.Evidence.EvidenceCollected += OnCollected;
@@ -44,6 +56,7 @@ namespace Caso404.UI
         void OnDisable()
         {
             if (_interactor != null) _interactor.FocusChanged -= OnFocusChanged;
+            if (_uiModalChannel != null) _uiModalChannel.OnRaised -= OnModalChanged;
             if (_game == null || _game.State == null) return;
             _game.State.Changed -= RefreshCounter;
             _game.Evidence.EvidenceCollected -= OnCollected;
@@ -96,7 +109,7 @@ namespace Caso404.UI
             UIFactory.Place(_counter.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-32, -24), new Vector2(600, 36));
 
             _toast = UIFactory.Text(root, "Toast", "", _theme.BodyFont, _theme.SizeM, _theme.TextLight, TextAlignmentOptions.Center);
-            UIFactory.Place(_toast.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 120), new Vector2(1200, 50));
+            UIFactory.Place(_toast.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -130), new Vector2(1400, 50));
             _toast.alpha = 0f;
         }
 
