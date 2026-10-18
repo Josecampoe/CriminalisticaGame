@@ -50,7 +50,8 @@ MonoBehaviour:
       _noneFlags: []
       _exposedLies: []
       _knownFactIds: []
-    _text: "Conf\xEDa en Rivera y comparte todo de inmediato."
+    _text: "(Elena conf\xEDa en ti y comparte todo de inmediato.)"
+    _alexTrustDelta: 0
   - _condition:
       _allEvidenceAnalyzed: []
       _anyEvidenceAnalyzed: []
@@ -60,7 +61,8 @@ MonoBehaviour:
       _noneFlags: []
       _exposedLies: []
       _knownFactIds: []
-    _text: Es cooperativa, pero cautelosa.
+    _text: (Elena coopera, pero con cautela.)
+    _alexTrustDelta: 0
   - _condition:
       _allEvidenceAnalyzed: []
       _anyEvidenceAnalyzed: []
@@ -71,6 +73,7 @@ MonoBehaviour:
       _exposedLies: []
       _knownFactIds: []
     _text: Metieron preso a Carlos por algo que no hizo.
+    _alexTrustDelta: 0
   - _condition:
       _allEvidenceAnalyzed: []
       _anyEvidenceAnalyzed: []
@@ -81,6 +84,7 @@ MonoBehaviour:
       _exposedLies: []
       _knownFactIds: []
     _text: Laura me dijo que guardaste mi cuaderno fuera del sistema. Gracias.
+    _alexTrustDelta: -5
   _extraTopics:
   - _id: tomas_correo
     _label: "Preguntar por el correo de Tom\xE1s"
