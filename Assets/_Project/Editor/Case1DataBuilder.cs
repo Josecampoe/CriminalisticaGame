@@ -393,7 +393,11 @@ namespace Caso404.EditorTools
             Dirty(c1);
 
             var db = Asset<GameDatabase>(DatabasePath);
-            db.Cases = new[] { c1 };
+            // Conserva los demás casos (el caso 2 lo agrega su propio generador).
+            var cases = new System.Collections.Generic.List<CaseData>(db.Cases);
+            cases.RemoveAll(x => x == null || x.Id == "c1");
+            cases.Insert(0, c1);
+            db.Cases = cases;
             db.Alex = alex;
             db.IntroText = "Valdora, 2031. La Unidad de Criminalística estrena compañero: ALEX, una inteligencia artificial que nunca duerme, nunca olvida y nunca se equivoca. O eso dice el folleto.";
             Dirty(db);
