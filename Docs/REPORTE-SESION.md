@@ -115,3 +115,14 @@ Las decisiones de esta sesión están en `Docs/DECISIONES.md`, secciones S1–S5
 
 ## Sesión 1 (resumen)
 Fases A–F: preparación del proyecto, ScriptableObjects y generador de datos del caso 1, núcleo (`GameState`, servicios, guardado, `EndingEvaluator`), jugador en primera persona con inspección, UI básica y la escena c1_s1 hasta `dec_c1_s1`. Commits `10af5de` a `836946b`.
+
+---
+
+## Cierre de la sesión 2 (12:31 PM)
+
+El trabajo se detuvo a las 10:20 AM porque se alcanzó el límite de uso. Se retomó a las 12:31 PM, después de la hora límite (11:45), solo para cerrar este reporte. No hubo cambios de código después de las 10:20: el último commit de código es `02c618d` (glitch 404 y atajos de Editor).
+
+Estado final:
+- Fases A a L completas. El caso 1 y el caso 2 se juegan de principio a fin, incluido el final secreto.
+- 40 pruebas EditMode y 6 PlayMode en verde. Las pruebas explícitas de capturas y del proxy también pasaron.
+- Lo pendiente y los pasos para probar están en las secciones 2 y 4 de este reporte.
