@@ -126,7 +126,10 @@ namespace Caso404.UI
             _tag.text = "";
             _input.text = "";
             _chooser.gameObject.SetActive(false);
-            SetLine($"<color=#{ColorUtility.ToHtmlStringRGB(_theme.Muted)}>¿Qué le preguntas a {character.DisplayName}?</color>", instant: true);
+            var greeting = _game.Dialogue.Greeting(character);
+            SetLine(string.IsNullOrEmpty(greeting)
+                ? $"<color=#{ColorUtility.ToHtmlStringRGB(_theme.Muted)}>¿Qué le preguntas a {character.DisplayName}?</color>"
+                : greeting, instant: string.IsNullOrEmpty(greeting));
             if (_player.Controller != null) _player.Controller.FocusOn(head);
             Open();
             RefreshButtons();
