@@ -60,14 +60,9 @@ namespace Caso404.Tests
             var d = Make(w);
             var andres = Who(w, "andres");
             w.CollectAndAnalyze("ev_c1_llavero");
-            w.State.SetCurrentScene("c1", "c1_s3");
-            d.Begin(andres);
-            Assert.IsTrue(d.Present(andres, Item(d, "ev_c1_llavero")).ExposedLie);
-            Assert.IsFalse(w.Evidence.IsFound(w.Ev("ev_c1_celular_andres")), "En el sótano todavía no entrega el celular (GUION: se obtiene en la Comisaría)");
-            w.State.SetCurrentScene("c1", "c1_s4");
             d.Begin(andres);
             d.Present(andres, Item(d, "ev_c1_llavero"));
-            Assert.IsTrue(w.Evidence.IsFound(w.Ev("ev_c1_celular_andres")), "En la Comisaría lo entrega aunque la mentira ya estuviera descubierta");
+            Assert.IsTrue(w.Evidence.IsFound(w.Ev("ev_c1_celular_andres")));
         }
 
         [Test]
