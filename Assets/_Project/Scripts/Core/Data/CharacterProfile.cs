@@ -97,9 +97,12 @@ namespace Caso404.Data
     {
         [SerializeField] private Condition _condition = new();
         [SerializeField, TextArea] private string _text;
+        [SerializeField] private int _alexTrustDelta;
 
         public Condition Condition { get => _condition; internal set => _condition = value; }
         public string Text { get => _text; internal set => _text = value; }
+        /// <summary>Cambio de confianza en ALEX la primera vez que se muestra (ej. −5 por el cuaderno).</summary>
+        public int AlexTrustDelta { get => _alexTrustDelta; internal set => _alexTrustDelta = value; }
     }
 
     /// <summary>Perfil de un personaje: lo que sabe, lo que miente y cómo habla. La IA solo le da voz.</summary>
