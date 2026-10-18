@@ -47,6 +47,8 @@ namespace Caso404.EditorTools
             PorteriaSceneBuilder.Build();
             ComisariaSceneBuilder.Build();
             ServidoresSceneBuilder.Build();
+            PisoEjecutivoSceneBuilder.Build();
+            CasetaSceneBuilder.Build();
             RefreshBuildSettings();
             Debug.Log("[Caso404] Todo construido.");
         }
