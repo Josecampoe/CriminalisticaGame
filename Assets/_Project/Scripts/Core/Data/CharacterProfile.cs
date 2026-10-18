@@ -55,6 +55,8 @@ namespace Caso404.Data
         [SerializeField] private bool _requiresCalmApproach;
         [SerializeField] private bool _onlyInEnding;
         [SerializeField] private List<FlagData> _setsFlags = new();
+        [SerializeField] private EvidenceData _revealedByEvidence;
+        [SerializeField] private List<string> _alsoRevealsFactIds = new();
         [SerializeField] private DecisionData _triggersDecision;
 
         public string FactId { get => _factId; internal set => _factId = value; }
@@ -66,6 +68,10 @@ namespace Caso404.Data
         /// <summary>Solo se revela en un final (ej. la confesión de Andrés).</summary>
         public bool OnlyInEnding { get => _onlyInEnding; internal set => _onlyInEnding = value; }
         public IReadOnlyList<FlagData> SetsFlags { get => _setsFlags; internal set => _setsFlags = new(value); }
+        /// <summary>Se revela al presentarle esta evidencia analizada (ej. el chat de Kairos a Sebastián).</summary>
+        public EvidenceData RevealedByEvidence { get => _revealedByEvidence; internal set => _revealedByEvidence = value; }
+        /// <summary>Otros hechos que cuenta al revelar el secreto (ej. la coartada del bar).</summary>
+        public IReadOnlyList<string> AlsoRevealsFactIds { get => _alsoRevealsFactIds; internal set => _alsoRevealsFactIds = new(value); }
         public DecisionData TriggersDecision { get => _triggersDecision; internal set => _triggersDecision = value; }
     }
 
