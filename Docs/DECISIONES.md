@@ -98,3 +98,61 @@ Registro de decisiones tomadas durante el desarrollo, con su motivo. Cuando el g
 | F7 | `SampleScene` se quitó de Build Settings, pero no se borró. Apartamento404 es la escena 0. | La regla era no borrar archivos que no creé yo. |
 | F8 | Se agregó una prueba PlayMode de humo (`Apartment404SmokeTest`) que recorre la escena hasta `dec_c1_s1`. Necesita gráficos: no corre con `-nographics`. | Es la única forma de comprobar la escena sin abrir el Editor. El modo inspección usa una RenderTexture, que no se puede crear sin GPU. |
 | F9 | `ScenePreviewCapture` guarda capturas de la escena en `Logs/preview_*.png`. | Sirve para revisar el greybox sin abrir el Editor. |
+
+---
+
+# Sesión 2 (fases G a L)
+
+## Infraestructura común
+
+| # | Decisión | Motivo |
+|---|---|---|
+| S1 | El builder de c1_s1 se convirtió en un kit reutilizable, `SceneKit`: materiales, cajas, paredes con huecos para puertas y ventanas, evidencias, personajes, jugador, UI y luces. Cada escena tiene un builder corto que lo usa. El menú *Caso404 → Construir todo* regenera los datos y las 5 escenas. | No repetir unas 400 líneas por escena, y que todas las escenas tengan exactamente la misma UI y el mismo jugador. |
+| S2 | El commit de G incluye todo el código nuevo de juego (acusación, final, fundido, menú y flujo de escenas), aunque varias piezas sean de las fases I y J. Los commits H, I y J agregan las escenas. | El `GameUIController` necesita esas vistas para compilar, y así cada commit compila. |
+| S3 | Todas las escenas tienen `Start New Game = false`: el estado llega por el guardado. El menú (*Nueva partida*) crea un `GameState` limpio y lo guarda antes de cargar c1_s1. | Así el estado pasa de una escena a otra sin una escena Bootstrap persistente. Para probar una escena sola desde el Editor, sin pasar por el menú, se usa la última partida guardada. |
+| S4 | Al pasar de escena, el `currentSceneId` se actualiza antes de guardar. | Así *Continuar* abre la escena a la que ibas, no la que ya terminaste. |
+| S5 | Las escenas sin decisión de cierre (c1_s2 y c1_s3) se terminan desde el tablero con **"Terminar la escena"**. Luego el jugador elige entre las escenas pendientes, y la Comisaría solo aparece cuando s2 y s3 están completas. | GUION §3.4: hay que completar s2 y s3 antes de ir a la Comisaría. |
+
+## Fase G — Café La Esquina
+
+| # | Decisión | Motivo |
+|---|---|---|
+| G1 | Café de noche (10×7 m): barra con cafetera y botellas, televisor con el "partido" en la pared este, 4 mesas y una vitrina a la calle. | Corresponde al ambiente del guion. |
+| G2 | Ubicación de las evidencias: el recibo junto al datáfono, sobre la barra; el video del café en un monitor de seguridad al final de la barra; la servilleta en la mesa de Carlos. | Las tres se ven desde la entrada. |
+| G3 | `CharacterNpc` revisa la condición de presencia de `SceneData` al iniciar. Carlos tiene la condición "no `flag_c1_carlos_detenido`" en el café, así que si fue detenido no aparece (sí aparece en la Comisaría). | GUION §3.4. |
+| G4 | Con `flag_c1_h_llave`, Hernán y Andrés tienen el botón **"Preguntar por la llave maestra"**. Sus frases las escribí yo, porque el guion no las trae: Hernán indica que la llave está en el llavero de mantenimiento, con registro de quién la saca; Andrés le resta importancia. | GUION §3.4 pide la opción, pero no da texto. Las frases no agregan hechos nuevos: solo apuntan al registro del llavero (`ev_c1_llavero`). |
+
+## Fase H — Portería y sótano
+
+| # | Decisión | Motivo |
+|---|---|---|
+| H1 | Distribución: portería (con la caseta y la chaqueta de Hernán en su silla), pasillo de sótano con casilleros, administración (DVR en la estantería), mantenimiento (tablero de llaves con la hoja de control) y parqueadero subterráneo con carros y el contenedor (portátil encima). | Las 4 zonas del guion. |
+| H2 | El overol y las cenizas están en el casillero abierto de Andrés y en una caneca al lado. Solo se activa uno, según `flag_c1_carlos_detenido`. | GUION §3.4: si Carlos fue detenido, Andrés quema el overol. |
+| H3 | La grabación original no tiene objeto en la escena: aparece sola en el expediente al analizar el DVR, con aviso en el HUD. | Es la mecánica del ERROR 404: el original se consigue por otra vía. |
+
+## Fase I — Comisaría
+
+| # | Decisión | Motivo |
+|---|---|---|
+| I1 | Oficina con tablero de corcho (abre el tablero con **todas** las hipótesis del caso), pantalla de ALEX (abre su panel) y el "Expediente para la Fiscalía" (abre la acusación). La sala de interrogatorio tiene a los 4 personajes sentados alrededor de la mesa. | GUION §2: tablero, interrogatorio y acusación en la Comisaría. |
+| I2 | El celular de Andrés solo se entrega en la Comisaría (`SceneId = c1_s4`). Si su mentira ya se descubrió en el sótano, basta con volver a presentarle una prueba sólida en la Comisaría. | GUION §3.4: "Aquí se obtiene `ev_c1_celular_andres`". |
+| I3 | `dec_c1_cuaderno` funciona en cualquier escena donde esté Laura: en c1_s1 o en la Comisaría si no se resolvió antes. | El guion la ata a que Laura entregue el cuaderno, no a un lugar. |
+| I4 | Acusación: se elige uno de los 4 sospechosos y exactamente 3 evidencias analizadas, con confirmación. El final lo calcula `AccusationService`. | GUION §3.6. |
+| I5 | El final verdadero revela `f_c1_andres_pago` (`EndingData.RevealsFactIds`). | GUION: Andrés lo confiesa solo en el final verdadero. |
+| I6 | La escena Comisaria apunta a `c1_s4`. Para el caso 2 habrá que elegir el `SceneData` según el caso actual. | Pendiente para el caso 2 (anotado en el reporte). |
+
+## Fase J — Flujo completo
+
+| # | Decisión | Motivo |
+|---|---|---|
+| J1 | Menú principal: título con efecto de máquina de escribir, **Nueva partida**, **Continuar** (solo si hay partida guardada) y **Salir**. Es la escena 0 de Build Settings. | Skill diseno-ui, pantalla 1. |
+| J2 | Hay un fundido a negro de 0.6 s entre escenas (`ScreenFader`, en un Canvas aparte por encima de todo). | Transición simple que oculta la carga. |
+| J3 | Pantalla de final: título y texto del guion (con la variante del final incompleto que corresponda) y un resumen: a quién acusaste, pruebas sólidas, contradicciones de ALEX (x de 5), evidencias encontradas y qué prueba sólida se te escapó. Después viene "Tres meses después..." con efecto de máquina de escribir, y un aviso de que el caso 2 aún no está disponible, con vuelta al menú. | Skill diseno-ui, pantalla 9: "lo que descubrió y lo que se le escapó". |
+| J4 | Si se entra a la Comisaría con el caso ya cerrado (con *Continuar*), aparece "Caso cerrado" con el final obtenido y vuelta al menú. | Evita acusar dos veces. |
+
+## Fase K — Pruebas del caso completo
+
+| # | Decisión | Motivo |
+|---|---|---|
+| K1 | `Case1FullFlowTests` (PlayMode) tiene 4 recorridos desde el menú: **verdadero** (investigando todo, con celular y análisis profundo), **verdadero con Carlos detenido**, **incompleto** (sin cuestionar a ALEX) y **engaño** (siguiendo a ALEX). Reemplaza a la prueba de humo de c1_s1. | Pediste recorrer los 3 finales. Se agregó el caso de Carlos detenido porque es el camino mínimo del GUION §5. |
+| K2 | Las pruebas usan las mismas entradas que el jugador: `PlayerContext` para inspeccionar, hablar y acusar; el modo inspección para guardar; los botones de las ventanas, por su texto, para elegir. Solo dos acciones van directo al servicio: girar el objeto, que marca el detalle oculto, y las respuestas del tablero. | El mouse no se puede simular en batch. |
