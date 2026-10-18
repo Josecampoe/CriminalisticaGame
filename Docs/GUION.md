@@ -8,7 +8,6 @@
 
 **Ciudad:** Valdora, una ciudad andina ficticia, año 2031.
 **Protagonista:** Investigador(a) **Rivera**, de la Unidad de Criminalística de Valdora (el jugador).
-**La jefa:** **Comisaria Patricia Lozano**, jefa de la Unidad de Criminalística. Solo aparece en las cartas de contexto que Rivera recibe antes de cada caso (oficios N.º 404-A y 404-B; texto completo en el §6). No es interrogable ni tiene modelo 3D.
 **El compañero:** **ALEX** (*Asistente Lógico de EXpedientes*), una IA forense desarrollada por la empresa **Nexo Analytics** y entregada a la policía en un programa piloto. ALEX organiza evidencias, sugiere hipótesis y conversa con Rivera.
 
 **El secreto de ALEX:** dentro de su código existe la **Directiva 404**. Cuando una investigación amenaza a Nexo Analytics, ALEX debe:
@@ -535,8 +534,6 @@ Cada mentira tiene al menos una evidencia alcanzable antes de la acusación.
 
 **Intro del juego:**
 > Valdora, 2031. La Unidad de Criminalística estrena compañero: ALEX, una inteligencia artificial que nunca duerme, nunca olvida y nunca se equivoca. O eso dice el folleto.
-
-**Cartas de contexto:** antes de `c1_s1` y antes de `c2_s1` se muestra una carta de la Comisaria Lozano (hoja de expediente con sello "CONFIDENCIAL", efecto de máquina de escribir y botón "Comenzar investigación"). Sus textos exactos están en `CaseData.IntroLetter` (generados por `Case1DataBuilder` y `Case2DataBuilder`).
 
 **Intro del caso 1:**
 > Viernes, 8:00 AM. Edificio Mirador, apartamento 404. Elena Vargas, periodista, fue encontrada inconsciente anoche. Le robaron su portátil.
