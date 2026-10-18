@@ -61,3 +61,26 @@ Registro de decisiones tomadas durante el desarrollo, con su motivo. Cuando el g
 | D8 | `GameContext` (con `[DefaultExecutionOrder(-100)]`) crea los servicios en cada escena. Entre escenas, el estado pasa por el archivo de guardado. `Start New Game` está activado en c1_s1. | Es lo más simple mientras solo existe una escena. La escena `Bootstrap` persistente queda pendiente para cuando haya varias. |
 | D9 | En esta fase también entraron `DialogueService`, la capa de IA (`IAiClient`, `OfflineAiClient`, `HttpAiClient`, `AiReplyValidator`, `AiSettings`) y sus pruebas. | `GameContext` y el NPC los necesitan para compilar. |
 | D10 | Descubrir mentiras, revelar secretos y entregar evidencias en el diálogo lo deciden reglas fijas con los datos. La IA solo pone la voz, y su respuesta se valida antes de usarla. | Regla de oro de CLAUDE.md. |
+
+## Fase E — UI básica
+
+| # | Decisión | Motivo |
+|---|---|---|
+| E1 | Cada pantalla se arma por código en su `Build()` con `UIFactory` y los tokens del `UITheme`. No hay prefabs de UI. | Se puede generar y enlazar todo desde un script de Editor en modo batch, sin trabajo manual en el Inspector. Cambiar el tema cambia todas las pantallas. Más adelante cada vista se puede pasar a prefab sin tocar su lógica. |
+| E2 | La skill `diseno-ui` pide describir la jerarquía de cada pantalla y esperar tu visto bueno. Como esta sesión es autónoma, la jerarquía queda escrita abajo (E10) para que la revises. | Pediste no hacer preguntas. |
+| E3 | Fuente única LiberationSans SDF en los tres roles (títulos, cuerpo, mono). | Ver A9. El `UITheme` ya tiene los tres campos para Special Elite, Inter y IBM Plex Mono. |
+| E4 | En el expediente, el texto cian de ALEX sobre papel se oscurece un 55 %. | El cian #4FD1C5 sobre papel #E9E2D0 no llega al contraste mínimo de 4.5:1 que pide la skill. |
+| E5 | El tablero no dice si una respuesta es correcta: solo "Respuesta registrada". | Si dijera "correcto/incorrecto", el jugador probaría opciones hasta acertar en vez de deducir. |
+| E6 | La decisión que dispara un secreto (el cuaderno de Laura → `dec_c1_cuaderno`) se abre al cerrar la conversación, no en medio de ella. | Así el jugador alcanza a leer la frase de Laura antes de que la pantalla de decisión la tape. |
+| E7 | Los atajos (Tab, Q, H) solo funcionan si no hay otro panel abierto, o si el panel abierto es el mismo (entonces lo cierran). | Evita que escribir una pregunta con Q o Tab abra otro panel. |
+| E8 | Panel de ALEX: tres preguntas rápidas con las frases de ejemplo del GUION §3.5. El tono se muestra en el estado ("modo formal", "respuesta limitada"). Con confianza menor que 30, el panel hace glitch cada 3–6 s. | GUION §1: con confianza baja ALEX se vuelve evasivo y su panel muestra glitches. No se muestra el número de confianza porque el guion no lo hace visible al jugador. |
+| E9 | Si la siguiente escena no está en Build Settings, aparece "Fin de la demo" con la partida guardada y botones para reiniciar o salir. | c1_s2 y c1_s3 todavía no existen. |
+
+### E10 — Jerarquía de cada pantalla (qué ve primero el jugador y cuál es la acción principal)
+- **HUD**: retícula al centro (ámbar si apunta a algo nuevo) → prompt "E — ..." debajo → nombre de la escena arriba (se desvanece) → contador de evidencias sin analizar arriba a la derecha → atajos abajo a la izquierda → avisos abajo al centro.
+- **Inspección**: objeto 3D grande al centro → nombre arriba → descripción y detalle oculto (ámbar) abajo → **Guardar en expediente** (principal, ámbar) y Soltar.
+- **Expediente**: fichas a la izquierda (nombre + estado: NUEVA, ANALIZADA o "Sin valor como prueba") → ficha ampliada a la derecha → **Analizar** (principal, ámbar) → informe con título rojo. Si lo entrega ALEX, el texto va en cian oscuro.
+- **Diálogo**: panel inferior → nombre (ámbar) y rol → texto con efecto de escritura → botones rápidos (Sobre el crimen, Sobre otra persona, **Presentar evidencia**, Presionar, Despedirse y, cuando aplica, Hablarle con calma) → campo para escribir la pregunta.
+- **Panel de ALEX**: lateral derecho, borde cian → última frase de ALEX → preguntas rápidas → tarjetas de observaciones con **Cuestionar** (rojo) y Aceptar (cian). Las refutadas aparecen tachadas.
+- **Tablero de hipótesis**: preguntas sobre papel → opciones (bloqueadas en gris con lo que falta analizar) → Responder → **Tomar la decisión** (rojo, abajo a la derecha).
+- **Decisión**: pregunta grande → recomendación de ALEX en cian → opciones grandes → confirmación si es irreversible.
