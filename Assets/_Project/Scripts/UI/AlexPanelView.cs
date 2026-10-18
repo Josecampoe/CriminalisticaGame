@@ -1,177 +1,97 @@
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Caso404.AI;
 using Caso404.Core;
 using Caso404.Data;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Caso404.UI
 {
     /// <summary>
-    /// Panel de ALEX (estilo terminal cian, entra deslizándose desde la derecha). Arriba, la conversación con ALEX
-    /// como un historial de chat; en medio, preguntas rápidas y un campo para escribirle; abajo, sus afirmaciones
+    /// Panel de ALEX (estilo terminal cian, lateral derecho). Muestra lo último que dijo ALEX y sus afirmaciones
     /// como tarjetas con "Aceptar" o "Cuestionar". Cuestionar pide una evidencia analizada; la lógica la decide AlexService.
     /// Con confianza baja, o al descubrir una mentira, el panel hace glitch.
     /// </summary>
     public class AlexPanelView : UIPanel
     {
-        const float PanelWidth = 660f;
-        const int MaxLogEntries = 14;
-
         [SerializeField] private GameContext _game;
 
         RectTransform _panel;
+        TextMeshProUGUI _speech;
         TextMeshProUGUI _status;
-        RectTransform _toneHolder;
         TextMeshProUGUI _glitchLabel;
-        TextMeshProUGUI _thinking;
-        TextMeshProUGUI _claimsTitle;
-        RectTransform _log;
-        ScrollRect _logScroll;
         RectTransform _claims;
         RectTransform _chooser;
         RectTransform _chooserList;
         TextMeshProUGUI _chooserTitle;
-        TMP_InputField _input;
-        Button _askButton;
-        Button[] _quick;
-        TextMeshProUGUI _lastAlexText;
         LieData _questioning;
         bool _greeted;
         float _nextAmbientGlitch;
         Coroutine _glitch;
-        Coroutine _slide;
-        CancellationTokenSource _cts;
-        bool _busy;
-        readonly List<(bool alex, string text)> _entries = new();
 
         protected override void Build()
         {
             var rt = UIFactory.Stretch((RectTransform)transform);
-            var bg = UIFactory.AsScreen(UIFactory.Panel(rt, "Panel", UITheme.WithAlpha(_theme.BgDark, 0.97f)), _theme, _theme.AlexCyan);
+            var bg = UIFactory.Panel(rt, "Panel", UITheme.WithAlpha(_theme.BgDark, 0.97f));
             _panel = bg.rectTransform;
             _panel.anchorMin = new Vector2(1f, 0f);
             _panel.anchorMax = new Vector2(1f, 1f);
             _panel.pivot = new Vector2(1f, 0.5f);
-            _panel.sizeDelta = new Vector2(PanelWidth, 0);
+            _panel.sizeDelta = new Vector2(620, 0);
             _panel.anchoredPosition = Vector2.zero;
-            var border = UIFactory.Panel(_panel, "Borde", _theme.AlexCyan);
+            var border = UIFactory.Panel(_panel, "Border", _theme.AlexCyan);
             border.rectTransform.anchorMin = new Vector2(0, 0);
             border.rectTransform.anchorMax = new Vector2(0, 1);
-            border.rectTransform.sizeDelta = new Vector2(3, 0);
+            border.rectTransform.sizeDelta = new Vector2(4, 0);
 
-            var content = UIFactory.Rect("Contenido", _panel);
-            UIFactory.Stretch(content, 32, 24, 28, 26);
+            var content = UIFactory.Rect("Content", _panel);
+            UIFactory.Stretch(content, 28, 24, 24, 24);
             UIFactory.VLayout(content.gameObject, 12);
 
-            BuildHeader(content);
-            UIFactory.Divider(content, UITheme.WithAlpha(_theme.AlexCyan, 0.25f));
+            var title = UIFactory.Text(content, "Title", "ALEX // Asistente Lógico de EXpedientes", _theme.MonoFont, _theme.SizeM, _theme.AlexCyan);
+            UIFactory.Layout(title.gameObject, preferredHeight: 34);
+            _status = UIFactory.Text(content, "Status", "", _theme.MonoFont, _theme.SizeS, _theme.Muted);
+            UIFactory.Layout(_status.gameObject, preferredHeight: 22);
 
-            // Historial de la conversación con ALEX.
-            var logBox = UIFactory.Round(UIFactory.Panel(content, "Conversacion", UITheme.WithAlpha(_theme.AlexCyan, 0.05f)), _theme);
-            UIFactory.Layout(logBox.gameObject, flexibleHeight: 1.3f, minHeight: 220);
-            UIFactory.Frame(logBox.transform, _theme, UITheme.WithAlpha(_theme.AlexCyan, 0.18f));
-            var logHolder = UIFactory.Rect("Lista", logBox.transform);
-            UIFactory.Stretch(logHolder, 6, 6, 6, 6);
-            _log = UIFactory.ScrollList(logHolder, "Mensajes", 12, 12);
-            _logScroll = _log.GetComponentInParent<ScrollRect>();
-            UIFactory.Stretch((RectTransform)_log.parent.parent);
+            var speechBox = UIFactory.Panel(content, "Speech", UITheme.WithAlpha(_theme.AlexCyan, 0.08f));
+            UIFactory.Layout(speechBox.gameObject, minHeight: 130, preferredHeight: 130);
+            _speech = UIFactory.Text(speechBox.transform, "Text", "", _theme.MonoFont, _theme.SizeBody, _theme.AlexCyan);
+            UIFactory.Stretch(_speech.rectTransform, 14, 10, 14, 10);
 
-            _thinking = UIFactory.Text(content, "Procesando", "", _theme.MonoFont, _theme.SizeS, _theme.AlexCyan);
-            UIFactory.Layout(_thinking.gameObject, preferredHeight: 18);
-
-            var ask = UIFactory.Rect("Preguntas", content);
+            var ask = UIFactory.Rect("Ask", content);
             UIFactory.VLayout(ask.gameObject, 6);
-            _quick = new Button[3];
-            for (int i = 0; i < 3; i++)
-            {
-                int index = i;
-                _quick[i] = UIFactory.Ghost(ask, "", _theme, _theme.AlexCyan, () => AskQuick(index), 40, _theme.SizeS);
-                var label = _quick[i].GetComponentInChildren<TextMeshProUGUI>();
-                label.alignment = TextAlignmentOptions.MidlineLeft;
-                label.font = _theme.MonoFont;
-                label.fontStyle = FontStyles.Normal;
-            }
+            UIFactory.Layout(ask.gameObject, preferredHeight: 3 * 40 + 12);
+            UIFactory.Button(ask, "¿Quién crees que fue?", _theme, UITheme.WithAlpha(_theme.AlexCyan, 0.18f), _theme.TextLight, () => Say(_game.Case.AlexLines.Crime.Text), 40, _theme.SizeS);
+            UIFactory.Button(ask, "Pero la ventana se rompió desde adentro.", _theme, UITheme.WithAlpha(_theme.AlexCyan, 0.18f), _theme.TextLight, () => Say(_game.Case.AlexLines.Evidence.Text), 40, _theme.SizeS);
+            UIFactory.Button(ask, "¿Por qué tu archivo dio error justo en esos 15 minutos?", _theme, UITheme.WithAlpha(_theme.AlexCyan, 0.18f), _theme.TextLight, () => Say(_game.Case.AlexLines.Press.Text), 40, _theme.SizeS);
 
-            var inputRow = UIFactory.Rect("Escribir", content);
-            UIFactory.HLayout(inputRow.gameObject, 8, 0, false);
-            UIFactory.Layout(inputRow.gameObject, minHeight: 48, preferredHeight: 48);
-            _input = UIFactory.Input(inputRow, _theme, "Pregúntale algo a ALEX…", AlexService.MaxQuestionLength, _theme.AlexCyan);
-            if (_input.textComponent is TextMeshProUGUI it) it.font = _theme.MonoFont;
-            _input.onSubmit.AddListener(_ => AskTyped());
-            _askButton = UIFactory.Button(inputRow, "Enviar", _theme, _theme.AlexCyan, _theme.Ink, AskTyped, 48, _theme.SizeS + 1);
-            UIFactory.Layout(_askButton.gameObject, minHeight: 48, preferredHeight: 48, preferredWidth: 120);
-
-            _claimsTitle = UIFactory.Kicker(content, "Observaciones de ALEX", _theme, UITheme.WithAlpha(_theme.TextLight, 0.55f));
-            var claimsHolder = UIFactory.Rect("Observaciones", content);
-            UIFactory.Layout(claimsHolder.gameObject, flexibleHeight: 1, minHeight: 180);
-            _claims = UIFactory.ScrollList(claimsHolder, "Tarjetas", 10, 0);
+            var claimsTitle = UIFactory.Text(content, "ClaimsTitle", "OBSERVACIONES DE ALEX", _theme.MonoFont, _theme.SizeS, _theme.Muted);
+            UIFactory.Layout(claimsTitle.gameObject, preferredHeight: 22);
+            var claimsHolder = UIFactory.Rect("ClaimsHolder", content);
+            UIFactory.Layout(claimsHolder.gameObject, flexibleHeight: 1, minHeight: 200);
+            _claims = UIFactory.ScrollList(claimsHolder, "Claims", 10, 0);
             UIFactory.Stretch((RectTransform)_claims.parent.parent);
 
-            var close = UIFactory.Ghost(content, "Cerrar   Q / Esc", _theme, _theme.Muted, Close, 44, _theme.SizeS);
+            var close = UIFactory.Button(content, "Cerrar (Q / Esc)", _theme, _theme.Muted, _theme.TextLight, Close, 44, _theme.SizeS);
             UIFactory.Layout(close.gameObject, minHeight: 44, preferredHeight: 44);
 
-            _glitchLabel = UIFactory.Text(_panel, "404", "404", _theme.MonoFont, 160, UITheme.WithAlpha(_theme.AccentRed, 0.85f), TextAlignmentOptions.Center);
+            _glitchLabel = UIFactory.Text(_panel, "404", "404", _theme.MonoFont, 140, UITheme.WithAlpha(_theme.AccentRed, 0.85f), TextAlignmentOptions.Center);
             UIFactory.Stretch(_glitchLabel.rectTransform);
             _glitchLabel.gameObject.SetActive(false);
 
-            BuildChooser(rt);
-        }
-
-        void BuildHeader(RectTransform content)
-        {
-            var header = UIFactory.Rect("Encabezado", content);
-            var h = UIFactory.HLayout(header.gameObject, 14, 0, false);
-            h.childAlignment = TextAnchor.MiddleLeft;
-            UIFactory.Layout(header.gameObject, preferredHeight: 58);
-            var dot = UIFactory.Dot(header, "Luz", _theme.AlexCyan, _theme, 14);
-            dot.gameObject.AddComponent<PulseUI>();
-            var titles = UIFactory.Rect("Titulos", header);
-            UIFactory.VLayout(titles.gameObject, 0);
-            UIFactory.Layout(titles.gameObject, flexibleWidth: 1, preferredHeight: 58);
-            var title = UIFactory.Text(titles, "Titulo", "ALEX", _theme.MonoFont, 32, _theme.AlexCyan);
-            title.fontStyle = FontStyles.Bold;
-            title.characterSpacing = 12f;
-            UIFactory.Layout(title.gameObject, preferredHeight: 36);
-            var sub = UIFactory.Text(titles, "Subtitulo", "Asistente Lógico de EXpedientes · Nexo Analytics", _theme.MonoFont, _theme.SizeS - 1, UITheme.WithAlpha(_theme.TextLight, 0.5f));
-            UIFactory.Layout(sub.gameObject, preferredHeight: 20);
-            _toneHolder = UIFactory.Rect("Tono", header);
-            var th = UIFactory.HLayout(_toneHolder.gameObject, 0, 0, false);
-            th.childAlignment = TextAnchor.MiddleRight;
-            th.childControlWidth = false;
-            UIFactory.Layout(_toneHolder.gameObject, preferredWidth: 200, preferredHeight: 34);
-
-            _status = UIFactory.Text(content, "Estado", "", _theme.MonoFont, _theme.SizeS, UITheme.WithAlpha(_theme.TextLight, 0.55f));
-            UIFactory.Layout(_status.gameObject, preferredHeight: 20);
-        }
-
-        /// <summary>Selector de evidencia para Cuestionar, a la izquierda del panel.</summary>
-        void BuildChooser(RectTransform rt)
-        {
-            var dim = UIFactory.Backdrop(rt, _theme, 0.55f);
-            dim.gameObject.name = "Selector";
-            _chooser = dim.rectTransform;
-            _chooser.offsetMax = new Vector2(-PanelWidth, 0);
-            var card = UIFactory.Card(_chooser, "Tarjeta", UITheme.WithAlpha(_theme.BgDark, 0.98f), _theme);
-            UIFactory.Place(card.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900, 720));
-            UIFactory.Frame(card.transform, _theme, UITheme.WithAlpha(_theme.AccentRed, 0.45f));
-            var inner = UIFactory.Rect("Contenido", card.transform);
-            UIFactory.Stretch(inner, 36, 28, 36, 30);
-            UIFactory.VLayout(inner.gameObject, 12);
-            UIFactory.Kicker(inner, "Cuestionar a ALEX", _theme, _theme.AccentRed);
-            _chooserTitle = UIFactory.Text(inner, "Titulo", "", _theme.BodyFont, _theme.SizeM, _theme.TextLight);
-            UIFactory.Layout(_chooserTitle.gameObject, preferredHeight: 110);
-            UIFactory.Divider(inner, UITheme.WithAlpha(_theme.TextLight, 0.12f));
-            var holder = UIFactory.Rect("Lista", inner);
-            UIFactory.Layout(holder.gameObject, flexibleHeight: 1);
-            _chooserList = UIFactory.ScrollList(holder, "Items", 8, 2);
+            // Selector de evidencia para Cuestionar.
+            var chooserBg = UIFactory.Panel(rt, "Chooser", UITheme.WithAlpha(_theme.BgDark, 0.98f));
+            _chooser = chooserBg.rectTransform;
+            UIFactory.Region(_chooser, new Vector2(0.15f, 0.2f), new Vector2(0.6f, 0.85f));
+            _chooserTitle = UIFactory.Text(_chooser, "Title", "", _theme.BodyFont, _theme.SizeBody, _theme.TextLight);
+            UIFactory.Stretch(_chooserTitle.rectTransform, 24, 0, 24, 16).anchorMin = new Vector2(0, 0.82f);
+            var holder = UIFactory.Rect("ListHolder", _chooser);
+            UIFactory.Stretch(holder, 16, 76, 16, 0).anchorMax = new Vector2(1, 0.8f);
+            _chooserList = UIFactory.ScrollList(holder, "List", 8, 4);
             UIFactory.Stretch((RectTransform)_chooserList.parent.parent);
-            var back = UIFactory.Ghost(inner, "Volver", _theme, _theme.Muted, CloseChooser, 48);
-            UIFactory.Layout(back.gameObject, minHeight: 48, preferredHeight: 48);
+            var back = UIFactory.Button(_chooser, "Volver", _theme, _theme.Muted, _theme.TextLight, CloseChooser);
+            UIFactory.Place((RectTransform)back.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 14), new Vector2(240, 48));
             _chooser.gameObject.SetActive(false);
         }
 
@@ -196,92 +116,10 @@ namespace Caso404.UI
                 _greeted = true;
                 Say(_game.Case.AlexIntroLine);
             }
-            RefreshQuickQuestions();
             Refresh();
-            if (_slide != null) StopCoroutine(_slide);
-            _slide = StartCoroutine(SlideIn());
         }
 
-        protected override void OnHidden()
-        {
-            CloseChooser();
-            CancelPending();
-        }
-
-        void OnDestroy() => CancelPending();
-
-        IEnumerator SlideIn()
-        {
-            for (float t = 0; t < 0.22f; t += Time.unscaledDeltaTime)
-            {
-                float k = 1f - Mathf.Pow(1f - t / 0.22f, 3f);
-                _panel.anchoredPosition = new Vector2(Mathf.Lerp(PanelWidth * 0.4f, 0f, k), 0f);
-                yield return null;
-            }
-            _panel.anchoredPosition = Vector2.zero;
-            _slide = null;
-        }
-
-        /// <summary>Textos de las preguntas rápidas: los del caso (GUION) o unos genéricos si el caso no los trae.</summary>
-        void RefreshQuickQuestions()
-        {
-            var q = _game.Case.AlexQuestions;
-            string[] defaults = { "¿Quién crees que fue?", "¿Qué opinas de esta evidencia?", "¿Por qué fallaron tus registros?" };
-            for (int i = 0; i < _quick.Length; i++)
-            {
-                string text = q != null && i < q.Length && !string.IsNullOrEmpty(q[i]) ? q[i] : defaults[i];
-                UIFactory.SetLabel(_quick[i], $"<color={UITheme.Hex(UITheme.WithAlpha(_theme.AlexCyan, 0.6f))}>?</color>  {text}");
-            }
-        }
-
-        void AskQuick(int index)
-        {
-            if (_busy) return;
-            var label = _quick[index].GetComponentInChildren<TextMeshProUGUI>().GetParsedText();
-            int cut = label.IndexOf("  ");
-            AddEntry(false, cut >= 0 ? label.Substring(cut + 2) : label);
-            var lines = _game.Case.AlexLines;
-            Say(index == 0 ? lines.Crime.Text : index == 1 ? lines.Evidence.Text : lines.Press.Text);
-        }
-
-        /// <summary>Envía la pregunta escrita a ALEX. Mientras responde, el campo queda bloqueado y se ve "procesando…".</summary>
-        async void AskTyped()
-        {
-            var q = _input.text?.Trim();
-            if (_busy || string.IsNullOrEmpty(q)) return;
-            _input.text = "";
-            AddEntry(false, q);
-            SetBusy(true);
-            CancelPending();
-            _cts = new CancellationTokenSource();
-            try
-            {
-                var answer = await _game.Alex.AskAsync(q, _cts.Token);
-                if (this != null && IsOpen && !string.IsNullOrEmpty(answer)) Say(answer);
-            }
-            catch (System.OperationCanceledException) { }
-            finally
-            {
-                if (this != null) SetBusy(false);
-            }
-        }
-
-        void SetBusy(bool busy)
-        {
-            _busy = busy;
-            _input.interactable = !busy;
-            _askButton.interactable = !busy;
-            foreach (var b in _quick) b.interactable = !busy;
-            _thinking.text = "";
-        }
-
-        void CancelPending()
-        {
-            if (_cts == null) return;
-            _cts.Cancel();
-            _cts.Dispose();
-            _cts = null;
-        }
+        protected override void OnHidden() => CloseChooser();
 
         void OnClaimRaised(LieData claim) => Say(claim.Statement);
 
@@ -293,79 +131,49 @@ namespace Caso404.UI
         void Refresh()
         {
             var alex = _game.Alex;
-            var (tone, color) = alex.Tone switch
-            {
-                AlexTone.Warm => ("EN LÍNEA", _theme.AlexCyan),
-                AlexTone.Formal => ("MODO FORMAL", _theme.WarningAmber),
-                _ => ("RESPUESTA LIMITADA", _theme.AccentRed),
-            };
-            UIFactory.Clear(_toneHolder);
-            UIFactory.Chip(_toneHolder, tone, _theme, color, _theme.SizeS - 2);
-            _status.text = $"Contradicciones detectadas: {alex.ContradictionCount}";
-            if (_lastAlexText != null) _lastAlexText.color = SpeechColor();
+            string tone = alex.Tone switch { AlexTone.Warm => "en línea", AlexTone.Formal => "en línea · modo formal", _ => "en línea · respuesta limitada" };
+            _status.text = $"Estado: {tone}    Contradicciones detectadas: {alex.ContradictionCount}";
+            _speech.color = alex.Tone == AlexTone.Cold ? Color.Lerp(_theme.AlexCyan, _theme.Muted, 0.5f) : _theme.AlexCyan;
 
             UIFactory.Clear(_claims);
             var claims = alex.RaisedClaims.ToList();
-            int pending = claims.Count(c => !alex.IsRefuted(c) && !alex.IsAccepted(c));
-            _claimsTitle.text = pending > 0 ? $"OBSERVACIONES DE ALEX · {pending} PENDIENTE{(pending > 1 ? "S" : "")}" : "OBSERVACIONES DE ALEX";
             if (claims.Count == 0)
-                UIFactory.Text(_claims, "Vacio", "ALEX todavía no ha hecho observaciones. Aparecen al analizar evidencias.", _theme.MonoFont, _theme.SizeS, _theme.Muted);
+                UIFactory.Text(_claims, "Empty", "ALEX todavía no ha hecho observaciones.", _theme.MonoFont, _theme.SizeS, _theme.Muted);
             foreach (var claim in claims) BuildCard(claim);
         }
-
-        Color SpeechColor() => _game.Alex.Tone == AlexTone.Cold ? Color.Lerp(_theme.AlexCyan, _theme.Muted, 0.5f) : _theme.AlexCyan;
 
         void BuildCard(LieData claim)
         {
             var alex = _game.Alex;
             bool refuted = alex.IsRefuted(claim);
             bool accepted = alex.IsAccepted(claim);
-            var accent = refuted ? _theme.AccentRed : accepted ? _theme.AlexCyan : _theme.WarningAmber;
-            var card = UIFactory.Round(UIFactory.Panel(_claims, $"Tarjeta_{claim.Id}", UITheme.WithAlpha(accent, 0.08f)), _theme);
-            var v = UIFactory.VLayout(card.gameObject, 8, 0);
-            v.padding = new RectOffset(22, 14, 14, 14);
-            var bar = UIFactory.Panel(card.transform, "Acento", accent);
-            bar.rectTransform.anchorMin = new Vector2(0, 0);
-            bar.rectTransform.anchorMax = new Vector2(0, 1);
-            bar.rectTransform.pivot = new Vector2(0, 0.5f);
-            bar.rectTransform.offsetMin = new Vector2(0, 8);
-            bar.rectTransform.offsetMax = new Vector2(4, -8);
-            UIFactory.Ignore(bar.gameObject);
-
-            var top = UIFactory.Rect("Estado", card.transform);
-            var th = UIFactory.HLayout(top.gameObject, 0, 0, false);
-            th.childControlWidth = false;
-            UIFactory.Layout(top.gameObject, preferredHeight: 26);
-            UIFactory.Chip(top, refuted ? "REFUTADA · CONTRADICCIÓN" : accepted ? "ACEPTADA" : "PENDIENTE", _theme, accent, _theme.SizeS - 2);
-
-            var text = UIFactory.Text(card.transform, "Afirmacion", $"“{claim.Statement}”", _theme.MonoFont, _theme.SizeS + 1, refuted ? _theme.Muted : _theme.AlexCyan);
+            var card = UIFactory.Panel(_claims, $"Card_{claim.Id}", UITheme.WithAlpha(refuted ? _theme.AccentRed : _theme.AlexCyan, 0.12f));
+            UIFactory.VLayout(card.gameObject, 8, 14);
+            var text = UIFactory.Text(card.transform, "Statement", $"\"{claim.Statement}\"", _theme.MonoFont, _theme.SizeS, refuted ? _theme.Muted : _theme.AlexCyan);
             if (refuted) text.fontStyle = FontStyles.Strikethrough;
+            string status = refuted ? $"<color=#{ColorUtility.ToHtmlStringRGB(_theme.AccentRed)}>[REFUTADA] Contradicción registrada</color>" : accepted ? "[ACEPTADA]" : "[PENDIENTE]";
+            UIFactory.Text(card.transform, "Status", status, _theme.MonoFont, _theme.SizeS, _theme.Muted);
             if (refuted) return;
-            var row = UIFactory.Rect("Botones", card.transform);
+            var row = UIFactory.Rect("Buttons", card.transform);
             UIFactory.HLayout(row.gameObject, 8);
             UIFactory.Layout(row.gameObject, preferredHeight: 40);
             if (!accepted) UIFactory.Button(row, "Aceptar", _theme, _theme.AlexCyan, _theme.Ink, () => Say(alex.Accept(claim)), 40, _theme.SizeS);
-            UIFactory.Ghost(row, "Cuestionar", _theme, _theme.AccentRed, () => OpenChooser(claim), 40, _theme.SizeS);
+            UIFactory.Button(row, "Cuestionar", _theme, _theme.AccentRed, _theme.TextLight, () => OpenChooser(claim), 40, _theme.SizeS);
         }
 
         void OpenChooser(LieData claim)
         {
             _questioning = claim;
-            _chooserTitle.text = $"¿Con qué evidencia refutas a ALEX?\n<size=80%><color={UITheme.Hex(_theme.AlexCyan)}>“{claim.Statement}”</color></size>";
+            _chooserTitle.text = $"¿Con qué evidencia refutas a ALEX?\n<size=80%><color=#{ColorUtility.ToHtmlStringRGB(_theme.AlexCyan)}>\"{claim.Statement}\"</color></size>";
             UIFactory.Clear(_chooserList);
             var evidence = _game.Evidence.AnalyzedEvidence.ToList();
             if (evidence.Count == 0)
-                UIFactory.Text(_chooserList, "Vacio", "No tienes evidencias analizadas.", _theme.BodyFont, _theme.SizeBody, _theme.Muted);
+                UIFactory.Text(_chooserList, "Empty", "No tienes evidencias analizadas.", _theme.BodyFont, _theme.SizeBody, _theme.TextLight);
             foreach (var ev in evidence)
             {
                 var captured = ev;
-                var label = $"{ev.DisplayName}\n<size=72%><color={UITheme.Hex(UITheme.WithAlpha(_theme.TextLight, 0.55f))}>{ev.AnalysisResult}</color></size>";
-                var b = UIFactory.Button(_chooserList, label, _theme, UITheme.WithAlpha(_theme.TextLight, 0.06f), _theme.TextLight, () => Question(captured), 70, _theme.SizeBody);
-                var t = b.GetComponentInChildren<TextMeshProUGUI>();
-                t.alignment = TextAlignmentOptions.MidlineLeft;
-                t.rectTransform.offsetMin = new Vector2(24, 4);
-                t.textWrappingMode = TextWrappingModes.Normal;
-                t.overflowMode = TextOverflowModes.Ellipsis;
+                var b = UIFactory.Button(_chooserList, ev.DisplayName, _theme, _theme.Paper, _theme.Ink, () => Question(captured), 52, _theme.SizeS);
+                b.GetComponentInChildren<TextMeshProUGUI>().alignment = TextAlignmentOptions.MidlineLeft;
             }
             _chooser.gameObject.SetActive(true);
         }
@@ -381,53 +189,16 @@ namespace Caso404.UI
             var claim = _questioning;
             CloseChooser();
             if (claim == null) return;
-            AddEntry(false, $"Te cuestiono con: {evidence.DisplayName}");
             var result = _game.Alex.Question(claim, evidence);
             Say(result.Response);
             if (result.Success) Glitch(0.2f, show404: true);
         }
 
-        void Say(string text)
-        {
-            if (string.IsNullOrEmpty(text)) return;
-            AddEntry(true, text);
-        }
-
-        /// <summary>Agrega un mensaje al historial (ALEX a la izquierda en cian, el jugador a la derecha).</summary>
-        void AddEntry(bool alex, string text)
-        {
-            _entries.Add((alex, text));
-            if (_entries.Count > MaxLogEntries) _entries.RemoveAt(0);
-            if (_log == null) return;
-            UIFactory.Clear(_log);
-            _lastAlexText = null;
-            foreach (var (isAlex, line) in _entries)
-            {
-                var who = UIFactory.Text(_log, "Quien", isAlex ? "ALEX" : "TÚ", _theme.MonoFont, _theme.SizeS - 3,
-                    UITheme.WithAlpha(isAlex ? _theme.AlexCyan : _theme.TextLight, 0.45f), isAlex ? TextAlignmentOptions.Left : TextAlignmentOptions.Right);
-                who.characterSpacing = 6f;
-                UIFactory.Layout(who.gameObject, preferredHeight: 14);
-                var t = UIFactory.Text(_log, "Mensaje", isAlex ? $"> {line}" : line, isAlex ? _theme.MonoFont : _theme.BodyFont,
-                    _theme.SizeBody - (isAlex ? 1 : 0), isAlex ? SpeechColor() : UITheme.WithAlpha(_theme.TextLight, 0.85f),
-                    isAlex ? TextAlignmentOptions.TopLeft : TextAlignmentOptions.TopRight);
-                if (!isAlex) t.fontStyle = FontStyles.Italic;
-                if (isAlex) _lastAlexText = t;
-            }
-            if (isActiveAndEnabled) StartCoroutine(ScrollToEnd());
-        }
-
-        IEnumerator ScrollToEnd()
-        {
-            yield return null;
-            Canvas.ForceUpdateCanvases();
-            if (_logScroll != null) _logScroll.verticalNormalizedPosition = 0f;
-        }
+        void Say(string text) => _speech.text = $"> {text}";
 
         void Update()
         {
-            if (!IsOpen) return;
-            if (_busy) _thinking.text = "ALEX está procesando" + new string('.', 1 + (int)(Time.unscaledTime * 3f) % 3) + (Time.unscaledTime % 1f < 0.5f ? "_" : "");
-            if (_game.Alex.Tone != AlexTone.Cold || Time.unscaledTime < _nextAmbientGlitch) return;
+            if (!IsOpen || _game.Alex.Tone != AlexTone.Cold || Time.unscaledTime < _nextAmbientGlitch) return;
             _nextAmbientGlitch = Time.unscaledTime + Random.Range(3f, 6f);
             Glitch(0.15f, show404: false);
         }
@@ -445,11 +216,11 @@ namespace Caso404.UI
             for (float t = 0; t < seconds; t += Time.unscaledDeltaTime)
             {
                 _panel.anchoredPosition = basePos + new Vector2(Random.Range(-8f, 8f), Random.Range(-3f, 3f));
-                if (_lastAlexText != null) _lastAlexText.color = Random.value > 0.5f ? _theme.AccentRed : _theme.AlexCyan;
+                _speech.color = Random.value > 0.5f ? _theme.AccentRed : _theme.AlexCyan;
                 yield return null;
             }
             _panel.anchoredPosition = basePos;
-            if (_lastAlexText != null) _lastAlexText.color = SpeechColor();
+            _speech.color = _theme.AlexCyan;
             if (show404)
             {
                 yield return new WaitForSecondsRealtime(0.3f);
