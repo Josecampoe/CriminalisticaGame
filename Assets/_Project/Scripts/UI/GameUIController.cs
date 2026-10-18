@@ -47,6 +47,7 @@ namespace Caso404.UI
                 _input.JournalPressed += OnJournal;
                 _input.AlexPressed += OnAlex;
                 _input.HypothesisPressed += OnHypothesis;
+                _input.CancelPressed += OnCancel;
             }
             if (_player != null)
             {
@@ -73,6 +74,7 @@ namespace Caso404.UI
                 _input.JournalPressed -= OnJournal;
                 _input.AlexPressed -= OnAlex;
                 _input.HypothesisPressed -= OnHypothesis;
+                _input.CancelPressed -= OnCancel;
             }
             if (_player != null)
             {
@@ -132,6 +134,14 @@ namespace Caso404.UI
             if (_ui.Top == panel) { panel.Close(); return; }
             if (_ui.Top != null) return;
             panel.Open();
+        }
+
+        /// <summary>Escape sin paneles abiertos: menú de pausa.</summary>
+        void OnCancel()
+        {
+            if (_ui.Top != null || _ui.LastCloseFrame == Time.frameCount) return;
+            var body = $"{_game.Case.Title} — {_game.Scene.DisplayName}\n\nLa partida se guarda al decidir y al cambiar de escena.";
+            _message.Show("Pausa", body, null, true, ("Continuar", (Action)null), ("Guardar y salir al menú", GoToMenu));
         }
 
         void OpenHypothesis()
