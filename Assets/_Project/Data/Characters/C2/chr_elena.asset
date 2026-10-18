@@ -50,8 +50,7 @@ MonoBehaviour:
       _noneFlags: []
       _exposedLies: []
       _knownFactIds: []
-    _text: "(Elena conf\xEDa en ti y comparte todo de inmediato.)"
-    _alexTrustDelta: 0
+    _text: "Conf\xEDa en Rivera y comparte todo de inmediato."
   - _condition:
       _allEvidenceAnalyzed: []
       _anyEvidenceAnalyzed: []
@@ -61,8 +60,7 @@ MonoBehaviour:
       _noneFlags: []
       _exposedLies: []
       _knownFactIds: []
-    _text: (Elena coopera, pero con cautela.)
-    _alexTrustDelta: 0
+    _text: Es cooperativa, pero cautelosa.
   - _condition:
       _allEvidenceAnalyzed: []
       _anyEvidenceAnalyzed: []
@@ -73,7 +71,6 @@ MonoBehaviour:
       _exposedLies: []
       _knownFactIds: []
     _text: Metieron preso a Carlos por algo que no hizo.
-    _alexTrustDelta: 0
   - _condition:
       _allEvidenceAnalyzed: []
       _anyEvidenceAnalyzed: []
@@ -84,7 +81,6 @@ MonoBehaviour:
       _exposedLies: []
       _knownFactIds: []
     _text: Laura me dijo que guardaste mi cuaderno fuera del sistema. Gracias.
-    _alexTrustDelta: -5
   _extraTopics:
   - _id: tomas_correo
     _label: "Preguntar por el correo de Tom\xE1s"
@@ -114,14 +110,3 @@ MonoBehaviour:
       _text: "Tom\xE1s me dijo una vez que ALEX al principio se llamaba de otra forma."
       _revealsFactIds:
       - f_c2_elena_lucero
-  _refusesUnless:
-    _allEvidenceAnalyzed: []
-    _anyEvidenceAnalyzed: []
-    _allFlags:
-    - {fileID: 11400000, guid: e1d7082c5a6960842a617b88745388d0, type: 2}
-    _anyFlags: []
-    _noneFlags: []
-    _exposedLies: []
-    _knownFactIds: []
-  _cooperatesAfterSeeing: {fileID: 11400000, guid: 0c694d47e77926c4f85af03ca6868c38, type: 2}
-  _refusalLine: "Metieron preso a Carlos por algo que no hizo. No tengo nada que hablar con la polic\xEDa."
