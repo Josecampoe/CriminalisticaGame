@@ -6,22 +6,36 @@ using UnityEngine;
 namespace Caso404.EditorTools
 {
     /// <summary>
-    /// Renderiza capturas de la escena c1_s1 desde varios puntos de vista (a la altura de los ojos) en Logs/preview_*.png.
-    /// Sirve para revisar el greybox sin abrir el Editor. Uso: -executeMethod Caso404.EditorTools.ScenePreviewCapture.Capture
+    /// Renderiza capturas de las escenas desde varios puntos de vista (a la altura de los ojos) en Logs/preview_*.png.
+    /// Sirve para revisar el greybox sin abrir el Editor. Uso: -executeMethod Caso404.EditorTools.ScenePreviewCapture.CaptureAll
     /// </summary>
     public static class ScenePreviewCapture
     {
+        [MenuItem("Caso404/Capturar vistas de las escenas")]
+        public static void CaptureAll()
+        {
+            Capture();
+            EditorSceneManager.OpenScene(CafeSceneBuilder.ScenePath);
+            Shot("c1s2_entrada", new Vector3(0f, 1.65f, 0.9f), new Vector3(12, 10, 0));
+            Shot("c1s2_barra", new Vector3(1.5f, 1.65f, 3.5f), new Vector3(20, -40, 0));
+            EditorSceneManager.OpenScene(PorteriaSceneBuilder.ScenePath);
+            Shot("c1s3_porteria", new Vector3(-3.8f, 1.65f, 1f), new Vector3(10, 10, 0));
+            Shot("c1s3_sotano", new Vector3(1f, 1.65f, 3f), new Vector3(8, 90, 0));
+            Shot("c1s3_mantenimiento", new Vector3(6.5f, 1.65f, 4.6f), new Vector3(10, 0, 0));
+            Shot("c1s3_parqueadero", new Vector3(13f, 1.65f, 3f), new Vector3(10, 60, 0));
+            EditorSceneManager.OpenScene(ComisariaSceneBuilder.ScenePath);
+            Shot("c1s4_oficina", new Vector3(-1.5f, 1.65f, 0.9f), new Vector3(10, -20, 0));
+            Shot("c1s4_interrogatorio", new Vector3(5f, 1.65f, 2f), new Vector3(15, 60, 0));
+            Debug.Log("[Caso404] Capturas guardadas en Logs/preview_*.png");
+        }
+
         [MenuItem("Caso404/Capturar vistas de c1_s1")]
         public static void Capture()
         {
             EditorSceneManager.OpenScene(Apartment404SceneBuilder.ScenePath);
             Shot("01_entrada", new Vector3(2.5f, 1.65f, 1.2f), new Vector3(10, -30, 0));
-            Shot("02_sala_balcon", new Vector3(1.5f, 1.65f, 2.5f), new Vector3(8, -20, 0));
-            Shot("03_escritorio", new Vector3(2.4f, 1.65f, 3.2f), new Vector3(20, 80, 0));
             Shot("04_balcon", new Vector3(0.3f, 1.65f, 7.3f), new Vector3(35, 200, 0));
             Shot("05_pasillo", new Vector3(3.5f, 1.65f, -1f), new Vector3(5, -100, 0));
-            Shot("06_sofa", new Vector3(-1.2f, 1.65f, 2.0f), new Vector3(35, -100, 0));
-            Debug.Log("[Caso404] Capturas guardadas en Logs/preview_*.png");
         }
 
         static void Shot(string name, Vector3 pos, Vector3 euler)
