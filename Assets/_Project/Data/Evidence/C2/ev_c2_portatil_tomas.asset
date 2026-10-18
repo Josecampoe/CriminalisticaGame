@@ -41,6 +41,5 @@ MonoBehaviour:
     _password: LUCERO
     _resultText: "Carpeta directiva_404: el c\xF3digo de la directiva y una lista de casos donde se activ\xF3, entre ellos \"Mirador / Apto 404\"."
     _alexComment: 
-    _alexGlitch: 1
     _setsFlags:
     - {fileID: 11400000, guid: a1ea66fbd5a3a044ba42fcdc6491ef86, type: 2}
