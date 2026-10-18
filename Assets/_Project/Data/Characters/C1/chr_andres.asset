@@ -55,3 +55,18 @@ MonoBehaviour:
       _text: "Yo... yo no quer\xEDa que nadie saliera herido. Ella no ten\xEDa que estar ah\xED."
       _revealsFactIds: []
   _attitudeVariants: []
+  _extraTopics:
+  - _id: llave_maestra
+    _label: Preguntar por la llave maestra
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags:
+      - {fileID: 11400000, guid: b1ea9debfe2b3d44e84e271fa06fde81, type: 2}
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+    _line:
+      _text: "\xBFLa maestra? Esa casi no se usa, oiga. Solo para emergencias. Todo queda en el registro."
+      _revealsFactIds: []
