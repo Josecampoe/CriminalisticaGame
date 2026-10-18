@@ -18,34 +18,21 @@ namespace Caso404.UI
         [SerializeField] private UITheme _theme;
         [SerializeField] private GameContext _game;
         [SerializeField] private PlayerInteractor _interactor;
-        [SerializeField] private Core.Events.BoolEventChannel _uiModalChannel;
 
         Image _crosshair;
         TextMeshProUGUI _prompt;
         TextMeshProUGUI _sceneTitle;
         TextMeshProUGUI _counter;
         TextMeshProUGUI _toast;
-        TextMeshProUGUI _objective;
         readonly Queue<(string text, Color color)> _toasts = new();
         Coroutine _toastRoutine;
         Coroutine _titleRoutine;
 
-        CanvasGroup _group;
-
-        void Awake()
-        {
-            _group = gameObject.AddComponent<CanvasGroup>();
-            _group.blocksRaycasts = false;
-            Build();
-        }
-
-        /// <summary>Con un panel abierto el HUD se oculta para no encimarse (los avisos siguen en la capa de arriba).</summary>
-        void OnModalChanged(bool open) => _group.alpha = open ? 0f : 1f;
+        void Awake() => Build();
 
         void OnEnable()
         {
             if (_interactor != null) _interactor.FocusChanged += OnFocusChanged;
-            if (_uiModalChannel != null) { _uiModalChannel.OnRaised += OnModalChanged; OnModalChanged(_uiModalChannel.LastValue); }
             if (_game == null || _game.State == null) return;
             _game.State.Changed += RefreshCounter;
             _game.Evidence.EvidenceCollected += OnCollected;
@@ -56,7 +43,6 @@ namespace Caso404.UI
         void OnDisable()
         {
             if (_interactor != null) _interactor.FocusChanged -= OnFocusChanged;
-            if (_uiModalChannel != null) _uiModalChannel.OnRaised -= OnModalChanged;
             if (_game == null || _game.State == null) return;
             _game.State.Changed -= RefreshCounter;
             _game.Evidence.EvidenceCollected -= OnCollected;
@@ -102,14 +88,11 @@ namespace Caso404.UI
                 _theme.BodyFont, _theme.SizeS, UITheme.WithAlpha(_theme.TextLight, 0.75f));
             UIFactory.Place(shortcuts.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(32, 24), new Vector2(900, 30));
 
-            _objective = UIFactory.Text(root, "Objective", "", _theme.BodyFont, _theme.SizeS, UITheme.WithAlpha(_theme.TextLight, 0.85f));
-            UIFactory.Place(_objective.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(32, -24), new Vector2(900, 60));
-
             _counter = UIFactory.Text(root, "Counter", "", _theme.BodyFont, _theme.SizeBody, _theme.WarningAmber, TextAlignmentOptions.TopRight);
             UIFactory.Place(_counter.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-32, -24), new Vector2(600, 36));
 
             _toast = UIFactory.Text(root, "Toast", "", _theme.BodyFont, _theme.SizeM, _theme.TextLight, TextAlignmentOptions.Center);
-            UIFactory.Place(_toast.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -130), new Vector2(1400, 50));
+            UIFactory.Place(_toast.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 120), new Vector2(1200, 50));
             _toast.alpha = 0f;
         }
 
@@ -126,31 +109,7 @@ namespace Caso404.UI
             if (_game == null || _game.Evidence == null) return;
             int n = _game.Evidence.UnanalyzedCount;
             _counter.text = n > 0 ? $"Evidencias sin analizar: {n}  (Tab)" : "";
-            _objective.text = Objective();
             if (_interactor != null) OnFocusChanged(_interactor.Current);
-        }
-
-        /// <summary>Qué le falta al jugador en esta escena (guía para no perderse; solo lee el estado).</summary>
-        string Objective()
-        {
-            var g = _game;
-            var scene = g.Scene;
-            if (g.State.State.accusations.Exists(a => a.caseId == g.Case.Id)) return "Objetivo: caso cerrado.";
-            int pending = 0, found = 0;
-            foreach (var e in scene.Evidence)
-            {
-                if (e.Source != EvidenceSource.Scene || !g.Evidence.IsAvailable(e)) continue;
-                if (g.Evidence.IsFound(e)) found++; else pending++;
-            }
-            string explore = pending > 0 ? $"  ·  Objetos por revisar aquí: {pending}" : "";
-            // Al llegar a una escena grande, lo primero es recorrerla.
-            if (found == 0 && pending > 0) return $"Objetivo: recorre todo el lugar y revisa los objetos sospechosos (E)  ·  Por revisar: {pending}";
-            if (g.Evidence.UnanalyzedCount > 0) return "Objetivo: analiza tus evidencias nuevas (Tab)" + explore;
-            if (scene.Hypothesis != null && !g.Hypotheses.IsComplete(scene.Hypothesis)) return "Objetivo: investiga y completa la hipótesis (H)" + explore;
-            if (scene.ClosingDecision != null && !g.Decisions.HasTaken(scene.ClosingDecision)) return "Objetivo: toma la decisión de cierre (H)" + explore;
-            if (scene.HasAccusation) return "Objetivo: interroga y presenta la acusación (expediente para la Fiscalía)";
-            if (!g.State.IsSceneCompleted(scene.Id)) return "Objetivo: termina la escena desde el tablero (H)" + explore;
-            return "";
         }
 
         void OnCollected(EvidenceData ev) => ShowToast($"Guardada en el expediente: {ev.DisplayName}", _theme.WarningAmber);
