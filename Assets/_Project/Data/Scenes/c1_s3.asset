@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec4b29b1d066997429b8fa8401ac128b, type: 3}
+  m_Name: c1_s3
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.SceneData
+  _id: c1_s3
+  _caseId: c1
+  _unitySceneName: PorteriaSotano
+  _displayName: "Porter\xEDa y s\xF3tano del Edificio Mirador"
+  _ambience: "Caseta de porter\xEDa con libro de registro, pasillo de s\xF3tano con casilleros, cuarto de mantenimiento, parqueadero con contenedor."
+  _introText: 
+  _evidence:
+  - {fileID: 11400000, guid: 302a7cefa57bd86478aea1c75cc3c10d, type: 2}
+  - {fileID: 11400000, guid: 6ad87aa58a02fed40acf6319b1e23981, type: 2}
+  - {fileID: 11400000, guid: 1d752b55a26529c4bafd6f0a21671c99, type: 2}
+  - {fileID: 11400000, guid: 8142425eb550f174bbadcbc94a17b3bb, type: 2}
+  - {fileID: 11400000, guid: 6570dafa5dac02349b13154bd9e499dd, type: 2}
+  - {fileID: 11400000, guid: 7b2b87636e092414bbdf620fc4019f8a, type: 2}
+  - {fileID: 11400000, guid: b8db40c1cd70d8842a58b4b1f9043308, type: 2}
+  - {fileID: 11400000, guid: 2064eec3d4d27f44f86a2573a1e1a120, type: 2}
+  _characters:
+  - _character: {fileID: 11400000, guid: d4e959ad40896ea47bf256528866a3a7, type: 2}
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+  - _character: {fileID: 11400000, guid: 8619e8624deb7cb43bceded6ad568156, type: 2}
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+  _hypothesis: {fileID: 11400000, guid: f3378547a37c9374292aa267eddf8387, type: 2}
+  _closingDecision: {fileID: 0}
+  _requiredCompletedSceneIds: []

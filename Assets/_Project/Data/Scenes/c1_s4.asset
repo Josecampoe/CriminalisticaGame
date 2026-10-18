@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec4b29b1d066997429b8fa8401ac128b, type: 3}
+  m_Name: c1_s4
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.SceneData
+  _id: c1_s4
+  _caseId: c1
+  _unitySceneName: Comisaria
+  _displayName: "Comisar\xEDa"
+  _ambience: Oficina con tablero de corcho y sala de interrogatorio.
+  _introText: 
+  _evidence:
+  - {fileID: 11400000, guid: 005d711974179c14eb02e3ca46c816fe, type: 2}
+  _characters:
+  - _character: {fileID: 11400000, guid: a31aa0a5e8fc6234d868ccf200bf05a4, type: 2}
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+  - _character: {fileID: 11400000, guid: 8c9eebfea2839094ba4293edc50d4817, type: 2}
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+  - _character: {fileID: 11400000, guid: d4e959ad40896ea47bf256528866a3a7, type: 2}
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+  - _character: {fileID: 11400000, guid: 8619e8624deb7cb43bceded6ad568156, type: 2}
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+  _hypothesis: {fileID: 0}
+  _closingDecision: {fileID: 0}
+  _requiredCompletedSceneIds:
+  - c1_s2
+  - c1_s3

@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec4b29b1d066997429b8fa8401ac128b, type: 3}
+  m_Name: c1_s2
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.SceneData
+  _id: c1_s2
+  _caseId: c1
+  _unitySceneName: CafeLaEsquina
+  _displayName: "Caf\xE9 La Esquina"
+  _ambience: "Caf\xE9 peque\xF1o de barrio, de noche, olor a tinto, televisor con un partido repetido."
+  _introText: 
+  _evidence:
+  - {fileID: 11400000, guid: e11dad27ba09fc949879eb5f85bb7e2d, type: 2}
+  - {fileID: 11400000, guid: 79d34c6a556ffcb449f1a23fb500d9d0, type: 2}
+  - {fileID: 11400000, guid: b8120c542a8f0364ebff12bf834ddecc, type: 2}
+  _characters:
+  - _character: {fileID: 11400000, guid: a31aa0a5e8fc6234d868ccf200bf05a4, type: 2}
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags:
+      - {fileID: 11400000, guid: 6a95f91835e1a9f4296aaafee78cc523, type: 2}
+      _exposedLies: []
+      _knownFactIds: []
+  _hypothesis: {fileID: 11400000, guid: 5c3f941f2b610a847b2f859e3266d63f, type: 2}
+  _closingDecision: {fileID: 0}
+  _requiredCompletedSceneIds: []
