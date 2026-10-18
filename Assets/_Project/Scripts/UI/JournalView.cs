@@ -28,6 +28,7 @@ namespace Caso404.UI
         Button _extra;
         TMP_InputField _password;
         EvidenceData _selected;
+        TextMeshProUGUI _glitch;
 
         protected override void Build()
         {
@@ -59,6 +60,10 @@ namespace Caso404.UI
             _extra = UIFactory.Button(card.transform, "Análisis adicional", _theme, _theme.BgDark, _theme.TextLight, OnExtra, 52);
             _extraResult = UIFactory.Text(card.transform, "ExtraResult", "", _theme.BodyFont, _theme.SizeBody, _theme.Ink);
             UIFactory.Layout(UIFactory.Rect("Spacer", card.transform).gameObject, flexibleHeight: 1);
+
+            _glitch = UIFactory.Text(rt, "Glitch404", "404", _theme.MonoFont, 220, _theme.AlexCyan, TextAlignmentOptions.Center);
+            UIFactory.Stretch(_glitch.rectTransform);
+            _glitch.gameObject.SetActive(false);
         }
 
         void OnEnable()
@@ -149,9 +154,25 @@ namespace Caso404.UI
         void OnExtra()
         {
             if (_selected == null) return;
-            var result = _game.Evidence.RunExtraAnalysis(_selected, _password.text);
+            var ev = _selected;
+            var result = _game.Evidence.RunExtraAnalysis(ev, _password.text);
             Refresh();
             if (!result.Success) _reason.text = result.Text;
+            else if (ev.ExtraAnalysis.AlexGlitch) StartCoroutine(Glitch404());
+        }
+
+        /// <summary>GUION §4.5: al abrir la carpeta directiva_404, la interfaz de ALEX hace glitch y aparece "404" medio segundo.</summary>
+        System.Collections.IEnumerator Glitch404()
+        {
+            _glitch.gameObject.SetActive(true);
+            for (float t = 0; t < 0.5f; t += Time.unscaledDeltaTime)
+            {
+                _glitch.color = Random.value > 0.5f ? _theme.AlexCyan : _theme.AccentRed;
+                _glitch.rectTransform.anchoredPosition = new Vector2(Random.Range(-12f, 12f), Random.Range(-4f, 4f));
+                yield return null;
+            }
+            _glitch.rectTransform.anchoredPosition = Vector2.zero;
+            _glitch.gameObject.SetActive(false);
         }
 
         // El cian sobre papel claro no llega a 4.5:1; se oscurece para mantener el contraste.
