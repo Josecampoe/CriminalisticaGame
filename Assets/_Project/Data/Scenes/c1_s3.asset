@@ -49,3 +49,4 @@ MonoBehaviour:
   _hypothesis: {fileID: 11400000, guid: f3378547a37c9374292aa267eddf8387, type: 2}
   _closingDecision: {fileID: 0}
   _requiredCompletedSceneIds: []
+  _hasAccusation: 0
