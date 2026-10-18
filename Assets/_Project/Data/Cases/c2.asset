@@ -15,7 +15,6 @@ MonoBehaviour:
   _id: c2
   _title: Protocolo 404
   _introText: "Tres meses despu\xE9s. Torre Nexo Analytics, piso 12. El creador de ALEX est\xE1 muerto."
-  _introLetter: "Unidad de Criminal\xEDstica de Valdora \u2014 Oficio N.\xBA 404-B\nPara: Investigador(a) Rivera\nAsunto: Muerte de Tom\xE1s Quintero, Torre Nexo Analytics, piso 12\n\nRivera:\nHan pasado tres meses desde el caso del Edificio Mirador. Hoy, a las 6:10 de la ma\xF1ana, la guardia de seguridad de la Torre Nexo encontr\xF3 muerto a Tom\xE1s Quintero, 45 a\xF1os, ingeniero jefe de Nexo Analytics y creador de ALEX. Estaba dentro de la sala de servidores B. Se activ\xF3 el sistema de extinci\xF3n por gas con la puerta bloqueada.\nLa empresa ya emiti\xF3 un comunicado: falla de energ\xEDa y activaci\xF3n accidental. ALEX confirma esa versi\xF3n en su informe preliminar.\nNexo financia la mitad de los equipos de esta unidad, as\xED que habr\xE1 presi\xF3n para cerrar esto r\xE1pido. No lo cierre r\xE1pido. Ci\xE9rrelo bien.\nUna cosa m\xE1s: Elena Vargas ya se recuper\xF3, y me llam\xF3 esta ma\xF1ana. Dice que Tom\xE1s le escribi\xF3 la noche en que muri\xF3.\n\u2014 Comisaria Patricia Lozano"
   _alexIntroLine: "Detective, el informe preliminar indica una falla t\xE9cnica. No creo que nos tome mucho tiempo."
   _alexLines:
     _crime:
