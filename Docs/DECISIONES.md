@@ -203,3 +203,4 @@ Registro de decisiones tomadas durante el desarrollo, con su motivo. Cuando el g
 | M6 | El HUD se oculta mientras hay un panel abierto (escucha `evt_ui_modal`), y los avisos pasan a la parte superior. | Se encimaba con los títulos de los paneles y con el diálogo. |
 | M7 | En el modo inspección, los objetos planos (huella, papeles, teléfono) se inclinan hacia la cámara al abrirse. | Se veían de canto, como una línea. |
 | M8 | En la acusación, el resultado del análisis de cada prueba se muestra al 85 % del tamaño (antes, 70 %). | Era ilegible. |
+| M9 | **Opciones** en el menú principal: sensibilidad del mouse (de 0.25x a 3.3x), invertir eje Y y pantalla completa. Se guardan en `PlayerPrefs` (`GameSettings`), no en el `GameState`. El controlador las lee al empezar y al cerrar paneles, no en cada frame. | Son preferencias de la máquina del jugador, no de la partida. Te sirven si la cámara se siente rápida o lenta en tu prueba. |
