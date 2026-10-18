@@ -29,3 +29,5 @@ MonoBehaviour:
   _grantsEvidenceOnExposed: []
   _alexTrigger: 0
   _alexTriggerEvidence: {fileID: 0}
+  _evidenceRequirements: []
+  _triggersDecision: {fileID: 0}

@@ -49,6 +49,8 @@ MonoBehaviour:
     _requiresCalmApproach: 1
     _onlyInEnding: 0
     _setsFlags: []
+    _revealedByEvidence: {fileID: 0}
+    _alsoRevealsFactIds: []
     _triggersDecision: {fileID: 11400000, guid: d414a5a6b81cb534ab8c1e7b59322714, type: 2}
   _fallback:
     _crime:
