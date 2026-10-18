@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40ddba45c3bd07a48b33b068fb975abb, type: 3}
+  m_Name: ev_c1_cenizas
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.EvidenceData
+  _id: ev_c1_cenizas
+  _caseId: c1
+  _sceneId: c1_s3
+  _displayName: Caneca con cenizas
+  _description: "Una caneca met\xE1lica con restos quemados."
+  _icon: {fileID: 0}
+  _inspectPrefab: {fileID: 0}
+  _source: 0
+  _spawnCondition:
+    _allEvidenceAnalyzed: []
+    _anyEvidenceAnalyzed: []
+    _allFlags:
+    - {fileID: 11400000, guid: 6a95f91835e1a9f4296aaafee78cc523, type: 2}
+    _anyFlags: []
+    _noneFlags: []
+    _exposedLies: []
+    _knownFactIds: []
+  _hasHiddenDetail: 0
+  _hiddenDetailText: 
+  _analysisResult: Tela quemada. No se puede analizar.
+  _analyzedByAlex: 0
+  _canBeAnalyzed: 0
+  _revealsFactIds: []
+  _setsFlagsOnAnalyze: []
+  _extraAnalysis:
+    _kind: 0
+    _buttonLabel: 
+    _password: 
+    _resultText: 
+    _alexComment: 
+    _setsFlags: []
