@@ -45,6 +45,7 @@ namespace Caso404.EditorTools
             Wall(env, "Inter Norte", new Vector3(4, 0, 8), new Vector3(12, 0, 8), "wall_hall");
             Wall(env, "Inter Este", new Vector3(12, 0, 0), new Vector3(12, 0, 8), "wall_hall");
             Box("Mesa de interrogatorio", env, new Vector3(8f, 0.38f, 4f), new Vector3(1.2f, 0.76f, 2.4f), "metal");
+            for (int i = 0; i < 4; i++) Box($"Silla {i}", env, new Vector3(i < 2 ? 7f : 9f, 0.22f, 3.2f + (i % 2) * 1.6f), new Vector3(0.45f, 0.44f, 0.45f), "dark");
 
             // Tablero de hipótesis (corcho con fotos e hilo rojo)
             var board = Trigger<SceneCloseTrigger>("Tablero de corcho (hipótesis)", new Vector3(-5.9f, 1.6f, 4f), new Vector3(0.08f, 1.4f, 2.6f), "cork", "Revisar el tablero de hipótesis");
@@ -65,22 +66,7 @@ namespace Caso404.EditorTools
             Npc("laura", new Vector3(7f, 0f, 4.8f), 90f, seated: true);
             Npc("hernan", new Vector3(9f, 0f, 3.2f), 270f, seated: true);
             Npc("andres", new Vector3(9f, 0f, 4.8f), 270f, seated: true);
-            // Elenco del caso 2 (la escena es compartida; cada personaje solo aparece si el caso en curso lo lista).
-            Npc("sebastian", new Vector3(7f, 0f, 3.2f), 90f, seated: true, caseId: "c2", withChair: false);
-            Npc("valeria", new Vector3(7f, 0f, 4.8f), 90f, seated: true, caseId: "c2", withChair: false);
-            Npc("ines", new Vector3(9f, 0f, 3.2f), 270f, seated: true, caseId: "c2", withChair: false);
-            Npc("elena", new Vector3(-3.6f, 0f, 5.2f), 120f, caseId: "c2");
-            var c2s4 = Db.FindCase("c2")?.FindScene("c2_s4");
-            if (c2s4 != null)
-            {
-                var so = new SerializedObject(Game);
-                var list = so.FindProperty("_alternativeScenes");
-                list.arraySize = 1;
-                list.GetArrayElementAtIndex(0).objectReferenceValue = c2s4;
-                so.ApplyModifiedPropertiesWithoutUndo();
-            }
 
-            CityKit.Surround(-4f, false, 7); // segundo piso
             Finish(scene, ScenePath);
         }
 
