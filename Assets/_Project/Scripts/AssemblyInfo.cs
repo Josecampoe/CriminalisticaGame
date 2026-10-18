@@ -4,4 +4,3 @@ using System.Runtime.CompilerServices;
 // el código del juego solo los lee.
 [assembly: InternalsVisibleTo("Caso404.Editor")]
 [assembly: InternalsVisibleTo("Caso404.Tests.EditMode")]
-[assembly: InternalsVisibleTo("Caso404.Tests.PlayMode")]
