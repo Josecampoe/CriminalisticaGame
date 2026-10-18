@@ -343,6 +343,7 @@ namespace Caso404.EditorTools
             Set(hud, "_theme", Theme);
             Set(hud, "_game", Game);
             Set(hud, "_interactor", _interactor);
+            Set(hud, "_uiModalChannel", _modal);
 
             var inspectionView = Panel<InspectionView>(canvas.transform, "InspectionView", ui);
             Set(inspectionView, "_inspection", _inspection);
