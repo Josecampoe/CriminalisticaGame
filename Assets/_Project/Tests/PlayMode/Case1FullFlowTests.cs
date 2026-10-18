@@ -63,7 +63,7 @@ namespace Caso404.Tests
             Assert.IsTrue(Game.State.HasFlag("flag_c1_pista_nx"), "El análisis profundo del celular activa flag_c1_pista_nx");
             yield return Accuse("andres", "end_c1_verdadero", "ev_c1_llavero", "ev_c1_overol", "ev_c1_celular_andres");
             Assert.IsTrue(Game.State.KnowsFact("f_c1_andres_pago"), "En el final verdadero Andrés confiesa el pago de Soporte NX");
-            yield return BackToMenu();
+            yield return ContinueToCase2();
         }
 
         [UnityTest]
@@ -224,6 +224,33 @@ namespace Caso404.Tests
             var ending = Object.FindAnyObjectByType<EndingView>();
             Assert.AreSame(ending, Ui.Top);
             Assert.AreEqual(expectedEnding, ending.ShownEndingId);
+        }
+
+        /// <summary>Tras el final del caso 1 empieza el caso 2 (c2_s1) conservando flags y alexTrust.</summary>
+        IEnumerator ContinueToCase2()
+        {
+            int trust = Game.State.AlexTrust;
+            Object.FindAnyObjectByType<EndingView>().Finish();
+            yield return null;
+            Assert.IsTrue(Choose("Comenzar «Protocolo 404»"), "Tras el caso 1 se ofrece empezar el caso 2");
+            yield return WaitScene("c2_s1");
+            var g = Game;
+            Assert.AreEqual("c2", g.Case.Id);
+            Assert.IsTrue(g.State.HasFlag("end_c1_verdadero"), "El final del caso 1 pasa al caso 2");
+            Assert.IsTrue(g.State.HasFlag("flag_c1_pista_nx"));
+            Assert.AreEqual(trust, g.State.AlexTrust, "alexTrust pasa del caso 1 al caso 2");
+            Assert.IsTrue(((MessageView)Ui.Top).Choose("Empezar"), "Intro del caso 2");
+            yield return CollectAndAnalyzeAll(5);
+            Assert.IsTrue(g.State.IsAlexClaimRaised("lie_c2_alex_falla"));
+            Assert.IsTrue(g.State.IsAlexClaimRaised("lie_c2_alex_nota"));
+            Assert.IsTrue(g.Alex.Question(g.Case.FindLie("lie_c2_alex_falla"), g.Case.FindEvidence("ev_c2_sensor_humo")).Success);
+            Assert.IsTrue(g.Alex.Question(g.Case.FindLie("lie_c2_alex_nota"), g.Case.FindEvidence("ev_c2_nota")).Success);
+            AnswerHypothesis(new Dictionary<string, string[]> { ["hyp_c2_s1_q1"] = new[] { "distancia" } });
+            yield return Decide(g.Scene.ClosingDecision, "B");
+            Assert.IsTrue(g.State.IsSceneCompleted("c2_s1"));
+            Assert.IsTrue(Choose("Menú principal"), "c2_s2 todavía no está construida");
+            float t = 0;
+            while (SceneManager.GetActiveScene().name != GameUIController.MainMenuScene && t < SceneTimeout) { t += Time.unscaledDeltaTime; yield return null; }
         }
 
         IEnumerator BackToMenu()
