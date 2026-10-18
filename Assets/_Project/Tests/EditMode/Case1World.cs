@@ -23,11 +23,11 @@ namespace Caso404.Tests
         public readonly HypothesisService Hypotheses;
         public readonly AccusationService Accusation;
 
-        public Case1World(string caseId = "c1")
+        public Case1World()
         {
             Db = AssetDatabase.LoadAssetAtPath<GameDatabase>(DatabasePath);
             Assert.IsNotNull(Db, "Falta GameDatabase: ejecuta Caso404/Generar datos caso 1.");
-            Case = Db.FindCase(caseId);
+            Case = Db.FindCase("c1");
             State = new GameStateService(new GameState { alexTrust = Db.Alex.StartTrust });
             Evidence = new EvidenceService(State, Case);
             Alex = new AlexService(State, Case, Db.Alex, Evidence);
