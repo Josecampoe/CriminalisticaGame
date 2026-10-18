@@ -41,5 +41,6 @@ MonoBehaviour:
     _password: 
     _resultText: 'Las placas son legibles: es el carro de Valeria Duarte.'
     _alexComment: 
+    _alexGlitch: 0
     _setsFlags:
     - {fileID: 11400000, guid: 0e734bf0d23284446815a336e9a0f5a4, type: 2}

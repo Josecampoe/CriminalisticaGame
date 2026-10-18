@@ -41,4 +41,5 @@ MonoBehaviour:
     _password: 
     _resultText: 
     _alexComment: 
+    _alexGlitch: 0
     _setsFlags: []
