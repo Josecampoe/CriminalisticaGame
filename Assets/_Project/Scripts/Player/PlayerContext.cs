@@ -16,6 +16,10 @@ namespace Caso404.Player
         public event Action<CharacterProfile, Transform> TalkRequested;
         /// <summary>Abrir el tablero de hipótesis y cerrar la escena.</summary>
         public event Action SceneCloseRequested;
+        /// <summary>Abrir la pantalla de acusación (Comisaría).</summary>
+        public event Action AccusationRequested;
+        /// <summary>Abrir el panel de ALEX (pantalla de ALEX en la Comisaría).</summary>
+        public event Action AlexRequested;
 
         [SerializeField] private FirstPersonController _controller;
         [SerializeField] private Camera _camera;
@@ -26,5 +30,7 @@ namespace Caso404.Player
         public void RequestInspect(EvidenceData evidence, GameObject source) => InspectRequested?.Invoke(evidence, source);
         public void RequestTalk(CharacterProfile character, Transform head) => TalkRequested?.Invoke(character, head);
         public void RequestSceneClose() => SceneCloseRequested?.Invoke();
+        public void RequestAccusation() => AccusationRequested?.Invoke();
+        public void RequestAlex() => AlexRequested?.Invoke();
     }
 }
