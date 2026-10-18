@@ -242,6 +242,10 @@ namespace Caso404.EditorTools
                 new ExtraTopic { Id = "tomas_alex", Label = "Preguntar qué le contó Tomás de ALEX",
                     Line = new FallbackLine("Tomás me dijo una vez que ALEX al principio se llamaba de otra forma.", "f_c2_elena_lucero") },
             };
+            // GUION §4.3: tras end_c1_engano, Elena solo coopera si le muestras su USB.
+            elena.RefusesUnless = Cond(allFlags: new[] { fEndEngano });
+            elena.CooperatesAfterSeeing = usb;
+            elena.RefusalLine = "Metieron preso a Carlos por algo que no hizo. No tengo nada que hablar con la policía.";
             elena.AttitudeVariants = new[]
             {
                 new AttitudeVariant { Condition = Cond(allFlags: new[] { fEndVerdadero }), Text = "(Elena confía en ti y comparte todo de inmediato.)" },
