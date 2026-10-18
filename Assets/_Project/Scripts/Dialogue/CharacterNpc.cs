@@ -34,7 +34,8 @@ namespace Caso404.Dialogue
         {
             // Presencia condicional según la escena (ej. Carlos no está en el café si fue detenido).
             var presence = _game != null ? _game.Scene.Characters.FirstOrDefault(p => p.Character == _profile) : null;
-            if (presence != null && !presence.Condition.Evaluate(_game.State)) gameObject.SetActive(false);
+            // Si la escena no lo lista (Comisaría compartida por los dos casos), tampoco aparece.
+            if (_game != null && (presence == null || !presence.Condition.Evaluate(_game.State))) gameObject.SetActive(false);
         }
 
         void OnEnable()
