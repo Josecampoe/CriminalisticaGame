@@ -169,3 +169,14 @@ Registro de decisiones tomadas durante el desarrollo, con su motivo. Cuando el g
 | L6 | El secreto de Sebastián (Kairos Labs) se revela al presentarle el chat analizado (`SecretEntry.RevealedByEvidence`) y le da al jugador la coartada del bar. | GUION §4.3: "Lo prueba `ev_c2_chat_kairos`". |
 | L7 | Frases que escribí porque el guion no las trae, sin hechos nuevos: <ul><li>Sebastián al refutarle "no hablé con Tomás": *"Está bien, hablé con él. ¿Y qué? Eso no me convierte en asesino."*</li><li>Sebastián al refutarle "me fui a las 7": *"Me fui a las nueve y veinte, en la moto."*</li><li>Valeria reacciona con sus frases de respaldo.</li><li>La recomendación de ALEX en `dec_c2_s1` usa su propia mentira sobre la nota.</li><li>Elena tiene dos temas extra que repiten sus hechos del guion (el correo y el primer nombre de ALEX).</li></ul> | El guion no tiene esas líneas. |
 | L8 | Las actitudes de Elena según el final del caso 1 quedan como datos (`AttitudeVariants`). Falta mostrarlas, el −5 de confianza por `flag_c1_cuaderno` y la regla de que solo coopera tras ver la USB si el caso 1 terminó en engaño. | Pendiente para la escena de la Comisaría del caso 2. |
+
+## Fase L — Caso 2: c2_s1 y paso entre casos
+
+| # | Decisión | Motivo |
+|---|---|---|
+| L9 | c2_s1 "Sala de servidores B": sala fría con tres filas de racks con luces azules, puerta de seguridad abierta (con lector: registro de la puerta vía ALEX), sensor de humo en el techo, panel rojo de gas, el cuerpo de Tomás cubierto (con la USB en la mano) y una taza con la nota en el escritorio técnico. Se cierra en el ascensor del piso 12. | GUION §4.4 y §7: sin personajes, solo comentarios de ALEX. |
+| L10 | Después del final del caso 1 y de "Tres meses después...", aparece **"Comenzar «Protocolo 404»"**, que carga c2_s1 conservando flags, finales y `alexTrust`. | GUION §2: el caso 2 siempre empieza y `alexTrust` pasa al caso 2. |
+| L11 | Si `alexTrust` es menor que 30 al empezar el caso 2, la intro usa la línea de ALEX *"Noto que has dejado de confiar en mí..."*. | GUION §4.5. |
+| L12 | La Comisaría es una sola escena de Unity para los dos casos. `GameContext` elige `c1_s4` o `c2_s4` según el caso en curso (`_alternativeScenes`), y cada personaje solo aparece si el `SceneData` activo lo lista. El elenco del caso 2 (Sebastián, Valeria, Inés y Elena) ya está colocado. | GUION §2: espacio compartido. |
+| L13 | En el final secreto, después del texto del interrogatorio a ALEX se abre `dec_c2_alex`. Su resultado ("Desconexión" o "Archivo encontrado") se muestra antes de los créditos "ERROR 404: CONFIANZA NO ENCONTRADA.". El flujo está listo, pero solo se podrá jugar cuando existan c2_s2 y c2_s3. | GUION §4.6. |
+| L14 | La prueba del final verdadero del caso 1 sigue hasta el caso 2: comprueba que pasan los flags, el final y `alexTrust`, recorre c2_s1 (5 evidencias, 2 contradicciones de ALEX, hipótesis) y toma `dec_c2_s1`. | Así se comprueba la conexión entre casos. |
