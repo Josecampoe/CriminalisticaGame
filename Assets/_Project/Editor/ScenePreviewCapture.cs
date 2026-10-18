@@ -26,6 +26,9 @@ namespace Caso404.EditorTools
             EditorSceneManager.OpenScene(ComisariaSceneBuilder.ScenePath);
             Shot("c1s4_oficina", new Vector3(-1.5f, 1.65f, 0.9f), new Vector3(10, -20, 0));
             Shot("c1s4_interrogatorio", new Vector3(5f, 1.65f, 2f), new Vector3(15, 60, 0));
+            EditorSceneManager.OpenScene(ServidoresSceneBuilder.ScenePath);
+            Shot("c2s1_entrada", new Vector3(0f, 1.65f, -1.5f), new Vector3(10, 0, 0));
+            Shot("c2s1_sala", new Vector3(-1.5f, 1.65f, 0.8f), new Vector3(25, 50, 0));
             Debug.Log("[Caso404] Capturas guardadas en Logs/preview_*.png");
         }
 
