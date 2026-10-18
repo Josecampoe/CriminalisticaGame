@@ -26,3 +26,5 @@ MonoBehaviour:
   _grantsEvidenceOnExposed: []
   _alexTrigger: 1
   _alexTriggerEvidence: {fileID: 11400000, guid: 7b2b87636e092414bbdf620fc4019f8a, type: 2}
+  _evidenceRequirements: []
+  _triggersDecision: {fileID: 0}
