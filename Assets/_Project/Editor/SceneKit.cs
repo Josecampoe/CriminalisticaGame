@@ -287,6 +287,7 @@ namespace Caso404.EditorTools
             cam.nearClipPlane = 0.05f;
             cam.fieldOfView = 65f;
             camGo.AddComponent<AudioListener>();
+            Set(camGo.AddComponent<CameraShake>(), "_game", Game);
 
             var fps = player.AddComponent<FirstPersonController>();
             Set(fps, "_input", _input);
@@ -335,6 +336,7 @@ namespace Caso404.EditorTools
         {
             var canvas = CreateCanvas("UI");
             var systems = new GameObject("UISystems");
+            Set(systems.AddComponent<AudioFeedback>(), "_game", Game);
             var ui = systems.AddComponent<UIManager>();
             Set(ui, "_input", _input);
             Set(ui, "_modalChannel", _modal);
