@@ -23,6 +23,7 @@ namespace Caso404.UI
         TextMeshProUGUI _summary;
         TextMeshProUGUI _closing;
         Action _onFinished;
+        bool _skipClosing;
         Coroutine _typing;
 
         public override bool ClosesWithEscape => false;
@@ -58,9 +59,10 @@ namespace Caso404.UI
         }
 
         /// <summary>Muestra el final y llama a onFinished después de "Tres meses después...".</summary>
-        public void Show(EndingResult result, Action onFinished)
+        public void Show(EndingResult result, Action onFinished, bool skipClosing = false)
         {
             _onFinished = onFinished;
+            _skipClosing = skipClosing || result.Ending == null || string.IsNullOrEmpty(result.Ending.ClosingText);
             ShownEndingId = result.Ending != null ? result.Ending.Id : "";
             _title.text = result.Ending != null ? result.Ending.Title : "Caso sin resolver";
             _text.text = result.Text;
@@ -88,8 +90,20 @@ namespace Caso404.UI
             return lines;
         }
 
+        /// <summary>Muestra solo la pantalla de cierre (ej. los créditos del final secreto tras dec_c2_alex).</summary>
+        public void ShowClosingOnly(EndingResult result, Action onFinished)
+        {
+            _onFinished = onFinished;
+            _skipClosing = false;
+            _closing.text = result.Ending != null ? result.Ending.ClosingText : "";
+            if (string.IsNullOrEmpty(_closing.text)) { onFinished?.Invoke(); return; }
+            Open();
+            ShowClosing();
+        }
+
         void ShowClosing()
         {
+            if (_skipClosing) { Finish(); return; }
             _page1.gameObject.SetActive(false);
             _page2.gameObject.SetActive(true);
             if (_typing != null) StopCoroutine(_typing);

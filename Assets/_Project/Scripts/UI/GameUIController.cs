@@ -34,6 +34,8 @@ namespace Caso404.UI
         [SerializeField] private bool _showIntro = true;
 
         DecisionData _pendingDecision;
+        DecisionData _followUpDecision;
+        Action _afterFollowUp;
 
         /// <summary>Id de la escena que se está cargando (para pruebas).</summary>
         public string LoadingSceneId { get; private set; }
@@ -105,7 +107,10 @@ namespace Caso404.UI
             if (_showIntro && firstVisit && !string.IsNullOrEmpty(scene.IntroText))
             {
                 var body = (_game.Case.Scenes[0] == scene ? _game.Database.IntroText + "\n\n" : "") + scene.IntroText;
-                _message.Show($"{CaseLabel()} — {_game.Case.Title}", body, _game.Case.AlexIntroLine, false,
+                // GUION §4.5: si la confianza ya es baja al empezar, ALEX lo nota.
+                bool lowTrust = _game.Alex.Tone == AI.AlexTone.Cold && !string.IsNullOrEmpty(_game.Case.AlexLowTrustIntroLine);
+                var alexLine = lowTrust ? _game.Case.AlexLowTrustIntroLine : _game.Case.AlexIntroLine;
+                _message.Show($"{CaseLabel()} — {_game.Case.Title}", body, alexLine, false,
                     ("Empezar", () => _hud.ShowSceneTitle(scene.DisplayName)));
             }
             else
@@ -172,6 +177,14 @@ namespace Caso404.UI
 
         void AfterDecision(DecisionOutcome outcome, bool changesScene)
         {
+            if (outcome.Decision == _followUpDecision && _afterFollowUp != null)
+            {
+                var next = _afterFollowUp;
+                _followUpDecision = null;
+                _afterFollowUp = null;
+                next();
+                return;
+            }
             if (!changesScene) return;
             if (outcome.LetPlayerChooseNextScene) FinishScene();
             else
@@ -223,10 +236,50 @@ namespace Caso404.UI
         // ---------- Acusación y final ----------
         void ShowEnding(EndingResult result)
         {
-            _ending.Show(result, () =>
-                _message.Show($"Fin del {CaseLabel().ToLowerInvariant()}",
-                    "El caso 2, «Protocolo 404», todavía no está disponible en esta versión.\n\nTu partida quedó guardada.", null, false,
-                    ("Menú principal", GoToMenu)));
+            var followUp = result.Ending != null ? result.Ending.FollowUpDecision : null;
+            if (followUp != null && !_game.Decisions.HasTaken(followUp))
+            {
+                // Final secreto: tras el interrogatorio a ALEX viene la decisión final (dec_c2_alex) y luego el cierre.
+                _followUpDecision = followUp;
+                _afterFollowUp = () => _ending.ShowClosingOnly(result, AfterCaseFinished);
+                _ending.Show(result, () => _decision.Show(followUp), skipClosing: true);
+                return;
+            }
+            _ending.Show(result, AfterCaseFinished);
+        }
+
+        /// <summary>Tras el final de un caso: ofrece el siguiente caso si existe y su primera escena está construida.</summary>
+        void AfterCaseFinished()
+        {
+            _game.SaveGame();
+            var cases = _game.Database.Cases;
+            int index = -1;
+            for (int i = 0; i < cases.Count; i++) if (cases[i] == _game.Case) index = i;
+            var nextCase = index >= 0 && index + 1 < cases.Count ? cases[index + 1] : null;
+            var first = nextCase != null && nextCase.Scenes.Count > 0 ? nextCase.Scenes[0] : null;
+            if (first != null && SceneLoader.CanLoad(first.UnitySceneName))
+            {
+                string label = nextCase.Id == "c2" ? "Caso 2" : "Siguiente caso";
+                _message.Show($"{label} — {nextCase.Title}", "La investigación continúa.", null, false,
+                    ($"Comenzar «{nextCase.Title}»", () => StartCase(nextCase, first)),
+                    ("Menú principal", GoToMenu));
+                return;
+            }
+            _message.Show($"Fin del {CaseLabel().ToLowerInvariant()}",
+                nextCase != null
+                    ? $"El caso «{nextCase.Title}» todavía no está disponible en esta versión.\n\nTu partida quedó guardada."
+                    : "Gracias por jugar.\n\nTu partida quedó guardada.",
+                null, false, ("Menú principal", GoToMenu));
+        }
+
+        /// <summary>Empieza el siguiente caso conservando flags, finales y alexTrust (GUION §2).</summary>
+        public void StartCase(CaseData nextCase, SceneData first)
+        {
+            _game.State.SetCurrentScene(nextCase.Id, first.Id);
+            _game.SaveGame();
+            LoadingSceneId = first.Id;
+            if (_fader != null) _fader.FadeOutThen(() => SceneLoader.TryLoad(first.UnitySceneName));
+            else SceneLoader.TryLoad(first.UnitySceneName);
         }
 
         /// <summary>Vuelve al menú principal.</summary>
