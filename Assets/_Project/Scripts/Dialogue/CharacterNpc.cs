@@ -1,4 +1,3 @@
-using System.Linq;
 using Caso404.Core;
 using Caso404.Data;
 using Caso404.Interaction;
@@ -11,21 +10,14 @@ namespace Caso404.Dialogue
     public class CharacterNpc : MonoBehaviour, IInteractable
     {
         [SerializeField] private CharacterProfile _profile;
-        [SerializeField] private GameContext _game;
         [SerializeField] private Transform _head;
         [SerializeField] private float _turnSpeed = 4f;
-        [Tooltip("Desactívalo en personajes sentados: solo giran la cabeza.")]
-        [SerializeField] private bool _turnBody = true;
 
         Transform _lookTarget;
         bool _talkedOnce;
 
         public CharacterProfile Profile => _profile;
         public Transform Head => _head != null ? _head : transform;
-        /// <summary>True mientras el jugador conversa con este personaje.</summary>
-        public bool IsTalking => _lookTarget != null;
-        /// <summary>A quién mira el personaje mientras conversa (la cámara del jugador), o null.</summary>
-        public Transform LookTarget => _lookTarget;
 
         public string Prompt => $"Hablar con {_profile.DisplayName}";
         public bool CanInteract => _profile != null;
@@ -33,25 +25,7 @@ namespace Caso404.Dialogue
 
         void Awake()
         {
-            if (_profile == null || _game == null) GameLog.Error($"{name}: asigna CharacterProfile y GameContext.", this);
-        }
-
-        void Start()
-        {
-            // Presencia condicional según la escena (ej. Carlos no está en el café si fue detenido).
-            var presence = _game != null ? _game.Scene.Characters.FirstOrDefault(p => p.Character == _profile) : null;
-            // Si la escena no lo lista (Comisaría compartida por los dos casos), tampoco aparece.
-            if (_game != null && (presence == null || !presence.Condition.Evaluate(_game.State))) gameObject.SetActive(false);
-        }
-
-        void OnEnable()
-        {
-            if (_game != null && _game.Dialogue != null) _game.Dialogue.ConversationEnded += OnConversationEnded;
-        }
-
-        void OnDisable()
-        {
-            if (_game != null && _game.Dialogue != null) _game.Dialogue.ConversationEnded -= OnConversationEnded;
+            if (_profile == null) GameLog.Error($"{name}: asigna un CharacterProfile.", this);
         }
 
         public void Interact(PlayerContext ctx)
@@ -61,14 +35,12 @@ namespace Caso404.Dialogue
             ctx.RequestTalk(_profile, Head);
         }
 
-        void OnConversationEnded(CharacterProfile who)
-        {
-            if (who == _profile) _lookTarget = null;
-        }
+        /// <summary>Deja de mirar al jugador (al cerrar el diálogo).</summary>
+        public void StopLooking() => _lookTarget = null;
 
         void Update()
         {
-            if (_lookTarget == null || !_turnBody) return;
+            if (_lookTarget == null) return;
             var dir = _lookTarget.position - transform.position;
             dir.y = 0f;
             if (dir.sqrMagnitude < 0.01f) return;
