@@ -72,3 +72,13 @@ MonoBehaviour:
     _line:
       _text: "\xBFLa maestra? Esa casi no se usa, oiga. Solo para emergencias. Todo queda en el registro."
       _revealsFactIds: []
+  _refusesUnless:
+    _allEvidenceAnalyzed: []
+    _anyEvidenceAnalyzed: []
+    _allFlags: []
+    _anyFlags: []
+    _noneFlags: []
+    _exposedLies: []
+    _knownFactIds: []
+  _cooperatesAfterSeeing: {fileID: 0}
+  _refusalLine: 
