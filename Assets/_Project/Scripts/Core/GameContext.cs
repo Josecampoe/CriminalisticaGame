@@ -87,6 +87,7 @@ namespace Caso404.Core
 
         void OnDecisionMade(DecisionData decision, DecisionOption option)
         {
+            foreach (var ev in option.GrantsEvidence) Evidence.Grant(ev); // ej. la copia espejo (si sigue disponible)
             SaveGame(); // se guarda al tomar una decisión (y al cambiar de escena)
             if (_decisionMadeChannel != null) _decisionMadeChannel.Raise($"{decision.Id}:{option.Id}");
         }
