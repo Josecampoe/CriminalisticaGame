@@ -33,3 +33,16 @@ Registro de decisiones tomadas durante el desarrollo, con su motivo. Cuando el g
 | B11 | Las frases "Presionar" del guion son la reacción del personaje cuando se le refuta su mentira principal. | Esas frases son confesiones. Si se dijeran sin pruebas, el jugador no tendría que deducir. |
 | B12 | El celular de Andrés solo se entrega si su mentira `lie_c1_andres_casa` se refuta con una evidencia (llavero, overol o grabación original), no con el testimonio de Hernán. | GUION: lo entrega si se le presenta "al menos una prueba sólida". Las tres evidencias que refutan esa mentira son pruebas sólidas. |
 | B13 | Las frases de respaldo de ALEX para el diálogo libre se guardan en `CaseData.AlexLines`, tomadas de los ejemplos del GUION §3.5. | Dependen del caso, y ALEX se comparte entre los dos casos. |
+
+## Fase C — Núcleo
+
+| # | Decisión | Motivo |
+|---|---|---|
+| C1 | Los servicios (`GameStateService`, `EvidenceService`, `AlexService`, `DecisionService`, `HypothesisService`, `AccusationService`, `SceneFlowService`, `SaveService`) son clases C# normales, no MonoBehaviour. Un `GameContext` en la escena los crea y los reparte. | Se pueden probar en EditMode sin escenas. Es la base para que las pruebas recorran los finales. |
+| C2 | Solo `GameStateService` modifica el `GameState`, y avisa con eventos C# (`Changed`, `TrustChanged`, `FlagAdded`...). Para avisos globales entre escenas también hay canales en ScriptableObject (`GameEventChannel`, `StringEventChannel`). | Sistemas desacoplados, como pide CLAUDE.md. |
+| C3 | Aceptar una afirmación de ALEX suma +5 a `alexTrust` una sola vez. Seguir su recomendación en una decisión suma lo que diga la opción (+10 en `dec_c1_s1` A). | El guion dice "+5 a +10". +5 para lo pequeño y +10 para la decisión grande. |
+| C4 | Una afirmación de ALEX se puede cuestionar aunque antes se haya aceptado. Cuestionar con una evidencia que no la refuta no cambia nada: ALEX responde *"Esa evidencia no contradice mi análisis, detective."* | A veces la prueba aparece más tarde (la grabación original en s3 refuta el ERROR 404 de s1). Castigar los intentos fallidos haría que el jugador adivine en vez de deducir. |
+| C5 | Responder mal una hipótesis está permitido y la respuesta se puede cambiar. La decisión de cierre se habilita cuando todas las preguntas tienen respuesta. Acertar activa los flags de la pregunta. | El guion solo dice qué pasa al acertar. Así no se bloquea el avance. |
+| C6 | Al acusar, el final se guarda también como flag (`end_c1_verdadero`, etc.). | GUION §2: los `end_c1_*` pasan al caso 2. Así lo leen las mismas condiciones que el resto de flags. |
+| C7 | Una prueba sólida solo cuenta si está analizada, y en la acusación no se puede repetir una prueba. | Evita acusaciones con evidencias que el jugador no entendió. |
+| C8 | `SaveService` escribe primero un archivo `.tmp` y luego lo renombra. Rechaza partidas de una versión más nueva que la del juego. | Si el juego se cierra a mitad de un guardado, la partida no queda corrupta. `saveVersion` deja lugar para migraciones. |
