@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Caso404.Core;
 using Caso404.Data;
@@ -8,11 +9,13 @@ using UnityEngine;
 namespace Caso404.UI
 {
     /// <summary>
-    /// Conecta las pantallas entre sí: atajos (Tab, Q, H), intro de la escena, decisión tras un secreto,
-    /// resultado de una decisión y paso a la siguiente escena. No contiene reglas de juego: llama a los servicios.
+    /// Conecta las pantallas entre sí: atajos (Tab, Q, H), intro, decisión tras un secreto, resultado de una decisión,
+    /// fin de escena, paso a la siguiente escena con fundido, acusación y final. No contiene reglas de juego: llama a servicios.
     /// </summary>
     public class GameUIController : MonoBehaviour
     {
+        public const string MainMenuScene = "MainMenu";
+
         [SerializeField] private GameContext _game;
         [SerializeField] private InputReader _input;
         [SerializeField] private PlayerContext _player;
@@ -22,12 +25,18 @@ namespace Caso404.UI
         [SerializeField] private JournalView _journal;
         [SerializeField] private AlexPanelView _alex;
         [SerializeField] private HypothesisView _hypothesis;
+        [SerializeField] private AccusationView _accusation;
         [SerializeField] private DecisionView _decision;
+        [SerializeField] private EndingView _ending;
         [SerializeField] private DialogueView _dialogue;
         [SerializeField] private MessageView _message;
+        [SerializeField] private ScreenFader _fader;
         [SerializeField] private bool _showIntro = true;
 
         DecisionData _pendingDecision;
+
+        /// <summary>Id de la escena que se está cargando (para pruebas).</summary>
+        public string LoadingSceneId { get; private set; }
 
         void OnEnable()
         {
@@ -37,8 +46,19 @@ namespace Caso404.UI
                 _input.AlexPressed += OnAlex;
                 _input.HypothesisPressed += OnHypothesis;
             }
-            if (_player != null) _player.SceneCloseRequested += OpenHypothesis;
-            if (_hypothesis != null) _hypothesis.DecisionRequested += ShowDecision;
+            if (_player != null)
+            {
+                _player.SceneCloseRequested += OpenHypothesis;
+                _player.AccusationRequested += OpenAccusation;
+                _player.AlexRequested += OnAlex;
+            }
+            if (_hypothesis != null)
+            {
+                _hypothesis.DecisionRequested += ShowDecision;
+                _hypothesis.SceneFinishRequested += FinishScene;
+                _hypothesis.AccusationRequested += OpenAccusation;
+            }
+            if (_accusation != null) _accusation.Accused += ShowEnding;
             if (_decision != null) _decision.Resolved += OnDecisionResolved;
             if (_dialogue != null) _dialogue.Closed += OnDialogueClosed;
             if (_game != null && _game.Dialogue != null) _game.Dialogue.SecretRevealed += OnSecretRevealed;
@@ -52,8 +72,19 @@ namespace Caso404.UI
                 _input.AlexPressed -= OnAlex;
                 _input.HypothesisPressed -= OnHypothesis;
             }
-            if (_player != null) _player.SceneCloseRequested -= OpenHypothesis;
-            if (_hypothesis != null) _hypothesis.DecisionRequested -= ShowDecision;
+            if (_player != null)
+            {
+                _player.SceneCloseRequested -= OpenHypothesis;
+                _player.AccusationRequested -= OpenAccusation;
+                _player.AlexRequested -= OnAlex;
+            }
+            if (_hypothesis != null)
+            {
+                _hypothesis.DecisionRequested -= ShowDecision;
+                _hypothesis.SceneFinishRequested -= FinishScene;
+                _hypothesis.AccusationRequested -= OpenAccusation;
+            }
+            if (_accusation != null) _accusation.Accused -= ShowEnding;
             if (_decision != null) _decision.Resolved -= OnDecisionResolved;
             if (_dialogue != null) _dialogue.Closed -= OnDialogueClosed;
             if (_game != null && _game.Dialogue != null) _game.Dialogue.SecretRevealed -= OnSecretRevealed;
@@ -62,10 +93,19 @@ namespace Caso404.UI
         void Start()
         {
             var scene = _game.Scene;
-            if (_showIntro && !string.IsNullOrEmpty(scene.IntroText) && _game.State.State.foundEvidenceIds.Count == 0)
+            var record = _game.State.State.accusations.FirstOrDefault(a => a.caseId == _game.Case.Id);
+            if (scene.HasAccusation && record != null)
             {
-                var body = _game.Database.IntroText + "\n\n" + scene.IntroText;
-                _message.Show($"Caso 1 — {_game.Case.Title}", body, _game.Case.AlexIntroLine, false,
+                var ending = _game.Case.Endings.FirstOrDefault(e => e.Id == record.endingId);
+                _message.Show("Caso cerrado", $"Este caso ya terminó con el final «{(ending != null ? ending.Title : record.endingId)}».", null, false,
+                    ("Menú principal", GoToMenu));
+                return;
+            }
+            bool firstVisit = !_game.State.IsSceneCompleted(scene.Id) && !scene.Evidence.Any(e => _game.State.IsEvidenceFound(e.Id));
+            if (_showIntro && firstVisit && !string.IsNullOrEmpty(scene.IntroText))
+            {
+                var body = (_game.Case.Scenes[0] == scene ? _game.Database.IntroText + "\n\n" : "") + scene.IntroText;
+                _message.Show($"{CaseLabel()} — {_game.Case.Title}", body, _game.Case.AlexIntroLine, false,
                     ("Empezar", () => _hud.ShowSceneTitle(scene.DisplayName)));
             }
             else
@@ -73,6 +113,8 @@ namespace Caso404.UI
                 _hud.ShowSceneTitle(scene.DisplayName);
             }
         }
+
+        string CaseLabel() => _game.Case.Id == "c1" ? "Caso 1" : _game.Case.Id == "c2" ? "Caso 2" : "Caso";
 
         // ---------- Atajos: solo funcionan si no hay otro panel encima (por ejemplo, mientras se escribe) ----------
         void OnJournal() => Toggle(_journal);
@@ -90,6 +132,13 @@ namespace Caso404.UI
         void OpenHypothesis()
         {
             if (_ui.Top == null) _hypothesis.Open();
+        }
+
+        void OpenAccusation()
+        {
+            if (!_game.Scene.HasAccusation || _ui.Top != null) return;
+            if (_game.State.State.accusations.Any(a => a.caseId == _game.Case.Id)) return;
+            _accusation.Open();
         }
 
         // ---------- Decisiones ----------
@@ -127,37 +176,68 @@ namespace Caso404.UI
         void AfterDecision(DecisionOutcome outcome, bool changesScene)
         {
             if (!changesScene) return;
-            _game.SceneFlow.CompleteCurrentScene();
-            if (outcome.LetPlayerChooseNextScene)
+            if (outcome.LetPlayerChooseNextScene) FinishScene();
+            else
             {
-                var choices = _game.SceneFlow.AvailableNextScenes()
-                    .Select(s => (s.DisplayName, (System.Action)(() => GoTo(s.Id)))).ToArray();
-                _message.Show("¿A dónde vamos?", "Elige la siguiente escena de la investigación.", null, false, choices);
+                _game.SceneFlow.CompleteCurrentScene();
+                GoTo(outcome.NextSceneId);
+            }
+        }
+
+        /// <summary>Termina la escena actual y deja elegir la siguiente entre las disponibles.</summary>
+        public void FinishScene()
+        {
+            _game.SceneFlow.CompleteCurrentScene();
+            var next = _game.SceneFlow.AvailableNextScenes().ToList();
+            if (next.Count == 0)
+            {
+                _message.Show("Sin escenas pendientes", "No quedan lugares por visitar en este caso.", null, false, ("Menú principal", GoToMenu));
                 return;
             }
-            GoTo(outcome.NextSceneId);
+            if (next.Count == 1)
+            {
+                var only = next[0];
+                _message.Show("Siguiente paso", $"Vamos a: {only.DisplayName}.", null, false, (only.DisplayName, (Action)(() => GoTo(only.Id))));
+                return;
+            }
+            var choices = next.Select(s => (s.DisplayName, (Action)(() => GoTo(s.Id)))).ToArray();
+            _message.Show("¿A dónde vamos?", "Elige la siguiente escena de la investigación.", null, false, choices);
         }
 
-        void GoTo(string sceneId)
+        /// <summary>Guarda y pasa a otra escena del caso con fundido a negro.</summary>
+        public void GoTo(string sceneId)
         {
             var next = _game.Case.FindScene(sceneId);
-            _game.SaveGame(); // se guarda al cambiar de escena
-            if (next != null && SceneLoader.TryLoad(next.UnitySceneName)) return;
-            string name = next != null ? next.DisplayName : sceneId;
-            _message.Show("Fin de la demo",
-                $"Completaste «{_game.Scene.DisplayName}». La siguiente escena, «{name}», todavía no está construida.\n\nLa partida quedó guardada.",
-                null, false,
-                ("Reiniciar escena", SceneLoader.ReloadCurrent),
-                ("Salir", Quit));
+            if (next == null || !SceneLoader.CanLoad(next.UnitySceneName))
+            {
+                _game.SaveGame();
+                string name = next != null ? next.DisplayName : sceneId;
+                _message.Show("Escena no disponible", $"La escena «{name}» todavía no está construida.\n\nLa partida quedó guardada.", null, false,
+                    ("Menú principal", GoToMenu));
+                return;
+            }
+            _game.State.SetCurrentScene(_game.Case.Id, next.Id); // para que "Continuar" abra la escena nueva
+            _game.SaveGame();
+            LoadingSceneId = next.Id;
+            if (_fader != null) _fader.FadeOutThen(() => SceneLoader.TryLoad(next.UnitySceneName));
+            else SceneLoader.TryLoad(next.UnitySceneName);
         }
 
-        static void Quit()
+        // ---------- Acusación y final ----------
+        void ShowEnding(EndingResult result)
         {
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#else
-            Application.Quit();
-#endif
+            _ending.Show(result, () =>
+                _message.Show($"Fin del {CaseLabel().ToLowerInvariant()}",
+                    "El caso 2, «Protocolo 404», todavía no está disponible en esta versión.\n\nTu partida quedó guardada.", null, false,
+                    ("Menú principal", GoToMenu)));
+        }
+
+        /// <summary>Vuelve al menú principal.</summary>
+        public void GoToMenu()
+        {
+            _game.SaveGame();
+            if (_fader != null) _fader.FadeOutThen(() => SceneLoader.TryLoad(MainMenuScene));
+            else SceneLoader.TryLoad(MainMenuScene);
         }
     }
 }

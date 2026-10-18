@@ -22,10 +22,6 @@ namespace Caso404.UI
         SaveService _saves;
         TextMeshProUGUI _title;
         Button _continue;
-        RectTransform _options;
-        TextMeshProUGUI _sensValue;
-        Button _invert;
-        Button _fullscreen;
 
         void Awake()
         {
@@ -49,68 +45,19 @@ namespace Caso404.UI
             UIFactory.Place(sub.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 170), new Vector2(1400, 40));
 
             var buttons = UIFactory.Rect("Buttons", rt);
-            UIFactory.Place(buttons, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -90), new Vector2(460, 340));
+            UIFactory.Place(buttons, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -60), new Vector2(460, 260));
             UIFactory.VLayout(buttons.gameObject, 16);
             UIFactory.Button(buttons, "Nueva partida", _theme, _theme.Paper, _theme.Ink, StartNewGame, 64, _theme.SizeM);
             _continue = UIFactory.Button(buttons, "Continuar", _theme, _theme.Paper, _theme.Ink, ContinueGame, 64, _theme.SizeM);
-            UIFactory.Button(buttons, "Opciones", _theme, _theme.Paper, _theme.Ink, () => _options.gameObject.SetActive(true), 56);
             UIFactory.Button(buttons, "Salir", _theme, _theme.Muted, _theme.TextLight, Quit, 56);
             _continue.interactable = _saves.TryLoad(out _);
-
-            BuildOptions(rt);
 
             var hint = UIFactory.Text(rt, "Hint", "Proyecto universitario · Ingeniería de Software · Unity", _theme.BodyFont, _theme.SizeS, _theme.Muted, TextAlignmentOptions.Center);
             UIFactory.Place(hint.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 30), new Vector2(1400, 30));
         }
 
-        void BuildOptions(RectTransform root)
-        {
-            var bg = UIFactory.Panel(root, "Options", _theme.BgDark);
-            _options = UIFactory.Stretch(bg.rectTransform);
-            var box = UIFactory.Rect("Box", _options);
-            UIFactory.Place(box, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(760, 520));
-            UIFactory.VLayout(box.gameObject, 18);
-            var title = UIFactory.Text(box, "Title", "OPCIONES", _theme.TitleFont, _theme.SizeL, _theme.TextLight, TextAlignmentOptions.Center);
-            UIFactory.Layout(title.gameObject, preferredHeight: 60);
-
-            _sensValue = UIFactory.Text(box, "SensLabel", "", _theme.BodyFont, _theme.SizeBody, _theme.TextLight);
-            UIFactory.Layout(_sensValue.gameObject, preferredHeight: 30);
-            var sliderGo = DefaultControls.CreateSlider(new DefaultControls.Resources());
-            sliderGo.transform.SetParent(box, false);
-            UIFactory.Layout(sliderGo, minHeight: 30, preferredHeight: 30);
-            foreach (var img in sliderGo.GetComponentsInChildren<Image>()) img.color = _theme.Paper;
-            var fill = sliderGo.transform.Find("Fill Area/Fill");
-            if (fill != null) fill.GetComponent<Image>().color = _theme.AlexCyan;
-            var slider = sliderGo.GetComponent<Slider>();
-            slider.minValue = GameSettings.MinSensitivity;
-            slider.maxValue = GameSettings.MaxSensitivity;
-            slider.value = GameSettings.Sensitivity;
-            slider.onValueChanged.AddListener(v => { GameSettings.Sensitivity = v; RefreshOptions(); });
-
-            _invert = UIFactory.Button(box, "", _theme, _theme.Paper, _theme.Ink, () => { GameSettings.InvertY = !GameSettings.InvertY; RefreshOptions(); }, 52);
-            _fullscreen = UIFactory.Button(box, "", _theme, _theme.Paper, _theme.Ink, () => { GameSettings.Fullscreen = !GameSettings.Fullscreen; RefreshOptions(); }, 52);
-            UIFactory.Button(box, "Volver", _theme, _theme.Muted, _theme.TextLight, () => _options.gameObject.SetActive(false), 52);
-            RefreshOptions();
-            _options.gameObject.SetActive(false);
-        }
-
-        void RefreshOptions()
-        {
-            _sensValue.text = $"Sensibilidad del mouse: {GameSettings.Sensitivity / GameSettings.DefaultSensitivity:0.0}x";
-            UIFactory.SetLabel(_invert, (GameSettings.InvertY ? "[x]" : "[  ]") + "  Invertir eje Y");
-            UIFactory.SetLabel(_fullscreen, (GameSettings.Fullscreen ? "[x]" : "[  ]") + "  Pantalla completa");
-        }
-
         /// <summary>Empieza una partida nueva en la primera escena del caso 1.</summary>
         public void StartNewGame()
-        {
-            var c = _database.FindCase(_firstCaseId);
-            // Antes del caso 1 se lee la carta de la Comisaria Lozano.
-            if (!string.IsNullOrEmpty(c.IntroLetter)) CaseLetterView.Show(transform.parent, _theme, c.IntroLetter, BeginNewGame);
-            else BeginNewGame();
-        }
-
-        void BeginNewGame()
         {
             var c = _database.FindCase(_firstCaseId);
             var first = c.Scenes[0];

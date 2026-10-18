@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Caso404.Core;
 using Caso404.Data;
 using TMPro;
@@ -9,18 +10,24 @@ using UnityEngine.UI;
 namespace Caso404.UI
 {
     /// <summary>
-    /// Tablero de hipótesis de la escena. Las opciones bloqueadas salen grises con el motivo
-    /// (qué falta analizar). Al responder todas, se habilita "Tomar la decisión".
+    /// Tablero de hipótesis. En una escena de exploración muestra su hipótesis; en la Comisaría, todas las del caso.
+    /// Las opciones bloqueadas salen grises con el motivo (qué falta analizar).
+    /// El botón principal cambia según la escena: decisión de cierre, terminar la escena o ir a la acusación.
     /// </summary>
     public class HypothesisView : UIPanel
     {
         /// <summary>El jugador quiere pasar a la decisión de cierre.</summary>
         public event Action<DecisionData> DecisionRequested;
+        /// <summary>El jugador terminó una escena sin decisión de cierre (pasa a elegir la siguiente).</summary>
+        public event Action SceneFinishRequested;
+        /// <summary>El jugador quiere acusar (Comisaría).</summary>
+        public event Action AccusationRequested;
 
         [SerializeField] private GameContext _game;
 
         RectTransform _content;
-        Button _decide;
+        Button _main;
+        TextMeshProUGUI _title;
         TextMeshProUGUI _footer;
         readonly Dictionary<string, HashSet<string>> _selection = new();
 
@@ -29,8 +36,8 @@ namespace Caso404.UI
             var rt = UIFactory.Stretch((RectTransform)transform);
             var dim = UIFactory.Panel(rt, "Dim", UITheme.WithAlpha(_theme.BgDark, 0.94f));
             UIFactory.Stretch(dim.rectTransform);
-            var title = UIFactory.Text(rt, "Title", "TABLERO — Hipótesis de la escena", _theme.TitleFont, _theme.SizeL, _theme.TextLight);
-            UIFactory.Place(title.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(60, -36), new Vector2(1200, 50));
+            _title = UIFactory.Text(rt, "Title", "TABLERO — Hipótesis", _theme.TitleFont, _theme.SizeL, _theme.TextLight);
+            UIFactory.Place(_title.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(60, -36), new Vector2(1300, 50));
             var close = UIFactory.Button(rt, "Cerrar (Esc)", _theme, _theme.Muted, _theme.TextLight, Close);
             UIFactory.Place((RectTransform)close.transform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-60, -36), new Vector2(200, 48));
 
@@ -41,22 +48,33 @@ namespace Caso404.UI
 
             _footer = UIFactory.Text(rt, "Footer", "", _theme.BodyFont, _theme.SizeBody, _theme.TextLight, TextAlignmentOptions.MidlineLeft);
             UIFactory.Place(_footer.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(60, 40), new Vector2(1100, 50));
-            _decide = UIFactory.Button(rt, "Tomar la decisión", _theme, _theme.AccentRed, _theme.TextLight, OnDecide);
-            UIFactory.Place((RectTransform)_decide.transform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-60, 40), new Vector2(360, 56));
+            _main = UIFactory.Button(rt, "Tomar la decisión", _theme, _theme.AccentRed, _theme.TextLight, OnMain);
+            UIFactory.Place((RectTransform)_main.transform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-60, 40), new Vector2(380, 56));
         }
 
         protected override void OnShown() => Rebuild();
 
+        /// <summary>Hipótesis que se muestran: la de la escena, o todas las del caso si la escena no tiene (Comisaría).</summary>
+        IEnumerable<HypothesisData> Shown()
+        {
+            if (_game.Scene.Hypothesis != null) return new[] { _game.Scene.Hypothesis };
+            return _game.Case.Hypotheses.Where(h => h != null);
+        }
+
         void Rebuild()
         {
             UIFactory.Clear(_content);
-            var hyp = _game.Scene.Hypothesis;
-            if (hyp == null)
+            bool all = _game.Scene.Hypothesis == null;
+            _title.text = all ? "TABLERO — Hipótesis del caso" : "TABLERO — Hipótesis de la escena";
+            foreach (var hyp in Shown())
             {
-                UIFactory.Text(_content, "None", "Esta escena no tiene hipótesis.", _theme.BodyFont, _theme.SizeM, _theme.Ink);
-            }
-            else
-            {
+                if (all)
+                {
+                    var scene = _game.Case.FindScene(hyp.SceneId);
+                    var header = UIFactory.Text(_content, $"H_{hyp.Id}", scene != null ? scene.DisplayName.ToUpperInvariant() : hyp.Id,
+                        _theme.TitleFont, _theme.SizeS, _theme.AccentRed);
+                    UIFactory.Layout(header.gameObject, preferredHeight: 26);
+                }
                 foreach (var q in hyp.Questions) BuildQuestion(q);
             }
             RefreshFooter();
@@ -121,23 +139,43 @@ namespace Caso404.UI
 
         void RefreshFooter()
         {
-            var hyp = _game.Scene.Hypothesis;
-            var decision = _game.Scene.ClosingDecision;
-            bool complete = _game.Hypotheses.IsComplete(hyp);
-            bool taken = decision != null && _game.Decisions.HasTaken(decision);
-            _decide.gameObject.SetActive(decision != null);
-            _decide.interactable = complete && !taken;
-            _footer.text = decision == null ? ""
-                : taken ? "La decisión de esta escena ya está tomada."
-                : complete ? "Hipótesis completa. Puedes tomar la decisión de cierre."
-                : "Responde todas las preguntas para cerrar la escena. Puedes volver a explorar y cambiar tus respuestas.";
+            var scene = _game.Scene;
+            var decision = scene.ClosingDecision;
+            bool complete = _game.Hypotheses.IsComplete(scene.Hypothesis);
+            if (scene.HasAccusation)
+            {
+                bool accused = _game.State.State.accusations.Any(a => a.caseId == _game.Case.Id);
+                UIFactory.SetLabel(_main, "Ir a la acusación");
+                _main.interactable = !accused;
+                _footer.text = accused ? "La acusación de este caso ya se presentó." : "Repasa el caso. Cuando estés listo(a), presenta la acusación.";
+            }
+            else if (decision != null)
+            {
+                bool taken = _game.Decisions.HasTaken(decision);
+                UIFactory.SetLabel(_main, "Tomar la decisión");
+                _main.interactable = complete && !taken;
+                _footer.text = taken ? "La decisión de esta escena ya está tomada."
+                    : complete ? "Hipótesis completa. Puedes tomar la decisión de cierre."
+                    : "Responde todas las preguntas para cerrar la escena. Puedes volver a explorar y cambiar tus respuestas.";
+            }
+            else
+            {
+                bool done = _game.State.IsSceneCompleted(scene.Id);
+                UIFactory.SetLabel(_main, "Terminar la escena");
+                _main.interactable = complete && !done;
+                _footer.text = done ? "Esta escena ya está terminada."
+                    : complete ? "Hipótesis completa. Puedes seguir con la investigación."
+                    : "Responde todas las preguntas para terminar la escena.";
+            }
         }
 
-        void OnDecide()
+        void OnMain()
         {
-            var decision = _game.Scene.ClosingDecision;
+            var scene = _game.Scene;
             Close();
-            if (decision != null) DecisionRequested?.Invoke(decision);
+            if (scene.HasAccusation) AccusationRequested?.Invoke();
+            else if (scene.ClosingDecision != null) DecisionRequested?.Invoke(scene.ClosingDecision);
+            else SceneFinishRequested?.Invoke();
         }
     }
 }
