@@ -45,25 +45,6 @@ namespace Caso404.Core
         public bool IsSceneCompleted(string sceneId) => State.completedSceneIds.Contains(sceneId);
         public int AlexTrust => State.alexTrust;
 
-        /// <summary>Cuántas líneas se recuerdan por personaje (solo para dar contexto a la IA).</summary>
-        public const int MaxRememberedLines = 16;
-
-        /// <summary>Lo último que se habló con un personaje (vacío si nunca se habló).</summary>
-        public IReadOnlyList<string> GetConversation(string characterId) =>
-            State.conversations.FirstOrDefault(c => c.characterId == characterId)?.lines ?? (IReadOnlyList<string>)Array.Empty<string>();
-
-        /// <summary>
-        /// Guarda una línea de conversación. No lanza Changed: es solo contexto para la IA, no cambia el caso.
-        /// </summary>
-        public void RememberConversation(string characterId, string line)
-        {
-            if (string.IsNullOrEmpty(characterId) || string.IsNullOrEmpty(line)) return;
-            var memory = State.conversations.FirstOrDefault(c => c.characterId == characterId);
-            if (memory == null) State.conversations.Add(memory = new ConversationMemory { characterId = characterId });
-            memory.lines.Add(line);
-            if (memory.lines.Count > MaxRememberedLines) memory.lines.RemoveRange(0, memory.lines.Count - MaxRememberedLines);
-        }
-
         /// <summary>Número de contradicciones de ALEX detectadas en un caso.</summary>
         public int GetContradictionCount(string caseId) => FindContradictions(caseId)?.lieIds.Count ?? 0;
 
