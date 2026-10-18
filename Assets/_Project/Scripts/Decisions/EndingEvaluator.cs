@@ -23,9 +23,18 @@ namespace Caso404.Decisions
     public static class EndingEvaluator
     {
         /// <summary>Cuenta las pruebas sólidas entre las elegidas (solo cuentan si están analizadas).</summary>
-        public static int CountSolidProofs(CaseData caseData, IEnumerable<string> proofIds, IGameStateReader state) =>
-            (proofIds ?? Enumerable.Empty<string>()).Distinct()
-                .Count(id => caseData.IsSolidProof(id) && state.IsEvidenceAnalyzed(id));
+        public static int CountSolidProofs(CaseData caseData, IEnumerable<string> proofIds, IGameStateReader state)
+        {
+            int chosen = (proofIds ?? Enumerable.Empty<string>()).Distinct().Count(id =>
+            {
+                var ev = caseData.FindEvidence(id);
+                return caseData.IsSolidProof(id) && state.IsEvidenceAnalyzed(id) &&
+                       caseData.SolidProofRequirements.All(r => r == null || r.Allows(ev, state));
+            });
+            // Flags que cuentan como prueba aunque no se elijan (ej. flag_c2_ines_testigo).
+            int flags = caseData.SolidProofFlags.Count(f => f != null && state.HasFlag(f.Id));
+            return chosen + flags;
+        }
 
         /// <summary>Evalúa el final de una acusación.</summary>
         public static EndingResult Evaluate(CaseData caseData, string accusedId, IEnumerable<string> proofIds,
