@@ -35,7 +35,6 @@ MonoBehaviour:
     _letPlayerChooseNextScene: 0
     _resultText: "Las p\xE1ginas est\xE1n da\xF1adas por humedad. Contenido no recuperable (404)."
     _resultSpokenByAlex: 1
-    _grantsEvidence: []
   - _id: B
     _text: "Guardarlo fuera del sistema y leerlo t\xFA mismo(a)"
     _condition:
@@ -53,4 +52,3 @@ MonoBehaviour:
     _letPlayerChooseNextScene: 0
     _resultText: "Nota de Elena: \"NX quiere la USB. Hay algo en su asistente de IA. Contacto: Tom\xE1s Q.\""
     _resultSpokenByAlex: 0
-    _grantsEvidence: []
