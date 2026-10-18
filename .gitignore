@@ -9,7 +9,6 @@
 /[Mm]emoryCaptures/
 *.csproj
 *.sln
-*.slnx
 *.suo
 *.user
 *.pidb
