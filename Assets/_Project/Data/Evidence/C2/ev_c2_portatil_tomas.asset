@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40ddba45c3bd07a48b33b068fb975abb, type: 3}
+  m_Name: ev_c2_portatil_tomas
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.EvidenceData
+  _id: ev_c2_portatil_tomas
+  _caseId: c2
+  _sceneId: c2_s2
+  _displayName: "Port\xE1til de Tom\xE1s"
+  _description: "El port\xE1til de Tom\xE1s Quintero."
+  _icon: {fileID: 0}
+  _inspectPrefab: {fileID: 0}
+  _source: 0
+  _spawnCondition:
+    _allEvidenceAnalyzed: []
+    _anyEvidenceAnalyzed: []
+    _allFlags: []
+    _anyFlags: []
+    _noneFlags: []
+    _exposedLies: []
+    _knownFactIds: []
+  _hasHiddenDetail: 0
+  _hiddenDetailText: 
+  _analysisResult: "ALEX: \"Disco da\xF1ado. No recuperable (404).\""
+  _analyzedByAlex: 1
+  _canBeAnalyzed: 1
+  _revealsFactIds: []
+  _setsFlagsOnAnalyze: []
+  _extraAnalysis:
+    _kind: 3
+    _buttonLabel: "Probar contrase\xF1a"
+    _password: LUCERO
+    _resultText: "Carpeta directiva_404: el c\xF3digo de la directiva y una lista de casos donde se activ\xF3, entre ellos \"Mirador / Apto 404\"."
+    _alexComment: 
+    _setsFlags:
+    - {fileID: 11400000, guid: a1ea66fbd5a3a044ba42fcdc6491ef86, type: 2}
