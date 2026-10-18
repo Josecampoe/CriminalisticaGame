@@ -80,7 +80,7 @@ namespace Caso404.AI
         {
             if (claim == null || !claim.IsAlexLie) return new QuestionOutcome(false, _alex.QuestionedFail);
             if (IsRefuted(claim)) return new QuestionOutcome(true, _alex.QuestionedSuccessLow);
-            if (evidence == null || !_evidence.IsAnalyzed(evidence) || !claim.IsRefutedBy(evidence))
+            if (evidence == null || !_evidence.IsAnalyzed(evidence) || !claim.IsRefutedBy(evidence, _state))
                 return new QuestionOutcome(false, _alex.QuestionedFail);
 
             _state.AddContradiction(_case.Id, claim.Id);
