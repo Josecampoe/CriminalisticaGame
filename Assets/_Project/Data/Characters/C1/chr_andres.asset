@@ -40,6 +40,8 @@ MonoBehaviour:
     _requiresCalmApproach: 0
     _onlyInEnding: 1
     _setsFlags: []
+    _revealedByEvidence: {fileID: 0}
+    _alsoRevealsFactIds: []
     _triggersDecision: {fileID: 0}
   _fallback:
     _crime:
