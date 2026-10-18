@@ -34,22 +34,17 @@ namespace Caso404.EditorTools
             Debug.Log($"[Caso404] Escena {ScenePath} construida.");
         }
 
-        /// <summary>Regenera datos, assets compartidos, personajes y todas las escenas.</summary>
-        [MenuItem("Caso404/Construir todo (datos y escenas)")]
+        /// <summary>Regenera datos, assets compartidos y todas las escenas del caso 1.</summary>
+        [MenuItem("Caso404/Construir todo (datos + escenas del caso 1)")]
         public static void BuildAll()
         {
             Case1DataBuilder.Build();
-            Case2DataBuilder.Build();
             SharedAssetsBuilder.Build();
-            CharacterArtBuilder.Build();
             Build();
             Apartment404SceneBuilder.Build();
             CafeSceneBuilder.Build();
             PorteriaSceneBuilder.Build();
             ComisariaSceneBuilder.Build();
-            ServidoresSceneBuilder.Build();
-            PisoEjecutivoSceneBuilder.Build();
-            CasetaSceneBuilder.Build();
             RefreshBuildSettings();
             Debug.Log("[Caso404] Todo construido.");
         }
