@@ -123,6 +123,9 @@ namespace Caso404.Data
         [SerializeField] private FallbackLines _fallback = new();
         [SerializeField] private List<AttitudeVariant> _attitudeVariants = new();
         [SerializeField] private List<ExtraTopic> _extraTopics = new();
+        [SerializeField] private Condition _refusesUnless = new();
+        [SerializeField] private EvidenceData _cooperatesAfterSeeing;
+        [SerializeField, TextArea] private string _refusalLine;
 
         public string Id { get => _id; internal set => _id = value; }
         public string DisplayName { get => _displayName; internal set => _displayName = value; }
@@ -139,6 +142,12 @@ namespace Caso404.Data
         public FallbackLines Fallback { get => _fallback; internal set => _fallback = value; }
         public IReadOnlyList<AttitudeVariant> AttitudeVariants { get => _attitudeVariants; internal set => _attitudeVariants = new(value); }
         public IReadOnlyList<ExtraTopic> ExtraTopics { get => _extraTopics; internal set => _extraTopics = new(value); }
+        /// <summary>Si esta condición se cumple, el personaje no coopera hasta ver <see cref="CooperatesAfterSeeing"/> (vacía = siempre coopera).</summary>
+        public Condition RefusesUnless { get => _refusesUnless; internal set => _refusesUnless = value; }
+        /// <summary>Evidencia que hay que presentarle para que coopere (ej. la USB a Elena).</summary>
+        public EvidenceData CooperatesAfterSeeing { get => _cooperatesAfterSeeing; internal set => _cooperatesAfterSeeing = value; }
+        /// <summary>Lo que dice mientras no coopera.</summary>
+        public string RefusalLine { get => _refusalLine; internal set => _refusalLine = value; }
 
         /// <summary>Busca el texto de un hecho propio por id (null si no lo conoce).</summary>
         public FactEntry FindFact(string factId) => _knownFacts.Find(f => f.Id == factId);
