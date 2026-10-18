@@ -60,3 +60,13 @@ MonoBehaviour:
     _line:
       _text: "\xBFLa llave maestra? Esa est\xE1 en el llavero de mantenimiento, en el s\xF3tano. Ah\xED queda anotado qui\xE9n la saca y a qu\xE9 hora."
       _revealsFactIds: []
+  _refusesUnless:
+    _allEvidenceAnalyzed: []
+    _anyEvidenceAnalyzed: []
+    _allFlags: []
+    _anyFlags: []
+    _noneFlags: []
+    _exposedLies: []
+    _knownFactIds: []
+  _cooperatesAfterSeeing: {fileID: 0}
+  _refusalLine: 
