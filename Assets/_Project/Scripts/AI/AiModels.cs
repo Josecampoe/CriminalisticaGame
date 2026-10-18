@@ -23,23 +23,6 @@ namespace Caso404.AI
         public List<string> History = new();
         public string SceneId;
         public int AlexTrust;
-        /// <summary>IDs de mentiras del personaje que el jugador ya descubrió (no debe sostenerlas).</summary>
-        public List<string> ExposedLieIds = new();
-
-        // ---- Solo para ALEX (IsAlex = true) ----
-        /// <summary>True si quien habla es ALEX: el proxy usa sus instrucciones de asistente con agenda oculta.</summary>
-        public bool IsAlex;
-        /// <summary>Afirmaciones que ALEX ya hizo, con su estado: "id: texto [pendiente|aceptada|refutada]".</summary>
-        public List<string> AlexClaims = new();
-        /// <summary>Tono según la confianza: Warm, Formal o Cold.</summary>
-        public string AlexTone;
-        /// <summary>Nombre del sospechoso hacia el que ALEX empuja (dato del caso, no lo decide la IA).</summary>
-        public string AlexTarget;
-        /// <summary>Personas del caso con su rol (información pública).</summary>
-        public List<string> Suspects = new();
-        public string CaseTitle;
-        /// <summary>Ejemplos de cómo habla (si está vacío se usan las frases de respaldo del personaje).</summary>
-        public List<string> StyleExamples = new();
     }
 
     /// <summary>Respuesta de la IA (formato JSON obligatorio, skill dialogo-ia).</summary>
