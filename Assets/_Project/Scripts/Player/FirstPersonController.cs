@@ -24,6 +24,8 @@ namespace Caso404.Player
         float _verticalVelocity;
         bool _locked;
         Transform _focusTarget;
+        float _sensitivityScale = 1f;
+        bool _invertY;
 
         /// <summary>True mientras un panel o el modo inspección bloquean el movimiento.</summary>
         public bool IsLocked => _locked;
@@ -49,10 +51,18 @@ namespace Caso404.Player
         /// <summary>Bloquea o libera el movimiento y el cursor.</summary>
         public void SetLocked(bool locked)
         {
+            if (!locked) RefreshSettings();
             _locked = locked;
             Cursor.lockState = locked ? CursorLockMode.None : CursorLockMode.Locked;
             Cursor.visible = locked;
             if (!locked) _focusTarget = null;
+        }
+
+        /// <summary>Lee las preferencias del jugador (se llama al empezar y al cerrar paneles, no en cada frame).</summary>
+        void RefreshSettings()
+        {
+            _sensitivityScale = Core.GameSettings.Sensitivity / Core.GameSettings.DefaultSensitivity;
+            _invertY = Core.GameSettings.InvertY;
         }
 
         /// <summary>Gira la vista suavemente hacia un punto (ej. el rostro del personaje al hablar).</summary>
@@ -73,8 +83,10 @@ namespace Caso404.Player
 
         void Look(Vector2 delta)
         {
-            transform.Rotate(0f, delta.x * _lookSensitivity, 0f);
-            _pitch = Mathf.Clamp(_pitch - delta.y * _lookSensitivity, -_maxPitch, _maxPitch);
+            float sens = _lookSensitivity * _sensitivityScale;
+            float y = _invertY ? -delta.y : delta.y;
+            transform.Rotate(0f, delta.x * sens, 0f);
+            _pitch = Mathf.Clamp(_pitch - y * sens, -_maxPitch, _maxPitch);
             _cameraPivot.localEulerAngles = new Vector3(_pitch, 0f, 0f);
         }
 
