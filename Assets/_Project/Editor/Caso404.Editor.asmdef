@@ -1,0 +1,14 @@
+{
+    "name": "Caso404.Editor",
+    "rootNamespace": "Caso404.EditorTools",
+    "references": [
+        "Caso404.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "autoReferenced": false,
+    "noEngineReferences": false
+}
