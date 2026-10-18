@@ -42,6 +42,8 @@ namespace Caso404.EditorTools
             ScenesFolder + "/PorteriaSotano.unity",
             ScenesFolder + "/Comisaria.unity",
             ScenesFolder + "/ServidoresB.unity",
+            ScenesFolder + "/PisoEjecutivo.unity",
+            ScenesFolder + "/CasetaSeguridad.unity",
         };
 
         public static GameDatabase Db { get; private set; }

@@ -31,13 +31,9 @@ namespace Caso404.EditorTools
             Wall(env, "Sur (ascensores)", new Vector3(-8, 0, 0), new Vector3(8, 0, 0), "wall_office");
             Wall(env, "Oeste", new Vector3(-8, 0, 0), new Vector3(-8, 0, 10), "wall_office");
             Wall(env, "Este", new Vector3(8, 0, 0), new Vector3(8, 0, 10), "wall_office");
-            // Ventanal de piso a techo hacia la ciudad de noche (vano con antepecho bajo y límite invisible)
-            Wall(env, "Norte (ventanal)", new Vector3(-8, 0, 10), new Vector3(8, 0, 10), "dark", new Opening(8f, 15.4f, 2.3f, 0.3f));
-            Box("Vidrio del ventanal", env, new Vector3(0, 1.45f, 10f), new Vector3(15.4f, 2.3f, 0.02f), "glass", keepCollider: false);
-            var limit = new GameObject("Límite invisible del ventanal");
-            limit.transform.SetParent(env, false);
-            limit.transform.position = new Vector3(0, 1.5f, 10f);
-            limit.AddComponent<BoxCollider>().size = new Vector3(16f, 3f, 0.2f);
+            Wall(env, "Norte (ventanal)", new Vector3(-8, 0, 10), new Vector3(8, 0, 10), "screen_off");
+            for (int i = 0; i < 24; i++)
+                Box($"Luz de la ciudad {i}", env, new Vector3(-7.5f + i * 0.65f, 0.9f + (i * 37 % 13) * 0.11f, 9.9f), new Vector3(0.08f, 0.08f, 0.01f), "yellow", keepCollider: false);
             // Frentes de vidrio con puertas y divisiones
             Wall(env, "Vidrio frente", new Vector3(-8, 0, 6), new Vector3(8, 0, 6), "glass", new Opening(3.5f, 1f), new Opening(8.5f, 1f), new Opening(13.5f, 1f));
             Wall(env, "División Tomás/Valeria", new Vector3(-3, 0, 6), new Vector3(-3, 0, 10), "glass");
@@ -77,7 +73,6 @@ namespace Caso404.EditorTools
             Npc("sebastian", new Vector3(5.3f, 0f, 9.1f), 180f, seated: true);
             Trigger<SceneCloseTrigger>("Ascensor (repasar el caso)", new Vector3(-1f, 1.1f, 0.12f), new Vector3(1.4f, 2.2f, 0.06f), "metal", "Repasar el caso (hipótesis)");
 
-            CityKit.Surround(-36f, true, 1212); // piso 12 de la Torre Nexo, de noche
             Finish(scene, ScenePath);
         }
     }
