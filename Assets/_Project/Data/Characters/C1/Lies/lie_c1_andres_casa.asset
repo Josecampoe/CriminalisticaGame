@@ -30,3 +30,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 005d711974179c14eb02e3ca46c816fe, type: 2}
   _alexTrigger: 0
   _alexTriggerEvidence: {fileID: 0}
+  _evidenceRequirements: []
+  _triggersDecision: {fileID: 0}
