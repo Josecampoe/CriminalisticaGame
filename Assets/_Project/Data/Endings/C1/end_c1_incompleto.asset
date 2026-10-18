@@ -89,4 +89,3 @@ MonoBehaviour:
     _text: "La acusaci\xF3n se cae en una semana y el caso queda abierto."
   _closingText: "Tres meses despu\xE9s..."
   _followUpDecision: {fileID: 0}
-  _revealsFactIds: []
