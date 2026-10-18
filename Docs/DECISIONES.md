@@ -156,3 +156,16 @@ Registro de decisiones tomadas durante el desarrollo, con su motivo. Cuando el g
 |---|---|---|
 | K1 | `Case1FullFlowTests` (PlayMode) tiene 4 recorridos desde el menú: **verdadero** (investigando todo, con celular y análisis profundo), **verdadero con Carlos detenido**, **incompleto** (sin cuestionar a ALEX) y **engaño** (siguiendo a ALEX). Reemplaza a la prueba de humo de c1_s1. | Pediste recorrer los 3 finales. Se agregó el caso de Carlos detenido porque es el camino mínimo del GUION §5. |
 | K2 | Las pruebas usan las mismas entradas que el jugador: `PlayerContext` para inspeccionar, hablar y acusar; el modo inspección para guardar; los botones de las ventanas, por su texto, para elegir. Solo dos acciones van directo al servicio: girar el objeto, que marca el detalle oculto, y las respuestas del tablero. | El mouse no se puede simular en batch. |
+
+## Fase L — Caso 2: datos
+
+| # | Decisión | Motivo |
+|---|---|---|
+| L1 | `Case2DataBuilder` genera los assets del caso 2 a partir del GUION §4: 15 evidencias, 11 mentiras (5 de ALEX), 4 personajes (Elena como aliada), 3 hipótesis, 3 decisiones, 4 finales y 4 escenas. También agrega el caso 2 a la `GameDatabase`. Regenerar el caso 1 ya no borra el caso 2. | Mismo enfoque que el caso 1. |
+| L2 | Hay refutaciones que exigen un flag, definidas por cada par mentira-evidencia (`EvidenceRequirement`). El portátil de Tomás solo refuta abierto con LUCERO (`flag_c2_directiva`). La cámara del parqueadero solo identifica el carro de Valeria tras el laboratorio externo. | GUION §4.4–4.5. |
+| L3 | Agregué dos flags técnicos que el guion no nombra: `flag_c2_placas_legibles` (laboratorio externo) y `flag_c2_ines_testigo_debil` (opción B con Inés). | Hacen falta para que esas reglas sean deterministas. El guion habla de "versión débil", y esa versión no cuenta como prueba sólida. |
+| L4 | `flag_c2_ines_testigo` cuenta como prueba sólida aunque no se elija entre las 3 pruebas (`CaseData.SolidProofFlags`). | GUION §4.6: "cuenta como prueba". |
+| L5 | Al refutar la mentira de Inés se abre `dec_c2_ines` (`LieData.TriggersDecision`). La opción A entrega la copia espejo solo si no hay `flag_c2_tiempo_perdido`. | GUION §4.4. |
+| L6 | El secreto de Sebastián (Kairos Labs) se revela al presentarle el chat analizado (`SecretEntry.RevealedByEvidence`) y le da al jugador la coartada del bar. | GUION §4.3: "Lo prueba `ev_c2_chat_kairos`". |
+| L7 | Frases que escribí porque el guion no las trae, sin hechos nuevos: <ul><li>Sebastián al refutarle "no hablé con Tomás": *"Está bien, hablé con él. ¿Y qué? Eso no me convierte en asesino."*</li><li>Sebastián al refutarle "me fui a las 7": *"Me fui a las nueve y veinte, en la moto."*</li><li>Valeria reacciona con sus frases de respaldo.</li><li>La recomendación de ALEX en `dec_c2_s1` usa su propia mentira sobre la nota.</li><li>Elena tiene dos temas extra que repiten sus hechos del guion (el correo y el primer nombre de ALEX).</li></ul> | El guion no tiene esas líneas. |
+| L8 | Las actitudes de Elena según el final del caso 1 quedan como datos (`AttitudeVariants`). Falta mostrarlas, el −5 de confianza por `flag_c1_cuaderno` y la regla de que solo coopera tras ver la USB si el caso 1 terminó en engaño. | Pendiente para la escena de la Comisaría del caso 2. |
