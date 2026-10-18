@@ -162,13 +162,6 @@ namespace Caso404.Interaction
                 copy.transform.position += pivot.position - b.center;
                 float size = Mathf.Max(b.size.x, b.size.y, b.size.z);
                 if (size > 0.0001f) pivot.localScale = Vector3.one * (0.5f / size);
-                // Objetos planos (huella, papeles, teléfono): se orientan hacia la cámara para que no se vean de canto.
-                float min = Mathf.Min(b.size.x, b.size.y, b.size.z);
-                if (min < size * 0.35f)
-                {
-                    if (Mathf.Approximately(min, b.size.y)) pivot.localRotation = Quaternion.Euler(-65f, 0f, 0f);
-                    else if (Mathf.Approximately(min, b.size.x)) pivot.localRotation = Quaternion.Euler(0f, 90f, 0f);
-                }
             }
             Destroy(holder);
             return pivot.gameObject;
