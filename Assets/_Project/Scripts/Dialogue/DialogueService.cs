@@ -75,6 +75,25 @@ namespace Caso404.Dialogue
         }
 
         /// <summary>
+        /// Saludo según la actitud del personaje (ej. Elena según el final del caso 1). Aplica una sola vez
+        /// el cambio de confianza de cada variante (se marca con un flag "att_personaje_n").
+        /// </summary>
+        public string Greeting(CharacterProfile c)
+        {
+            if (c == null) return "";
+            var lines = new List<string>();
+            for (int i = 0; i < c.AttitudeVariants.Count; i++)
+            {
+                var v = c.AttitudeVariants[i];
+                if (!v.Condition.Evaluate(_state)) continue;
+                lines.Add(v.Text);
+                var mark = $"att_{c.Id}_{i}";
+                if (v.AlexTrustDelta != 0 && !_state.HasFlag(mark)) { _state.AddFlag(mark); _state.ChangeTrust(v.AlexTrustDelta); }
+            }
+            return string.Join("\n", lines);
+        }
+
+        /// <summary>
         /// "Hablarle con calma": aparece cuando el personaje tiene un secreto de ese tipo desbloqueado,
         /// no lo ha revelado y no se le presionó en esta conversación.
         /// </summary>
