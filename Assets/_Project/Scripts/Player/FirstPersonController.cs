@@ -24,17 +24,9 @@ namespace Caso404.Player
         float _verticalVelocity;
         bool _locked;
         Transform _focusTarget;
-        float _sensitivityScale = 1f;
-        bool _invertY;
 
         /// <summary>True mientras un panel o el modo inspección bloquean el movimiento.</summary>
         public bool IsLocked => _locked;
-
-        /// <summary>True mientras la vista está fija en un personaje (conversación).</summary>
-        public bool IsFocusing => _locked && _focusTarget != null;
-
-        /// <summary>Velocidad horizontal actual en m/s (para el balanceo de la cámara).</summary>
-        public float PlanarSpeed { get; private set; }
 
         void Awake()
         {
@@ -57,18 +49,10 @@ namespace Caso404.Player
         /// <summary>Bloquea o libera el movimiento y el cursor.</summary>
         public void SetLocked(bool locked)
         {
-            if (!locked) RefreshSettings();
             _locked = locked;
             Cursor.lockState = locked ? CursorLockMode.None : CursorLockMode.Locked;
             Cursor.visible = locked;
             if (!locked) _focusTarget = null;
-        }
-
-        /// <summary>Lee las preferencias del jugador (se llama al empezar y al cerrar paneles, no en cada frame).</summary>
-        void RefreshSettings()
-        {
-            _sensitivityScale = Core.GameSettings.Sensitivity / Core.GameSettings.DefaultSensitivity;
-            _invertY = Core.GameSettings.InvertY;
         }
 
         /// <summary>Gira la vista suavemente hacia un punto (ej. el rostro del personaje al hablar).</summary>
@@ -80,7 +64,6 @@ namespace Caso404.Player
             ApplyGravity();
             if (_locked)
             {
-                PlanarSpeed = 0f;
                 UpdateFocus();
                 return;
             }
@@ -90,10 +73,8 @@ namespace Caso404.Player
 
         void Look(Vector2 delta)
         {
-            float sens = _lookSensitivity * _sensitivityScale;
-            float y = _invertY ? -delta.y : delta.y;
-            transform.Rotate(0f, delta.x * sens, 0f);
-            _pitch = Mathf.Clamp(_pitch - y * sens, -_maxPitch, _maxPitch);
+            transform.Rotate(0f, delta.x * _lookSensitivity, 0f);
+            _pitch = Mathf.Clamp(_pitch - delta.y * _lookSensitivity, -_maxPitch, _maxPitch);
             _cameraPivot.localEulerAngles = new Vector3(_pitch, 0f, 0f);
         }
 
@@ -101,7 +82,6 @@ namespace Caso404.Player
         {
             var dir = transform.right * input.x + transform.forward * input.y;
             if (dir.sqrMagnitude > 1f) dir.Normalize();
-            PlanarSpeed = dir.magnitude * _walkSpeed;
             _controller.Move((dir * _walkSpeed + Vector3.up * _verticalVelocity) * Time.deltaTime);
         }
 
