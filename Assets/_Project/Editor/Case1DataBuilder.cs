@@ -233,6 +233,18 @@ namespace Caso404.EditorTools
                 new FallbackLine("Yo vi al exnovio por aquí varias veces, eso sí."),
                 new FallbackLine("Ese overol lo usa todo el personal, oiga."),
                 new FallbackLine("Yo... yo no quería que nadie saliera herido. Ella no tenía que estar ahí."));
+            // Tema extra tras deducir que el agresor entró con llave (GUION §3.4, flag_c1_h_llave). Las frases no están en el guion: ver DECISIONES G4.
+            hernan.ExtraTopics = new[]
+            {
+                new ExtraTopic { Id = "llave_maestra", Label = "Preguntar por la llave maestra", Condition = Cond(allFlags: new[] { fLlave }),
+                    Line = new FallbackLine("¿La llave maestra? Esa está en el llavero de mantenimiento, en el sótano. Ahí queda anotado quién la saca y a qué hora.") }
+            };
+            Dirty(hernan);
+            andres.ExtraTopics = new[]
+            {
+                new ExtraTopic { Id = "llave_maestra", Label = "Preguntar por la llave maestra", Condition = Cond(allFlags: new[] { fLlave }),
+                    Line = new FallbackLine("¿La maestra? Esa casi no se usa, oiga. Solo para emergencias. Todo queda en el registro.") }
+            };
             andres.Secrets = new[]
             {
                 new SecretEntry { FactId = "f_c1_andres_pago", RevealText = "Alguien llamado \"Soporte NX\" me pagó.", OnlyInEnding = true }
@@ -334,6 +346,8 @@ namespace Caso404.EditorTools
                 new AccusationRequirement { AccusedAnyOf = new[] { andres }, MinSolidProofs = 2, MinAlexContradictions = 2 },
                 "Andrés confiesa: alguien llamado \"Soporte NX\" le pagó. Rivera anota en su libreta: \"ALEX se equivocó demasiadas veces, y siempre en la misma dirección.\" Elena sigue en coma, pero estable.",
                 null, closing);
+            endVerdadero.RevealsFactIds = new[] { "f_c1_andres_pago" };
+            Dirty(endVerdadero);
             var endIncompleto = Ending("end_c1_incompleto", 2, "Caso cerrado, preguntas abiertas",
                 new AccusationRequirement { AccusedAnyOf = new[] { andres, laura, hernan } },
                 "El caso se cierra, pero quedan preguntas abiertas.",
@@ -485,6 +499,7 @@ namespace Caso404.EditorTools
             c.PlaceholderColor = color; c.KnownFacts = facts; c.Lies = lies; c.Secrets = new SecretEntry[0];
             c.Fallback = new FallbackLines { Crime = crime, OtherPerson = other, Evidence = evidence, Press = press };
             c.AttitudeVariants = new AttitudeVariant[0];
+            c.ExtraTopics = new ExtraTopic[0];
             Dirty(c);
             return c;
         }
@@ -496,6 +511,7 @@ namespace Caso404.EditorTools
             s.Id = id; s.CaseId = "c1"; s.UnitySceneName = unityScene; s.DisplayName = name; s.Ambience = ambience; s.IntroText = intro;
             s.Evidence = evidence; s.Characters = characters; s.Hypothesis = hyp; s.ClosingDecision = decision;
             s.RequiredCompletedSceneIds = required ?? new string[0];
+            s.HasAccusation = id == "c1_s4";
             Dirty(s);
             return s;
         }
@@ -505,6 +521,7 @@ namespace Caso404.EditorTools
             var e = Asset<EndingData>($"{Root}/Endings/C1/{id}.asset");
             e.Id = id; e.CaseId = "c1"; e.Priority = priority; e.Title = title; e.Requirement = req; e.Epilogue = epilogue;
             e.Variants = variants ?? new EndingVariant[0]; e.ClosingText = closing; e.FollowUpDecision = null;
+            e.RevealsFactIds = new string[0];
             Dirty(e);
             return e;
         }
