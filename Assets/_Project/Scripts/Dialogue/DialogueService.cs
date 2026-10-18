@@ -37,9 +37,6 @@ namespace Caso404.Dialogue
         /// <summary>Un personaje reveló un secreto (ej. Laura entrega el cuaderno). La UI abre la decisión asociada.</summary>
         public event Action<CharacterProfile, SecretEntry> SecretRevealed;
         public event Action<CharacterProfile, LieData> LieExposed;
-        public event Action<CharacterProfile> ConversationEnded;
-        /// <summary>Una mentira descubierta o un secreto abre una decisión (ej. dec_c1_cuaderno, dec_c2_ines).</summary>
-        public event Action<DecisionData> DecisionTriggered;
 
         readonly GameStateService _state;
         readonly EvidenceService _evidence;
@@ -66,32 +63,7 @@ namespace Caso404.Dialogue
             _history.Clear();
         }
 
-        /// <summary>Termina la conversación actual.</summary>
-        public void End()
-        {
-            var c = Current;
-            Current = null;
-            if (c != null) ConversationEnded?.Invoke(c);
-        }
-
-        /// <summary>
-        /// Saludo según la actitud del personaje (ej. Elena según el final del caso 1). Aplica una sola vez
-        /// el cambio de confianza de cada variante (se marca con un flag "att_personaje_n").
-        /// </summary>
-        public string Greeting(CharacterProfile c)
-        {
-            if (c == null) return "";
-            var lines = new List<string>();
-            for (int i = 0; i < c.AttitudeVariants.Count; i++)
-            {
-                var v = c.AttitudeVariants[i];
-                if (!v.Condition.Evaluate(_state)) continue;
-                lines.Add(v.Text);
-                var mark = $"att_{c.Id}_{i}";
-                if (v.AlexTrustDelta != 0 && !_state.HasFlag(mark)) { _state.AddFlag(mark); _state.ChangeTrust(v.AlexTrustDelta); }
-            }
-            return string.Join("\n", lines);
-        }
+        public void End() => Current = null;
 
         /// <summary>
         /// "Hablarle con calma": aparece cuando el personaje tiene un secreto de ese tipo desbloqueado,
@@ -99,14 +71,9 @@ namespace Caso404.Dialogue
         /// </summary>
         public bool CanUseCalmApproach(CharacterProfile c) => !_pressedThisConversation && FindCalmSecret(c) != null;
 
-        /// <summary>True si el personaje todavía no coopera (ej. Elena tras el final del engaño, hasta ver su USB).</summary>
-        public bool IsRefusing(CharacterProfile c) =>
-            c != null && c.CooperatesAfterSeeing != null && !c.RefusesUnless.IsEmpty && c.RefusesUnless.Evaluate(_state) && !_state.HasFlag($"coop_{c.Id}");
-
         /// <summary>Pregunta por un tema (o con texto libre). Nunca falla: si la IA no responde, usa el respaldo.</summary>
         public async Task<DialogueLine> AskAsync(CharacterProfile c, DialogueTopic topic, string question, CancellationToken ct)
         {
-            if (IsRefusing(c)) return Remember(new DialogueLine { Speaker = c.DisplayName, Text = c.RefusalLine, Emotion = "enojado" }, question ?? topic.ToString());
             if (topic == DialogueTopic.Calm) return Calm(c);
             if (topic == DialogueTopic.Press) return Press(c);
 
@@ -125,7 +92,7 @@ namespace Caso404.Dialogue
         {
             foreach (var ev in _evidence.AnalyzedEvidence)
                 yield return new PresentableItem { Evidence = ev, Label = ev.DisplayName };
-            foreach (var suspect in _case.AllCharacters)
+            foreach (var suspect in _case.Suspects)
                 foreach (var fact in suspect.KnownFacts)
                     if (_state.KnowsFact(fact.Id) && suspect.Secrets.All(s => s.FactId != fact.Id))
                         yield return new PresentableItem { FactId = fact.Id, Label = $"Testimonio ({suspect.DisplayName}): {fact.Text}" };
@@ -134,58 +101,19 @@ namespace Caso404.Dialogue
         /// <summary>Presenta una evidencia o un testimonio. Si refuta una mentira del personaje, la descubre.</summary>
         public DialogueLine Present(CharacterProfile c, PresentableItem item)
         {
-            if (c.CooperatesAfterSeeing != null && item.Evidence != null && item.Evidence.Id == c.CooperatesAfterSeeing.Id && IsRefusing(c))
-            {
-                _state.AddFlag($"coop_{c.Id}");
-                return Remember(new DialogueLine { Speaker = c.DisplayName, Text = c.Fallback.Evidence.Text, Emotion = "triste" }, item.Label);
-            }
             var lie = c.Lies.FirstOrDefault(l => l != null && !_state.IsLieExposed(l.Id) &&
-                ((item.Evidence != null && l.IsRefutedBy(item.Evidence, _state)) || (item.FactId != null && l.IsRefutedByFact(item.FactId))));
-            bool granted = item.Evidence != null && GrantEvidenceFor(c, item.Evidence);
-            if (lie == null && !granted && item.Evidence != null)
-            {
-                var secret = c.Secrets.FirstOrDefault(s => s.RevealedByEvidence != null && s.RevealedByEvidence.Id == item.Evidence.Id &&
-                    !s.OnlyInEnding && !_state.KnowsFact(s.FactId) && s.UnlockCondition.Evaluate(_state));
-                if (secret != null) return RevealSecret(c, secret, item.Label);
-            }
+                ((item.Evidence != null && l.IsRefutedBy(item.Evidence)) || (item.FactId != null && l.IsRefutedByFact(item.FactId))));
             if (lie == null)
-            {
-                var reply = granted ? c.Lies.First(l => l != null && l.IsRefutedBy(item.Evidence)).ExposedResponse : c.Fallback.Evidence.Text;
-                return Remember(new DialogueLine { Speaker = c.DisplayName, Text = reply, Emotion = granted ? "nervioso" : "defensivo" }, item.Label);
-            }
+                return Remember(new DialogueLine { Speaker = c.DisplayName, Text = c.Fallback.Evidence.Text, Emotion = "defensivo" }, item.Label);
 
             _state.ExposeLie(lie.Id);
             _state.LearnFacts(lie.RevealsFactIdsOnExposed);
             _state.AddFlags(lie.SetsFlagsOnExposed);
+            if (item.Evidence != null)
+                foreach (var granted in lie.GrantsEvidenceOnExposed) _evidence.Grant(granted);
             LieExposed?.Invoke(c, lie);
-            if (lie.TriggersDecision != null) DecisionTriggered?.Invoke(lie.TriggersDecision);
             var text = $"«{lie.Statement}»... {lie.ExposedResponse}";
             return Remember(new DialogueLine { Speaker = c.DisplayName, Text = text, Emotion = "nervioso", ExposedLie = true }, item.Label);
-        }
-
-        /// <summary>
-        /// Entrega las evidencias que el personaje da al refutarle una mentira con una evidencia (ej. el celular de Andrés).
-        /// Solo en la escena donde esa evidencia aparece según el guion (el celular, en la Comisaría).
-        /// </summary>
-        bool GrantEvidenceFor(CharacterProfile c, EvidenceData presented)
-        {
-            bool any = false;
-            foreach (var l in c.Lies.Where(l => l != null && l.IsRefutedBy(presented)))
-                foreach (var g in l.GrantsEvidenceOnExposed)
-                    if (g != null && !_evidence.IsFound(g) && (string.IsNullOrEmpty(g.SceneId) || g.SceneId == _state.State.currentSceneId))
-                        any |= _evidence.Grant(g);
-            return any;
-        }
-
-        /// <summary>Temas extra disponibles ahora con este personaje (ej. la llave maestra).</summary>
-        public IEnumerable<ExtraTopic> AvailableExtraTopics(CharacterProfile c) =>
-            c == null || IsRefusing(c) ? Enumerable.Empty<ExtraTopic>() : c.ExtraTopics.Where(t => t.Condition.Evaluate(_state));
-
-        /// <summary>Pregunta por un tema extra (respuesta fija de los datos).</summary>
-        public DialogueLine AskExtra(CharacterProfile c, ExtraTopic topic)
-        {
-            _state.LearnFacts(topic.Line.RevealsFactIds);
-            return Remember(new DialogueLine { Speaker = c.DisplayName, Text = topic.Line.Text, Emotion = "neutral" }, topic.Label);
         }
 
         DialogueLine Press(CharacterProfile c)
@@ -201,17 +129,10 @@ namespace Caso404.Dialogue
             var secret = _pressedThisConversation ? null : FindCalmSecret(c);
             if (secret == null)
                 return Remember(new DialogueLine { Speaker = c.DisplayName, Text = c.Fallback.Crime.Text, Emotion = "triste" }, "Hablar con calma");
-            return RevealSecret(c, secret, "Hablar con calma");
-        }
-
-        DialogueLine RevealSecret(CharacterProfile c, SecretEntry secret, string playerSaid)
-        {
             _state.LearnFact(secret.FactId);
-            _state.LearnFacts(secret.AlsoRevealsFactIds);
             _state.AddFlags(secret.SetsFlags);
             SecretRevealed?.Invoke(c, secret);
-            if (secret.TriggersDecision != null) DecisionTriggered?.Invoke(secret.TriggersDecision);
-            return Remember(new DialogueLine { Speaker = c.DisplayName, Text = secret.RevealText, Emotion = "triste" }, playerSaid);
+            return Remember(new DialogueLine { Speaker = c.DisplayName, Text = secret.RevealText, Emotion = "triste" }, "Hablar con calma");
         }
 
         SecretEntry FindCalmSecret(CharacterProfile c) => c?.Secrets.FirstOrDefault(s =>
