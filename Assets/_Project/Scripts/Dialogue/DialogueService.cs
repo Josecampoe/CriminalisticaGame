@@ -99,9 +99,14 @@ namespace Caso404.Dialogue
         /// </summary>
         public bool CanUseCalmApproach(CharacterProfile c) => !_pressedThisConversation && FindCalmSecret(c) != null;
 
+        /// <summary>True si el personaje todavía no coopera (ej. Elena tras el final del engaño, hasta ver su USB).</summary>
+        public bool IsRefusing(CharacterProfile c) =>
+            c != null && c.CooperatesAfterSeeing != null && !c.RefusesUnless.IsEmpty && c.RefusesUnless.Evaluate(_state) && !_state.HasFlag($"coop_{c.Id}");
+
         /// <summary>Pregunta por un tema (o con texto libre). Nunca falla: si la IA no responde, usa el respaldo.</summary>
         public async Task<DialogueLine> AskAsync(CharacterProfile c, DialogueTopic topic, string question, CancellationToken ct)
         {
+            if (IsRefusing(c)) return Remember(new DialogueLine { Speaker = c.DisplayName, Text = c.RefusalLine, Emotion = "enojado" }, question ?? topic.ToString());
             if (topic == DialogueTopic.Calm) return Calm(c);
             if (topic == DialogueTopic.Press) return Press(c);
 
@@ -129,6 +134,11 @@ namespace Caso404.Dialogue
         /// <summary>Presenta una evidencia o un testimonio. Si refuta una mentira del personaje, la descubre.</summary>
         public DialogueLine Present(CharacterProfile c, PresentableItem item)
         {
+            if (c.CooperatesAfterSeeing != null && item.Evidence != null && item.Evidence.Id == c.CooperatesAfterSeeing.Id && IsRefusing(c))
+            {
+                _state.AddFlag($"coop_{c.Id}");
+                return Remember(new DialogueLine { Speaker = c.DisplayName, Text = c.Fallback.Evidence.Text, Emotion = "triste" }, item.Label);
+            }
             var lie = c.Lies.FirstOrDefault(l => l != null && !_state.IsLieExposed(l.Id) &&
                 ((item.Evidence != null && l.IsRefutedBy(item.Evidence, _state)) || (item.FactId != null && l.IsRefutedByFact(item.FactId))));
             bool granted = item.Evidence != null && GrantEvidenceFor(c, item.Evidence);
@@ -169,7 +179,7 @@ namespace Caso404.Dialogue
 
         /// <summary>Temas extra disponibles ahora con este personaje (ej. la llave maestra).</summary>
         public IEnumerable<ExtraTopic> AvailableExtraTopics(CharacterProfile c) =>
-            c == null ? Enumerable.Empty<ExtraTopic>() : c.ExtraTopics.Where(t => t.Condition.Evaluate(_state));
+            c == null || IsRefusing(c) ? Enumerable.Empty<ExtraTopic>() : c.ExtraTopics.Where(t => t.Condition.Evaluate(_state));
 
         /// <summary>Pregunta por un tema extra (respuesta fija de los datos).</summary>
         public DialogueLine AskExtra(CharacterProfile c, ExtraTopic topic)
