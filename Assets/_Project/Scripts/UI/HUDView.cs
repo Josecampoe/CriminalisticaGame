@@ -24,6 +24,7 @@ namespace Caso404.UI
         TextMeshProUGUI _sceneTitle;
         TextMeshProUGUI _counter;
         TextMeshProUGUI _toast;
+        TextMeshProUGUI _objective;
         readonly Queue<(string text, Color color)> _toasts = new();
         Coroutine _toastRoutine;
         Coroutine _titleRoutine;
@@ -88,6 +89,9 @@ namespace Caso404.UI
                 _theme.BodyFont, _theme.SizeS, UITheme.WithAlpha(_theme.TextLight, 0.75f));
             UIFactory.Place(shortcuts.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(32, 24), new Vector2(900, 30));
 
+            _objective = UIFactory.Text(root, "Objective", "", _theme.BodyFont, _theme.SizeS, UITheme.WithAlpha(_theme.TextLight, 0.85f));
+            UIFactory.Place(_objective.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(32, -24), new Vector2(900, 60));
+
             _counter = UIFactory.Text(root, "Counter", "", _theme.BodyFont, _theme.SizeBody, _theme.WarningAmber, TextAlignmentOptions.TopRight);
             UIFactory.Place(_counter.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-32, -24), new Vector2(600, 36));
 
@@ -109,7 +113,26 @@ namespace Caso404.UI
             if (_game == null || _game.Evidence == null) return;
             int n = _game.Evidence.UnanalyzedCount;
             _counter.text = n > 0 ? $"Evidencias sin analizar: {n}  (Tab)" : "";
+            _objective.text = Objective();
             if (_interactor != null) OnFocusChanged(_interactor.Current);
+        }
+
+        /// <summary>Qué le falta al jugador en esta escena (guía para no perderse; solo lee el estado).</summary>
+        string Objective()
+        {
+            var g = _game;
+            var scene = g.Scene;
+            if (g.State.State.accusations.Exists(a => a.caseId == g.Case.Id)) return "Objetivo: caso cerrado.";
+            int pending = 0;
+            foreach (var e in scene.Evidence)
+                if (e.Source == EvidenceSource.Scene && g.Evidence.IsAvailable(e) && !g.Evidence.IsFound(e)) pending++;
+            string explore = pending > 0 ? $"  ·  Objetos por revisar aquí: {pending}" : "";
+            if (g.Evidence.UnanalyzedCount > 0) return "Objetivo: analiza tus evidencias nuevas (Tab)" + explore;
+            if (scene.Hypothesis != null && !g.Hypotheses.IsComplete(scene.Hypothesis)) return "Objetivo: investiga y completa la hipótesis (H)" + explore;
+            if (scene.ClosingDecision != null && !g.Decisions.HasTaken(scene.ClosingDecision)) return "Objetivo: toma la decisión de cierre (H)" + explore;
+            if (scene.HasAccusation) return "Objetivo: interroga y presenta la acusación (expediente para la Fiscalía)";
+            if (!g.State.IsSceneCompleted(scene.Id)) return "Objetivo: termina la escena desde el tablero (H)" + explore;
+            return "";
         }
 
         void OnCollected(EvidenceData ev) => ShowToast($"Guardada en el expediente: {ev.DisplayName}", _theme.WarningAmber);
