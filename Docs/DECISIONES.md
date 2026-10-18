@@ -215,3 +215,10 @@ Registro de decisiones tomadas durante el desarrollo, con su motivo. Cuando el g
 | P4 | La respuesta usa **structured outputs** (`output_config.format` con un JSON Schema): `reply`, `emotion` (solo las 6 permitidas), `usedFactIds`, `usedLieIds`, `revealedSecretIds`. Si la API se niega (`refusal`) o la respuesta llega cortada (`max_tokens`), el proxy devuelve un error 502 y el juego usa la frase de respaldo. | El JSON siempre es válido, y el juego lo vuelve a validar (`AiReplyValidator`). |
 | P5 | El `HttpAiClient` envía el perfil del personaje: nombre, rol, personalidad, hechos (los secretos solo si el jugador ya los conoce), mentiras permitidas y frases de ejemplo. También envía la escena, las evidencias analizadas y las últimas 8 líneas. | Regla de oro: la IA solo recibe lo que el personaje sabe. |
 | P6 | `HttpProxyTests` (PlayMode, `[Explicit]`) prueba el `HttpAiClient` real contra el proxy en modo de prueba. Pasó en esta sesión. Para correrla hay que encender antes el proxy. | Verifica la conexión de punta a punta sin clave. La llamada real a la API no se probó, porque no hay clave en esta sesión. |
+
+## Sensación (feedback)
+
+| # | Decisión | Motivo |
+|---|---|---|
+| F10 | Sonidos de interfaz generados por código, sin archivos de audio (`AudioFeedback`): evidencia guardada, análisis, observación de ALEX, mentira descubierta y contradicción (tono grave). | La skill diseno-ui pide sonidos, y no hay assets de audio. Son marcadores para reemplazar por sonidos definitivos sin tocar la lógica. |
+| F11 | Sacudida corta de cámara (`CameraShake`, 0.25 s) al refutar a ALEX y, más suave, al descubrir una mentira. | La skill diseno-ui: "contradicción detectada: leve sacudida de pantalla". |
