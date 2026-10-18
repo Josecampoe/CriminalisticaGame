@@ -10,6 +10,7 @@ namespace Caso404.Dialogue
     public class CharacterNpc : MonoBehaviour, IInteractable
     {
         [SerializeField] private CharacterProfile _profile;
+        [SerializeField] private GameContext _game;
         [SerializeField] private Transform _head;
         [SerializeField] private float _turnSpeed = 4f;
 
@@ -25,7 +26,17 @@ namespace Caso404.Dialogue
 
         void Awake()
         {
-            if (_profile == null) GameLog.Error($"{name}: asigna un CharacterProfile.", this);
+            if (_profile == null || _game == null) GameLog.Error($"{name}: asigna CharacterProfile y GameContext.", this);
+        }
+
+        void OnEnable()
+        {
+            if (_game != null && _game.Dialogue != null) _game.Dialogue.ConversationEnded += OnConversationEnded;
+        }
+
+        void OnDisable()
+        {
+            if (_game != null && _game.Dialogue != null) _game.Dialogue.ConversationEnded -= OnConversationEnded;
         }
 
         public void Interact(PlayerContext ctx)
@@ -35,8 +46,10 @@ namespace Caso404.Dialogue
             ctx.RequestTalk(_profile, Head);
         }
 
-        /// <summary>Deja de mirar al jugador (al cerrar el diálogo).</summary>
-        public void StopLooking() => _lookTarget = null;
+        void OnConversationEnded(CharacterProfile who)
+        {
+            if (who == _profile) _lookTarget = null;
+        }
 
         void Update()
         {

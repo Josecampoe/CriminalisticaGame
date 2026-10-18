@@ -37,6 +37,7 @@ namespace Caso404.Dialogue
         /// <summary>Un personaje reveló un secreto (ej. Laura entrega el cuaderno). La UI abre la decisión asociada.</summary>
         public event Action<CharacterProfile, SecretEntry> SecretRevealed;
         public event Action<CharacterProfile, LieData> LieExposed;
+        public event Action<CharacterProfile> ConversationEnded;
 
         readonly GameStateService _state;
         readonly EvidenceService _evidence;
@@ -63,7 +64,13 @@ namespace Caso404.Dialogue
             _history.Clear();
         }
 
-        public void End() => Current = null;
+        /// <summary>Termina la conversación actual.</summary>
+        public void End()
+        {
+            var c = Current;
+            Current = null;
+            if (c != null) ConversationEnded?.Invoke(c);
+        }
 
         /// <summary>
         /// "Hablarle con calma": aparece cuando el personaje tiene un secreto de ese tipo desbloqueado,
