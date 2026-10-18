@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dec343f0efddaf742832f9dde88f5d1e, type: 3}
+  m_Name: dec_c1_cuaderno
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.DecisionData
+  _id: dec_c1_cuaderno
+  _prompt: "\xBFQu\xE9 haces con el cuaderno de Elena?"
+  _irreversible: 1
+  _alexRecommendedOptionId: 
+  _alexRecommendationText: 
+  _options:
+  - _id: A
+    _text: Registrarlo en el sistema para que ALEX lo analice
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+    _setsFlags:
+    - {fileID: 11400000, guid: 1acff06782db8834f87ae27cf5a92c7e, type: 2}
+    _alexTrustDelta: 5
+    _nextSceneId: 
+    _letPlayerChooseNextScene: 0
+    _resultText: "Las p\xE1ginas est\xE1n da\xF1adas por humedad. Contenido no recuperable (404)."
+    _resultSpokenByAlex: 1
+  - _id: B
+    _text: "Guardarlo fuera del sistema y leerlo t\xFA mismo(a)"
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+    _setsFlags:
+    - {fileID: 11400000, guid: e7846047a064f05498b5fc94fbdde19a, type: 2}
+    _alexTrustDelta: -5
+    _nextSceneId: 
+    _letPlayerChooseNextScene: 0
+    _resultText: "Nota de Elena: \"NX quiere la USB. Hay algo en su asistente de IA. Contacto: Tom\xE1s Q.\""
+    _resultSpokenByAlex: 0
