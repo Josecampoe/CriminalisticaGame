@@ -32,7 +32,6 @@ namespace Caso404.UI
         TextMeshProUGUI _tag;
         TextMeshProUGUI _thinking;
         RectTransform _quick;
-        RectTransform _extraRow;
         RectTransform _chooser;
         RectTransform _chooserList;
         TMP_InputField _input;
@@ -78,10 +77,6 @@ namespace Caso404.UI
             };
             _calm = UIFactory.Button(_quick, "Hablarle con calma", _theme, _theme.AlexCyan, _theme.Ink, () => Ask(DialogueTopic.Calm, null), 46, _theme.SizeS);
 
-            _extraRow = UIFactory.Rect("ExtraTopics", panel.transform);
-            UIFactory.HLayout(_extraRow.gameObject, 10, 0, false);
-            UIFactory.Layout(_extraRow.gameObject, preferredHeight: 44);
-
             var inputRow = UIFactory.Rect("InputRow", panel.transform);
             UIFactory.HLayout(inputRow.gameObject, 10, 0, false);
             UIFactory.Layout(inputRow.gameObject, preferredHeight: 48);
@@ -126,10 +121,7 @@ namespace Caso404.UI
             _tag.text = "";
             _input.text = "";
             _chooser.gameObject.SetActive(false);
-            var greeting = _game.Dialogue.Greeting(character);
-            SetLine(string.IsNullOrEmpty(greeting)
-                ? $"<color=#{ColorUtility.ToHtmlStringRGB(_theme.Muted)}>¿Qué le preguntas a {character.DisplayName}?</color>"
-                : greeting, instant: string.IsNullOrEmpty(greeting));
+            SetLine($"<color=#{ColorUtility.ToHtmlStringRGB(_theme.Muted)}>¿Qué le preguntas a {character.DisplayName}?</color>", instant: true);
             if (_player.Controller != null) _player.Controller.FocusOn(head);
             Open();
             RefreshButtons();
@@ -236,22 +228,7 @@ namespace Caso404.UI
             bool calm = _current != null && _game.Dialogue.CanUseCalmApproach(_current);
             _calm.gameObject.SetActive(calm);
             _calm.interactable = !_busy;
-            RebuildExtraTopics();
             if (!_busy) _thinking.gameObject.SetActive(false);
-        }
-
-        void RebuildExtraTopics()
-        {
-            UIFactory.Clear(_extraRow);
-            if (_current == null) return;
-            var c = _current;
-            foreach (var topic in _game.Dialogue.AvailableExtraTopics(c))
-            {
-                var t = topic;
-                var b = UIFactory.Button(_extraRow, t.Label, _theme, _theme.WarningAmber, _theme.Ink, () => ShowLine(_game.Dialogue.AskExtra(c, t)), 42, _theme.SizeS);
-                UIFactory.Layout(b.gameObject, minHeight: 42, preferredHeight: 42, preferredWidth: 360);
-                b.interactable = !_busy;
-            }
         }
 
         void CancelPending()
