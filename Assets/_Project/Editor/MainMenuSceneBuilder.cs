@@ -28,31 +28,23 @@ namespace Caso404.EditorTools
             Set(menu, "_theme", Theme);
             Set(menu, "_database", Db);
             Set(menu, "_fader", fader);
-            Set(menu, "_aiSettings", AssetDatabase.LoadAssetAtPath<Caso404.AI.AiSettings>(SharedAssetsBuilder.AiSettingsPath));
 
-            VisualPass.Apply("MainMenu");
             EditorSceneManager.SaveScene(scene, ScenePath);
             RefreshBuildSettings();
             Debug.Log($"[Caso404] Escena {ScenePath} construida.");
         }
 
-        /// <summary>Regenera datos, assets compartidos, personajes y todas las escenas.</summary>
-        [MenuItem("Caso404/Construir todo (datos y escenas)")]
+        /// <summary>Regenera datos, assets compartidos y todas las escenas del caso 1.</summary>
+        [MenuItem("Caso404/Construir todo (datos + escenas del caso 1)")]
         public static void BuildAll()
         {
             Case1DataBuilder.Build();
-            Case2DataBuilder.Build();
             SharedAssetsBuilder.Build();
-            CharacterArtBuilder.Build();
-            CityKit.RebuildFarCity();
             Build();
             Apartment404SceneBuilder.Build();
             CafeSceneBuilder.Build();
             PorteriaSceneBuilder.Build();
             ComisariaSceneBuilder.Build();
-            ServidoresSceneBuilder.Build();
-            PisoEjecutivoSceneBuilder.Build();
-            CasetaSceneBuilder.Build();
             RefreshBuildSettings();
             Debug.Log("[Caso404] Todo construido.");
         }
