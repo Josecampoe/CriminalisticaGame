@@ -35,5 +35,3 @@ MonoBehaviour:
   _variants: []
   _closingText: "Tres meses despu\xE9s..."
   _followUpDecision: {fileID: 0}
-  _revealsFactIds:
-  - f_c1_andres_pago
