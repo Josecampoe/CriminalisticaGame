@@ -38,6 +38,8 @@ namespace Caso404.Dialogue
         public event Action<CharacterProfile, SecretEntry> SecretRevealed;
         public event Action<CharacterProfile, LieData> LieExposed;
         public event Action<CharacterProfile> ConversationEnded;
+        /// <summary>Una mentira descubierta o un secreto abre una decisión (ej. dec_c1_cuaderno, dec_c2_ines).</summary>
+        public event Action<DecisionData> DecisionTriggered;
 
         readonly GameStateService _state;
         readonly EvidenceService _evidence;
@@ -99,7 +101,7 @@ namespace Caso404.Dialogue
         {
             foreach (var ev in _evidence.AnalyzedEvidence)
                 yield return new PresentableItem { Evidence = ev, Label = ev.DisplayName };
-            foreach (var suspect in _case.Suspects)
+            foreach (var suspect in _case.AllCharacters)
                 foreach (var fact in suspect.KnownFacts)
                     if (_state.KnowsFact(fact.Id) && suspect.Secrets.All(s => s.FactId != fact.Id))
                         yield return new PresentableItem { FactId = fact.Id, Label = $"Testimonio ({suspect.DisplayName}): {fact.Text}" };
@@ -109,8 +111,14 @@ namespace Caso404.Dialogue
         public DialogueLine Present(CharacterProfile c, PresentableItem item)
         {
             var lie = c.Lies.FirstOrDefault(l => l != null && !_state.IsLieExposed(l.Id) &&
-                ((item.Evidence != null && l.IsRefutedBy(item.Evidence)) || (item.FactId != null && l.IsRefutedByFact(item.FactId))));
+                ((item.Evidence != null && l.IsRefutedBy(item.Evidence, _state)) || (item.FactId != null && l.IsRefutedByFact(item.FactId))));
             bool granted = item.Evidence != null && GrantEvidenceFor(c, item.Evidence);
+            if (lie == null && !granted && item.Evidence != null)
+            {
+                var secret = c.Secrets.FirstOrDefault(s => s.RevealedByEvidence != null && s.RevealedByEvidence.Id == item.Evidence.Id &&
+                    !s.OnlyInEnding && !_state.KnowsFact(s.FactId) && s.UnlockCondition.Evaluate(_state));
+                if (secret != null) return RevealSecret(c, secret, item.Label);
+            }
             if (lie == null)
             {
                 var reply = granted ? c.Lies.First(l => l != null && l.IsRefutedBy(item.Evidence)).ExposedResponse : c.Fallback.Evidence.Text;
@@ -121,6 +129,7 @@ namespace Caso404.Dialogue
             _state.LearnFacts(lie.RevealsFactIdsOnExposed);
             _state.AddFlags(lie.SetsFlagsOnExposed);
             LieExposed?.Invoke(c, lie);
+            if (lie.TriggersDecision != null) DecisionTriggered?.Invoke(lie.TriggersDecision);
             var text = $"«{lie.Statement}»... {lie.ExposedResponse}";
             return Remember(new DialogueLine { Speaker = c.DisplayName, Text = text, Emotion = "nervioso", ExposedLie = true }, item.Label);
         }
@@ -163,10 +172,17 @@ namespace Caso404.Dialogue
             var secret = _pressedThisConversation ? null : FindCalmSecret(c);
             if (secret == null)
                 return Remember(new DialogueLine { Speaker = c.DisplayName, Text = c.Fallback.Crime.Text, Emotion = "triste" }, "Hablar con calma");
+            return RevealSecret(c, secret, "Hablar con calma");
+        }
+
+        DialogueLine RevealSecret(CharacterProfile c, SecretEntry secret, string playerSaid)
+        {
             _state.LearnFact(secret.FactId);
+            _state.LearnFacts(secret.AlsoRevealsFactIds);
             _state.AddFlags(secret.SetsFlags);
             SecretRevealed?.Invoke(c, secret);
-            return Remember(new DialogueLine { Speaker = c.DisplayName, Text = secret.RevealText, Emotion = "triste" }, "Hablar con calma");
+            if (secret.TriggersDecision != null) DecisionTriggered?.Invoke(secret.TriggersDecision);
+            return Remember(new DialogueLine { Speaker = c.DisplayName, Text = secret.RevealText, Emotion = "triste" }, playerSaid);
         }
 
         SecretEntry FindCalmSecret(CharacterProfile c) => c?.Secrets.FirstOrDefault(s =>
