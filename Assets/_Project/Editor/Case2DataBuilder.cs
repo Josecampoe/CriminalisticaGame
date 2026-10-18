@@ -65,7 +65,6 @@ namespace Caso404.EditorTools
                 Password = "LUCERO",
                 ResultText = "Carpeta directiva_404: el código de la directiva y una lista de casos donde se activó, entre ellos \"Mirador / Apto 404\".",
                 SetsFlags = new[] { fDirectiva }
-                , AlexGlitch = true
             };
             Fill(tarjeta, "c2_s2", "Registro de accesos del piso 12", "El registro de tarjetas de acceso del piso 12.", "Tarjeta de V. Duarte, 11:30 PM.");
             Fill(consola, "c2_s2", "Consola de Valeria", "La consola de la oficina de Valeria Duarte.", "Historial borrado a mano a las 11:52 PM.");
@@ -243,16 +242,12 @@ namespace Caso404.EditorTools
                 new ExtraTopic { Id = "tomas_alex", Label = "Preguntar qué le contó Tomás de ALEX",
                     Line = new FallbackLine("Tomás me dijo una vez que ALEX al principio se llamaba de otra forma.", "f_c2_elena_lucero") },
             };
-            // GUION §4.3: tras end_c1_engano, Elena solo coopera si le muestras su USB.
-            elena.RefusesUnless = Cond(allFlags: new[] { fEndEngano });
-            elena.CooperatesAfterSeeing = usb;
-            elena.RefusalLine = "Metieron preso a Carlos por algo que no hizo. No tengo nada que hablar con la policía.";
             elena.AttitudeVariants = new[]
             {
-                new AttitudeVariant { Condition = Cond(allFlags: new[] { fEndVerdadero }), Text = "(Elena confía en ti y comparte todo de inmediato.)" },
-                new AttitudeVariant { Condition = Cond(allFlags: new[] { fEndIncompleto }), Text = "(Elena coopera, pero con cautela.)" },
+                new AttitudeVariant { Condition = Cond(allFlags: new[] { fEndVerdadero }), Text = "Confía en Rivera y comparte todo de inmediato." },
+                new AttitudeVariant { Condition = Cond(allFlags: new[] { fEndIncompleto }), Text = "Es cooperativa, pero cautelosa." },
                 new AttitudeVariant { Condition = Cond(allFlags: new[] { fEndEngano }), Text = "Metieron preso a Carlos por algo que no hizo." },
-                new AttitudeVariant { Condition = Cond(allFlags: new[] { fCuaderno }), Text = "Laura me dijo que guardaste mi cuaderno fuera del sistema. Gracias.", AlexTrustDelta = -5 },
+                new AttitudeVariant { Condition = Cond(allFlags: new[] { fCuaderno }), Text = "Laura me dijo que guardaste mi cuaderno fuera del sistema. Gracias." },
             };
             Dirty(elena);
 
@@ -332,7 +327,6 @@ namespace Caso404.EditorTools
             var c2 = Asset<CaseData>(Case2Path);
             c2.Id = "c2";
             c2.Title = "Protocolo 404";
-            c2.IntroLetter = "Unidad de Criminalística de Valdora — Oficio N.º 404-B\nPara: Investigador(a) Rivera\nAsunto: Muerte de Tomás Quintero, Torre Nexo Analytics, piso 12\n\nRivera:\nHan pasado tres meses desde el caso del Edificio Mirador. Hoy, a las 6:10 de la mañana, la guardia de seguridad de la Torre Nexo encontró muerto a Tomás Quintero, 45 años, ingeniero jefe de Nexo Analytics y creador de ALEX. Estaba dentro de la sala de servidores B. Se activó el sistema de extinción por gas con la puerta bloqueada.\nLa empresa ya emitió un comunicado: falla de energía y activación accidental. ALEX confirma esa versión en su informe preliminar.\nNexo financia la mitad de los equipos de esta unidad, así que habrá presión para cerrar esto rápido. No lo cierre rápido. Ciérrelo bien.\nUna cosa más: Elena Vargas ya se recuperó, y me llamó esta mañana. Dice que Tomás le escribió la noche en que murió.\n— Comisaria Patricia Lozano"; // texto exacto de la carta (sesión 4, GUION §6)
             c2.IntroText = "Tres meses después. Torre Nexo Analytics, piso 12. El creador de ALEX está muerto.";
             c2.AlexIntroLine = "Detective, el informe preliminar indica una falla técnica. No creo que nos tome mucho tiempo.";
             c2.AlexLowTrustIntroLine = "Noto que has dejado de confiar en mí, detective. Es una lástima. Sigo aquí para ayudarte.";
