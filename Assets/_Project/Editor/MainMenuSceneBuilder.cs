@@ -39,6 +39,7 @@ namespace Caso404.EditorTools
         public static void BuildAll()
         {
             Case1DataBuilder.Build();
+            Case2DataBuilder.Build();
             SharedAssetsBuilder.Build();
             Build();
             Apartment404SceneBuilder.Build();
