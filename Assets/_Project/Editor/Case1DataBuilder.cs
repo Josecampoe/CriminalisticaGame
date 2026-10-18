@@ -381,6 +381,7 @@ namespace Caso404.EditorTools
             var db = Asset<GameDatabase>(DatabasePath);
             db.Cases = new[] { c1 };
             db.Alex = alex;
+            db.IntroText = "Valdora, 2031. La Unidad de Criminalística estrena compañero: ALEX, una inteligencia artificial que nunca duerme, nunca olvida y nunca se equivoca. O eso dice el folleto.";
             Dirty(db);
 
             AssetDatabase.SaveAssets();
