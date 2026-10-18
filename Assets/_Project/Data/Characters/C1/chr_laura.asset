@@ -49,8 +49,6 @@ MonoBehaviour:
     _requiresCalmApproach: 1
     _onlyInEnding: 0
     _setsFlags: []
-    _revealedByEvidence: {fileID: 0}
-    _alsoRevealsFactIds: []
     _triggersDecision: {fileID: 11400000, guid: d414a5a6b81cb534ab8c1e7b59322714, type: 2}
   _fallback:
     _crime:
@@ -68,14 +66,3 @@ MonoBehaviour:
       _text: "Est\xE1 bien, llegu\xE9 antes. O\xED un golpe, esper\xE9... ten\xEDa miedo. Cuando entr\xE9 ya estaba en el piso."
       _revealsFactIds: []
   _attitudeVariants: []
-  _extraTopics: []
-  _refusesUnless:
-    _allEvidenceAnalyzed: []
-    _anyEvidenceAnalyzed: []
-    _allFlags: []
-    _anyFlags: []
-    _noneFlags: []
-    _exposedLies: []
-    _knownFactIds: []
-  _cooperatesAfterSeeing: {fileID: 0}
-  _refusalLine: 
