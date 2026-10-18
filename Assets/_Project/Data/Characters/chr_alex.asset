@@ -42,6 +42,7 @@ MonoBehaviour:
       _text: 
       _revealsFactIds: []
   _attitudeVariants: []
+  _extraTopics: []
   _startTrust: 60
   _highTrustThreshold: 60
   _lowTrustThreshold: 30
