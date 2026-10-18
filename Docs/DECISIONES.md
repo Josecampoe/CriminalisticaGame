@@ -46,3 +46,18 @@ Registro de decisiones tomadas durante el desarrollo, con su motivo. Cuando el g
 | C6 | Al acusar, el final se guarda también como flag (`end_c1_verdadero`, etc.). | GUION §2: los `end_c1_*` pasan al caso 2. Así lo leen las mismas condiciones que el resto de flags. |
 | C7 | Una prueba sólida solo cuenta si está analizada, y en la acusación no se puede repetir una prueba. | Evita acusaciones con evidencias que el jugador no entendió. |
 | C8 | `SaveService` escribe primero un archivo `.tmp` y luego lo renombra. Rechaza partidas de una versión más nueva que la del juego. | Si el juego se cierra a mitad de un guardado, la partida no queda corrupta. `saveVersion` deja lugar para migraciones. |
+
+## Fase D — Jugador en primera persona
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D1 | Los controles se definen en código dentro de `InputReader` (Input System), no en el asset `InputSystem_Actions` de la plantilla. | Hay un solo lugar donde ver y cambiar todos los controles, y no hace falta enlazar referencias en el Inspector. Teclas: WASD/flechas para moverse, mouse para mirar, E interactuar, Tab expediente, Q ALEX, H hipótesis, Esc cerrar. También funciona con mando. |
+| D2 | Velocidad al caminar: 2.2 m/s. No se puede correr ni saltar. | La skill `unity-csharp` lo pide para un juego de investigación. |
+| D3 | El resaltado tiñe el color del objeto con `MaterialPropertyBlock` (ámbar si es nuevo, blanco si ya se revisó), sin shader de contorno. | Funciona con cualquier material URP Lit y no duplica materiales. Más adelante se puede cambiar por un contorno sin tocar el resto. |
+| D4 | El modo inspección copia el objeto a un "estudio" lejos de la escena (y = −500) y lo filma con una cámara propia en una `RenderTexture` que la UI muestra. | El objeto nunca atraviesa paredes y el fondo de la escena queda oscurecido detrás de la UI. Si la evidencia tiene `InspectPrefab`, se usa ese modelo en vez de la copia. |
+| D5 | El detalle oculto se revela al girar el objeto 150° acumulados. | Obliga a girarlo de verdad (GUION §2) sin exigir una orientación exacta. |
+| D6 | Los objetos interactivos solo emiten intenciones a través de `PlayerContext` (`InspectRequested`, `TalkRequested`, `SceneCloseRequested`). | Los objetos no conocen la UI ni los controladores, como pide la arquitectura. |
+| D7 | El jugador se bloquea escuchando un canal `BoolEventChannel` (`evt_ui_modal`) que emite el `UIManager`. | Ni el jugador conoce la UI ni la UI conoce al jugador. |
+| D8 | `GameContext` (con `[DefaultExecutionOrder(-100)]`) crea los servicios en cada escena. Entre escenas, el estado pasa por el archivo de guardado. `Start New Game` está activado en c1_s1. | Es lo más simple mientras solo existe una escena. La escena `Bootstrap` persistente queda pendiente para cuando haya varias. |
+| D9 | En esta fase también entraron `DialogueService`, la capa de IA (`IAiClient`, `OfflineAiClient`, `HttpAiClient`, `AiReplyValidator`, `AiSettings`) y sus pruebas. | `GameContext` y el NPC los necesitan para compilar. |
+| D10 | Descubrir mentiras, revelar secretos y entregar evidencias en el diálogo lo deciden reglas fijas con los datos. La IA solo pone la voz, y su respuesta se valida antes de usarla. | Regla de oro de CLAUDE.md. |
