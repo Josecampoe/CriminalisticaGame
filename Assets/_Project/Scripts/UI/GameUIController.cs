@@ -61,7 +61,7 @@ namespace Caso404.UI
             if (_accusation != null) _accusation.Accused += ShowEnding;
             if (_decision != null) _decision.Resolved += OnDecisionResolved;
             if (_dialogue != null) _dialogue.Closed += OnDialogueClosed;
-            if (_game != null && _game.Dialogue != null) _game.Dialogue.SecretRevealed += OnSecretRevealed;
+            if (_game != null && _game.Dialogue != null) _game.Dialogue.DecisionTriggered += OnDecisionTriggered;
         }
 
         void OnDisable()
@@ -87,7 +87,7 @@ namespace Caso404.UI
             if (_accusation != null) _accusation.Accused -= ShowEnding;
             if (_decision != null) _decision.Resolved -= OnDecisionResolved;
             if (_dialogue != null) _dialogue.Closed -= OnDialogueClosed;
-            if (_game != null && _game.Dialogue != null) _game.Dialogue.SecretRevealed -= OnSecretRevealed;
+            if (_game != null && _game.Dialogue != null) _game.Dialogue.DecisionTriggered -= OnDecisionTriggered;
         }
 
         void Start()
@@ -144,10 +144,7 @@ namespace Caso404.UI
         // ---------- Decisiones ----------
         void ShowDecision(DecisionData decision) => _decision.Show(decision);
 
-        void OnSecretRevealed(CharacterProfile who, SecretEntry secret)
-        {
-            if (secret.TriggersDecision != null) _pendingDecision = secret.TriggersDecision;
-        }
+        void OnDecisionTriggered(DecisionData decision) => _pendingDecision = decision;
 
         void OnDialogueClosed()
         {
