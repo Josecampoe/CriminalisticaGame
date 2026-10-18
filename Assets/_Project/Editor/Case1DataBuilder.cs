@@ -233,18 +233,6 @@ namespace Caso404.EditorTools
                 new FallbackLine("Yo vi al exnovio por aquí varias veces, eso sí."),
                 new FallbackLine("Ese overol lo usa todo el personal, oiga."),
                 new FallbackLine("Yo... yo no quería que nadie saliera herido. Ella no tenía que estar ahí."));
-            // Tema extra tras deducir que el agresor entró con llave (GUION §3.4, flag_c1_h_llave). Las frases no están en el guion: ver DECISIONES G4.
-            hernan.ExtraTopics = new[]
-            {
-                new ExtraTopic { Id = "llave_maestra", Label = "Preguntar por la llave maestra", Condition = Cond(allFlags: new[] { fLlave }),
-                    Line = new FallbackLine("¿La llave maestra? Esa está en el llavero de mantenimiento, en el sótano. Ahí queda anotado quién la saca y a qué hora.") }
-            };
-            Dirty(hernan);
-            andres.ExtraTopics = new[]
-            {
-                new ExtraTopic { Id = "llave_maestra", Label = "Preguntar por la llave maestra", Condition = Cond(allFlags: new[] { fLlave }),
-                    Line = new FallbackLine("¿La maestra? Esa casi no se usa, oiga. Solo para emergencias. Todo queda en el registro.") }
-            };
             andres.Secrets = new[]
             {
                 new SecretEntry { FactId = "f_c1_andres_pago", RevealText = "Alguien llamado \"Soporte NX\" me pagó.", OnlyInEnding = true }
@@ -346,8 +334,6 @@ namespace Caso404.EditorTools
                 new AccusationRequirement { AccusedAnyOf = new[] { andres }, MinSolidProofs = 2, MinAlexContradictions = 2 },
                 "Andrés confiesa: alguien llamado \"Soporte NX\" le pagó. Rivera anota en su libreta: \"ALEX se equivocó demasiadas veces, y siempre en la misma dirección.\" Elena sigue en coma, pero estable.",
                 null, closing);
-            endVerdadero.RevealsFactIds = new[] { "f_c1_andres_pago" };
-            Dirty(endVerdadero);
             var endIncompleto = Ending("end_c1_incompleto", 2, "Caso cerrado, preguntas abiertas",
                 new AccusationRequirement { AccusedAnyOf = new[] { andres, laura, hernan } },
                 "El caso se cierra, pero quedan preguntas abiertas.",
@@ -369,7 +355,6 @@ namespace Caso404.EditorTools
             var c1 = Asset<CaseData>(Case1Path);
             c1.Id = "c1";
             c1.Title = "Apartamento 404";
-            c1.IntroLetter = "Unidad de Criminalística de Valdora — Oficio N.º 404-A\nPara: Investigador(a) Rivera\nAsunto: Agresión y hurto en el Edificio Mirador, apartamento 404\n\nRivera:\nAnoche, poco antes de las 11, una vecina encontró inconsciente a Elena Vargas, 34 años, periodista de investigación del diario El Faro de Valdora. Tiene un golpe en la cabeza y está en coma inducido en el Hospital San Rafael. Los médicos dicen que se recuperará, pero no podrá declarar en semanas.\nDel apartamento desaparecieron su portátil y, según su editor, una memoria USB con material de una investigación que no había publicado.\nLa primera hipótesis de la patrulla es un robo por el balcón. No me convence. Elena llevaba meses escribiendo sobre empresas poderosas de esta ciudad, y en este oficio las coincidencias son raras.\nA partir de hoy trabajará con ALEX, el asistente de inteligencia artificial que Nexo Analytics entregó a la unidad en programa piloto. Úselo: organiza evidencias más rápido que cualquiera de nosotros. Pero recuerde lo que le enseñé el primer día: las conclusiones las firma usted, no la máquina.\nTiene hasta el lunes para presentarme un responsable con pruebas.\n— Comisaria Patricia Lozano"; // texto exacto de la carta (sesión 4, GUION §6)
             c1.IntroText = "Viernes, 8:00 AM. Edificio Mirador, apartamento 404. Elena Vargas, periodista, fue encontrada inconsciente anoche. Le robaron su portátil.";
             c1.AlexIntroLine = "Buenos días, detective. Ya preparé el expediente. Empecemos.";
             c1.AlexLines = new FallbackLines
@@ -394,13 +379,8 @@ namespace Caso404.EditorTools
             Dirty(c1);
 
             var db = Asset<GameDatabase>(DatabasePath);
-            // Conserva los demás casos (el caso 2 lo agrega su propio generador).
-            var cases = new System.Collections.Generic.List<CaseData>(db.Cases);
-            cases.RemoveAll(x => x == null || x.Id == "c1");
-            cases.Insert(0, c1);
-            db.Cases = cases;
+            db.Cases = new[] { c1 };
             db.Alex = alex;
-            db.IntroText = "Valdora, 2031. La Unidad de Criminalística estrena compañero: ALEX, una inteligencia artificial que nunca duerme, nunca olvida y nunca se equivoca. O eso dice el folleto.";
             Dirty(db);
 
             AssetDatabase.SaveAssets();
@@ -504,7 +484,6 @@ namespace Caso404.EditorTools
             c.PlaceholderColor = color; c.KnownFacts = facts; c.Lies = lies; c.Secrets = new SecretEntry[0];
             c.Fallback = new FallbackLines { Crime = crime, OtherPerson = other, Evidence = evidence, Press = press };
             c.AttitudeVariants = new AttitudeVariant[0];
-            c.ExtraTopics = new ExtraTopic[0];
             Dirty(c);
             return c;
         }
@@ -516,7 +495,6 @@ namespace Caso404.EditorTools
             s.Id = id; s.CaseId = "c1"; s.UnitySceneName = unityScene; s.DisplayName = name; s.Ambience = ambience; s.IntroText = intro;
             s.Evidence = evidence; s.Characters = characters; s.Hypothesis = hyp; s.ClosingDecision = decision;
             s.RequiredCompletedSceneIds = required ?? new string[0];
-            s.HasAccusation = id == "c1_s4";
             Dirty(s);
             return s;
         }
@@ -526,7 +504,6 @@ namespace Caso404.EditorTools
             var e = Asset<EndingData>($"{Root}/Endings/C1/{id}.asset");
             e.Id = id; e.CaseId = "c1"; e.Priority = priority; e.Title = title; e.Requirement = req; e.Epilogue = epilogue;
             e.Variants = variants ?? new EndingVariant[0]; e.ClosingText = closing; e.FollowUpDecision = null;
-            e.RevealsFactIds = new string[0];
             Dirty(e);
             return e;
         }
