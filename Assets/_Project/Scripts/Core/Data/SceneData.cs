@@ -32,7 +32,6 @@ namespace Caso404.Data
         [SerializeField] private HypothesisData _hypothesis;
         [SerializeField] private DecisionData _closingDecision;
         [SerializeField] private List<string> _requiredCompletedSceneIds = new();
-        [SerializeField] private bool _hasAccusation;
 
         public string Id { get => _id; internal set => _id = value; }
         public string CaseId { get => _caseId; internal set => _caseId = value; }
@@ -46,7 +45,5 @@ namespace Caso404.Data
         public DecisionData ClosingDecision { get => _closingDecision; internal set => _closingDecision = value; }
         /// <summary>Escenas que hay que completar antes de entrar (la Comisaría exige s2 y s3).</summary>
         public IReadOnlyList<string> RequiredCompletedSceneIds { get => _requiredCompletedSceneIds; internal set => _requiredCompletedSceneIds = new(value); }
-        /// <summary>En esta escena se hace la acusación final (la Comisaría).</summary>
-        public bool HasAccusation { get => _hasAccusation; internal set => _hasAccusation = value; }
     }
 }

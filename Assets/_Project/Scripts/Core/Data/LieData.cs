@@ -26,8 +26,6 @@ namespace Caso404.Data
         [SerializeField] private List<EvidenceData> _grantsEvidenceOnExposed = new();
         [SerializeField] private AlexClaimTrigger _alexTrigger;
         [SerializeField] private EvidenceData _alexTriggerEvidence;
-        [SerializeField] private List<EvidenceRequirement> _evidenceRequirements = new();
-        [SerializeField] private DecisionData _triggersDecision;
 
         public string Id { get => _id; internal set => _id = value; }
         public string CaseId { get => _caseId; internal set => _caseId = value; }
@@ -48,14 +46,6 @@ namespace Caso404.Data
         public IReadOnlyList<EvidenceData> GrantsEvidenceOnExposed { get => _grantsEvidenceOnExposed; internal set => _grantsEvidenceOnExposed = new(value); }
         public AlexClaimTrigger AlexTrigger { get => _alexTrigger; internal set => _alexTrigger = value; }
         public EvidenceData AlexTriggerEvidence { get => _alexTriggerEvidence; internal set => _alexTriggerEvidence = value; }
-        /// <summary>Evidencias que solo refutan con un flag (ej. el portátil abierto con la contraseña).</summary>
-        public IReadOnlyList<EvidenceRequirement> EvidenceRequirements { get => _evidenceRequirements; internal set => _evidenceRequirements = new(value); }
-        /// <summary>Decisión que se abre al descubrir esta mentira (ej. dec_c2_ines).</summary>
-        public DecisionData TriggersDecision { get => _triggersDecision; internal set => _triggersDecision = value; }
-
-        /// <summary>True si la evidencia refuta esta mentira en el estado actual (incluye sus requisitos de flags).</summary>
-        public bool IsRefutedBy(EvidenceData evidence, IGameStateReader state) =>
-            IsRefutedBy(evidence) && _evidenceRequirements.TrueForAll(r => r == null || r.Allows(evidence, state));
 
         /// <summary>True si la evidencia refuta esta mentira.</summary>
         public bool IsRefutedBy(EvidenceData evidence) => evidence != null && _refutedByEvidence.Exists(e => e != null && e.Id == evidence.Id);
