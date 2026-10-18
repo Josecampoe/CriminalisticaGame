@@ -1,108 +1,71 @@
-# Reporte de sesiones — El Caso 404
+# Reporte de la sesión — 18 de octubre de 2026
 
-## Sesión 4 (19 de octubre de 2026)
+**Resumen:** las seis fases (A a F) quedaron terminadas, cada una con su commit, a las 9:17 AM, antes del límite de las 11:45. La escena **c1_s1 "Apartamento 404"** se puede jugar desde la intro hasta la decisión `dec_c1_s1`. Hay **27 pruebas EditMode** y **1 prueba PlayMode**, todas en verde.
 
-> **Actualización de las 11:30 AM:** quedaron hechas también la **tarea 2 (espacios más grandes)** y la **tarea 3 (ciudad completa)**, con iluminación horneada. Ver la tabla.
-
-**En resumen:** las **4 tareas están hechas**: personajes, espacios más grandes, ciudad y cartas de contexto. También se generaron el **build de Windows** y la **subida a GitHub** en ramas por integrante.
-
-### Qué se hizo
-| Tarea | Estado | Detalle |
-|---|---|---|
-| Subida a GitHub | Hecha | `tools/split_by_owner.py` reparte el trabajo en una rama por integrante, con commits pequeños firmados por cada uno y la fecha original. Verifica que fusionar las 3 ramas da exactamente el mismo proyecto. Ramas: `jose/base-juego`, `majo/docs-ui-datos`, `daniel/core-pruebas`; las de esta sesión son `jose/sesion4`, `majo/sesion4` y `daniel/sesion4`. |
-| 1. Personajes | Hecha | Los 8 personajes usan modelos humanoides de Quaternius en vez de cápsulas, con ropa según el guion, peinado, barba, gorra o placa, y escala según edad. Tienen animaciones de reposo, hablar, sentado y sentado hablando, creadas por código porque el paquete no trae ninguna. Al hablar, el personaje mira al jugador. Se conservan los colliders, `CharacterNpc` y el resaltado. Los sentados tienen su propia silla. |
-| 4. Cartas de contexto | Hecha | Antes de c1_s1 (**Nueva partida**) y antes de c2_s1 (**Comenzar «Protocolo 404»**): fondo oscuro, hoja de expediente, sello CONFIDENCIAL, máquina de escribir (un clic muestra todo) y el botón "Comenzar investigación". Usan los textos exactos que me diste. La Comisaria Lozano quedó agregada al guion (§1 y §6). |
-| Build de Windows | Hecho | `Builds/ElCaso404/ElCaso404.exe` (135 MB; la primera compilación tras hornear la luz tarda unos 30 min por las variantes de shaders). Se regenera con **Caso404 → Build de Windows**. |
-| Capturas | Hecha | En `Docs/capturas/`: la carta del caso 1 (escribiéndose y completa), los personajes, cada escena (`c1s1_*` … `c2s3_*`), la ciudad desde el balcón y los ventanales de noche. La carta del caso 2 usa la misma vista que la del caso 1 (solo cambia el texto) y no tiene captura propia. |
-| 2. Espacios más grandes | Hecha | **Apartamento 404:** pasillo del edificio con puertas 401–405, ascensor y ventana; sala-comedor, cocina abierta, estudio con el escritorio de Elena, pasillo interno, baño, habitación y balcón de 8 m. Las 7 evidencias quedaron repartidas por pasillo, entrada, sala, balcón y estudio. **Café:** salón más grande, trastienda con el monitor de la cámara y baño. **Sala de servidores:** 4 filas de racks y pasillo con ventanal. La portería y la Comisaría ganaron ventanas a la calle. El objetivo del HUD ahora pide recorrer el lugar al llegar. |
-| 3. Ciudad alrededor | Hecha | Valdora por cuadras alrededor de 7 escenas: andenes, calles con líneas, edificios de Kenney (detallados cerca y mallas simples lejos, en un prefab compartido), faroles, árboles, carros estacionados, montañas, cielo nublado (caso 1) o nocturno con ventanas encendidas (caso 2) y niebla en el borde. Ya no hay piso infinito. Se ve el edificio donde ocurre cada escena, con la calle a la altura correcta (12 m bajo el balcón, 36 m bajo el piso 12). Hay colliders invisibles en el balcón y los ventanales. La Comisaría queda de día en el caso 1 y de noche en el caso 2. **Iluminación horneada** (rebotes y oclusión ambiental) con **Caso404 → Hornear iluminación**. |
-
-Pruebas: **40 EditMode y 6 PlayMode en verde** antes y después de los cambios. Las PlayMode ahora también pasan por las dos cartas.
-
-### Qué debes revisar tú
-1. **Cómo se ven los personajes.** Los cuerpos base del paquete gratuito son muy musculosos y la ropa queda ajustada, como un enterizo, porque está pintada sobre la piel. Si no te convence, la alternativa es un paquete con ropa modelada.
-2. **Las poses en el juego.** En Play los personajes deben estar en reposo; los sentados, en su silla; y al hablarles, gesticular y mirarte. Revisa sobre todo la Comisaría y el café.
-3. **La ciudad y los espacios**: recorre el apartamento completo y asómate al balcón, a las vitrinas del café y al ventanal del piso 12. Revisa que no haya bordes visibles, caídas ni objetos difíciles de alcanzar. La sala de servidores es oscura a propósito ("frío" en el guion); dime si quieres más luz.
-4. **Las dos cartas**: que el texto se lea bien en tu pantalla y que el clic complete el texto.
-5. **El vestuario que elegí** sin que lo pidieras: Laura con uniforme de enfermera, Sebastián con buzo con capota y Elena con chaqueta y jeans (`DECISIONES.md`, N2).
-6. **Los PR en GitHub** (enlaces abajo). Te recomiendo fusionar primero las ramas de la subida inicial y después las de la sesión 4: las de la sesión 4 continúan a las anteriores y no tienen conflictos.
-
-### Cómo probar
-- **En el Editor:** **Caso404 → Jugar desde el menú** (Ctrl+Shift+P) → **Nueva partida**. Debe aparecer la carta.
-- **En el ejecutable:** abre `Builds/ElCaso404/ElCaso404.exe`.
-
-### Para la próxima sesión
-- **"Ajustemos lo que encontré jugando"**: distancias, luz, objetos difíciles de alcanzar, textos.
-- Si quieres personajes con ropa modelada en 3D, habría que conseguir un paquete con ropa (el gratuito solo trae cuerpos base).
-- **Importante al regenerar escenas:** después de **Caso404 → Construir todo**, ejecuta **Caso404 → Hornear iluminación (todas las escenas)**.
-- Capturas de cada escena y de la carta del caso 2 (necesita jugar el caso 1 hasta el final o una prueba que llegue ahí).
+> **Importante:** todo se verificó con pruebas automáticas y con capturas de la escena. **Nadie lo ha jugado todavía con teclado y mouse.** Tu primera partida es la prueba de verdad (pasos en la sección 4).
 
 ---
 
-## Resumen (sesión 2, 18 de octubre de 2026)
-
-**El caso 1 se juega completo**, desde el menú principal hasta sus 3 finales y "Tres meses después...". **El caso 2 también se juega completo**: sus 4 escenas, la Comisaría compartida, los 4 finales y el final secreto con la decisión sobre ALEX.
-
-Todo se verificó en modo batch con **37 pruebas EditMode** y **6 pruebas PlayMode**, todas en verde. Las PlayMode recorren el juego desde el menú, como lo haría un jugador.
-
-> **Importante:** igual que en la sesión 1, **nadie lo ha jugado todavía con teclado y mouse.** Las pruebas usan las mismas entradas que el jugador (inspeccionar, hablar, acusar, elegir botones), pero no mueven el mouse ni caminan. Tu primera partida completa es la prueba de verdad (sección 4).
-
----
-
-## 1. Qué quedó hecho en esta sesión
+## 1. Qué quedó hecho
 
 | Fase | Commit | Contenido |
 |---|---|---|
-| G | `a476041` | Escena **c1_s2 Café La Esquina** (3 evidencias y Carlos, que no aparece si fue detenido). Kit común `SceneKit` para construir escenas. Botón "Terminar la escena" para las escenas sin decisión de cierre. Tema "Preguntar por la llave maestra". Código de acusación, final, fundido y menú. |
-| H | `bc766a4` | Escena **c1_s3 Portería y sótano**: portería, sótano con casilleros, administración (el DVR desbloquea la grabación original), mantenimiento (llavero) y parqueadero (portátil). El overol aparece, o en su lugar las cenizas si Carlos fue detenido. Hernán y Andrés. |
-| I | `90c3f1a` | **Comisaría**: tablero con todas las hipótesis del caso, pantalla de ALEX, sala de interrogatorio con los 4 personajes y "Expediente para la Fiscalía" (acusación: culpable + 3 pruebas). Andrés entrega su celular aquí; su análisis profundo activa `flag_c1_pista_nx`. |
-| J | `9d4e350` | **Menú principal** (Nueva partida, Continuar, Salir), fundidos entre escenas, **pantallas de final** con el texto del guion y un resumen de lo que descubriste y lo que se te escapó, y **"Tres meses después..."**. |
-| K | `42562f0` | **Pruebas PlayMode del caso 1 completo**: final verdadero, verdadero con Carlos detenido, incompleto y engaño. |
-| L | `863387c`, `6f69458`, `54b1502` | **Caso 2 completo:** <ul><li>Datos: 15 evidencias, 11 mentiras, 4 personajes con Elena como aliada, 3 decisiones y 4 finales.</li><li>Escenas: **c2_s1 Sala de servidores B**, **c2_s2 Piso ejecutivo** y **c2_s3 Caseta y parqueadero**, con la Comisaría compartida.</li><li>Mecánicas: contraseña LUCERO, laboratorio externo para las placas, la copia espejo que entrega Inés, el testimonio de Inés como prueba sólida y el final secreto con `dec_c2_alex`.</li><li>Paso del caso 1 al 2 conservando flags, finales y `alexTrust`.</li><li>10 pruebas EditMode y 2 PlayMode nuevas.</li></ul> |
+| — | `070cce9` | Tus documentos (guion, CLAUDE.md, skills) quedaron guardados en git. Corregí en las skills tres diferencias con el guion (`alexTrust` empieza en 60, contradicciones por caso, varias refutaciones por mentira). |
+| A | `10af5de` | Paquetes (se agregó Test Framework y se quitaron dos experimentales), carpetas `_Project/`, asmdefs (juego, editor y pruebas), capas `Interactable` e `Inspection`, URP como pipeline por defecto, recursos de TextMeshPro. |
+| B | `577c7b9` | ScriptableObjects de casos, personajes, ALEX, evidencias, mentiras, hipótesis, decisiones, finales, escenas y flags. Un script de Editor genera **los 54 assets del caso 1** con los IDs y textos del guion. |
+| C | `3080d34` | `GameState` y `GameStateService`, `SaveService` (JSON), canales de eventos, `EvidenceService`, `AlexService` (Aceptar/Cuestionar y confianza), `DecisionService`, `HypothesisService`, `AccusationService`, `EndingEvaluator`. Las pruebas recorren **los 3 finales**, incluido el **final verdadero con Carlos detenido**. |
+| D | `a323504` | Jugador en primera persona (`CharacterController`, Input System), interacción por raycast, resaltado ámbar/blanco y modo inspección: el objeto se gira con el mouse y el detalle oculto se revela al girarlo. También entró el `DialogueService` con la IA sin conexión. |
+| E | `22903ea` | UI completa con el `UITheme` noir: HUD, inspección, expediente con análisis, diálogo (frases de respaldo del guion), panel de ALEX con Aceptar/Cuestionar y glitch, tablero de hipótesis y decisión. |
+| F | `4e5a378` | Escena `Assets/_Project/Scenes/Apartamento404.unity` en greybox: sala, balcón y pasillo, las 7 evidencias, Laura, el jugador, la UI y la iluminación. Está en Build Settings como escena 0. |
 
-**Extras después de las fases (hasta las 10:20 AM):**
-- Regla de Elena con la USB.
-- Línea de objetivo en el HUD y menú de pausa con Esc.
-- **Opciones** en el menú (sensibilidad del mouse, invertir Y, pantalla completa).
-- Revisión visual de la UI con capturas (`UiScreenshots`), que corrigió el expediente, la inspección de objetos planos y el HUD encimado.
-- Sonidos generados por código y sacudida de cámara en las contradicciones.
-- Glitch "404" al abrir `directiva_404`.
-- **Proxy de IA en `Server/`** (Node, sin dependencias, clave por variable de entorno, con modo de prueba); el `HttpAiClient` ya lo usa y se probó contra el modo de prueba.
-- Prueba de integridad de las 8 escenas.
-- `Docs/ARQUITECTURA.md`, para la sustentación.
-- Atajos **Caso404 → Jugar desde el menú** (Ctrl+Shift+P) y **Borrar partida guardada**.
+**Qué se puede hacer en c1_s1:**
+- Inspeccionar y guardar las 7 evidencias, y analizarlas en el expediente.
+- Ver cómo ALEX culpa a Carlos al analizar la huella, y cómo da ERROR 404 al analizar la cámara del pasillo.
+- Cuestionar a ALEX con la ventana o la cerradura: cuenta como contradicción y baja su confianza.
+- Hablar con Laura: preguntarle, presentarle evidencias o testimonios, y descubrir su mentira de la hora con el teléfono.
+- Después, **"Hablarle con calma"**: entrega el cuaderno, y al cerrar la conversación se abre `dec_c1_cuaderno`.
+- Responder la hipótesis `hyp_c1_s1` y tomar `dec_c1_s1`. La partida se guarda.
 
-Estado final de las pruebas: **40 EditMode y 6 PlayMode en verde**, más 2 pruebas explícitas (capturas y proxy) que también pasaron.
-
-Las decisiones de esta sesión están en `Docs/DECISIONES.md`, secciones S1–S5, G1–G4, H1–H3, I1–I6, J1–J4, K1–K2 y L1–L19.
+**IA:** el juego usa solo `OfflineAiClient`. `IAiClient`, `HttpAiClient`, `AiSettings` y el validador de respuestas quedaron listos para conectar el proxy más adelante. No hay ninguna clave de API en el proyecto.
 
 ## 2. Qué falló o quedó pendiente
 
-**Problemas encontrados y resueltos durante la sesión**
-- Un nombre de método chocaba con el namespace `Caso404.Player`. Se renombró el método.
-- Una comprobación de la prueba contaba mal las evidencias de c1_s3: la grabación original no tiene objeto en la escena.
-- En la primera versión, el celular de Andrés se podía obtener en el sótano. Ahora solo se entrega en la Comisaría, como dice el guion.
+**Problemas que encontré y resolví**
+- `AssetDatabase.ImportPackage` no termina en modo batch. Los recursos de TMP se extrajeron a mano del `.unitypackage`, y el resultado es el mismo.
+- Crear una escena nueva descargaba los datos ya cargados y producía un error de referencia nula. Se corrigió el orden.
+- La prueba PlayMode no corre con `-nographics`, porque el modo inspección usa una RenderTexture. Se corre en batch con gráficos.
 
 **Pendiente**
-- **Prueba humana con teclado y mouse** de todo el recorrido (ver sección 4).
-- **Escena Bootstrap persistente.** Hoy el estado pasa entre escenas por el archivo de guardado. Funciona, pero cada escena crea sus propios servicios.
-- Elena en el final del engaño: resuelto en M1.
-- **IA real**: el proxy de `Server/` existe, pero solo se probó en modo de prueba (no había clave). Para usarlo, define `ANTHROPIC_API_KEY`, arranca `node Server/proxy.mjs` y desmarca *Use Offline* en `AiSettings`.
-- **Arte**: el greybox es de primitivas porque ProBuilder no está instalado. Faltan las fuentes Special Elite, Inter e IBM Plex, la iluminación horneada, el contorno de resaltado, los sonidos y la sacudida de pantalla.
-- Algunas frases las escribí yo porque el guion no las trae (B10, G4, L7). Revísalas para la sustentación.
+- **Escenas c1_s2 (Café), c1_s3 (Portería y sótano) y c1_s4 (Comisaría).** Sus datos ya existen, pero no se han construido. Por eso, después de `dec_c1_s1` aparece "Fin de la demo".
+- **Pantallas de acusación y de finales.** La lógica (`AccusationService`, `EndingEvaluator`) está hecha y probada; falta la UI.
+- La opción "Preguntar por la llave maestra" con Hernán y Andrés (cuando existe `flag_c1_h_llave`). Corresponde a c1_s3.
+- Escena `Bootstrap` persistente, menú principal y botón "Continuar". Hoy cada escena crea sus servicios y el estado pasa por el guardado.
+- **ProBuilder y Cinemachine no se instalaron** (motivo en A3 y A4 de `DECISIONES.md`). El greybox es de primitivas.
+- Fuentes Special Elite, Inter e IBM Plex Mono. Se usa LiberationSans; el `UITheme` ya tiene los campos para cambiarlas.
+- Detalles visuales y de sensación:
+  - iluminación sin hornear;
+  - resaltado por tinte en vez de contorno;
+  - fondo oscurecido en vez de desenfocado;
+  - faltan los sonidos y la sacudida de pantalla de la skill de UI.
+- Servidor proxy para la IA (`Server/`).
+- Queda un aviso de compilación (API obsoleta) en `ProjectSetup.cs`. No afecta el juego.
 
-## 3. Decisiones más importantes (detalle en `Docs/DECISIONES.md`)
-- **S3:** las escenas cargan el estado desde el guardado. Para jugar desde el principio, entra por **MainMenu → Nueva partida**.
-- **S5:** el café y la portería se terminan desde el tablero con "Terminar la escena". La Comisaría solo se abre cuando ambas están completas.
-- **I2:** el celular de Andrés solo se consigue en la Comisaría, presentándole una prueba sólida (llavero, overol o grabación original).
-- **L2 y L3:** el portátil de Tomás solo cuenta abierto con LUCERO, y la cámara del parqueadero solo identifica el carro de Valeria tras el laboratorio externo. Agregué dos flags técnicos que el guion no nombra.
-- **L12:** la Comisaría es una sola escena para los dos casos. El juego elige `c1_s4` o `c2_s4` según el caso en curso.
+## 3. Decisiones que tomé
 
-## 4. Cómo probar el juego completo en Unity
+Todas están en **`Docs/DECISIONES.md`**, con su motivo y su número. Las que más afectan cómo se juega:
+- **B9:** en `dec_c1_s1` A (detener a Carlos), el jugador elige después entre ir al café o a la portería.
+- **B10 y B11:** escribí dos reacciones que el guion no traía. Las frases "Presionar" del guion solo se dicen cuando ya se descubrió una mentira del personaje.
+- **B12:** el celular de Andrés solo se entrega si su mentira se refuta con una evidencia sólida, no con el testimonio de Hernán.
+- **C3 y C4:** Aceptar a ALEX suma +5 una sola vez. Cuestionarlo con una evidencia equivocada no castiga.
+- **E5:** el tablero no dice si la respuesta es correcta; así el jugador no prueba hasta acertar.
+- **E6:** la decisión del cuaderno se abre al cerrar la conversación con Laura.
+- **E10:** la jerarquía de cada pantalla, que la skill de UI pedía aprobar antes de construirla. Revísala.
 
-1. Abre el proyecto con Unity **6000.6.6f1** y espera a que importe.
-2. Opcional: menú **Caso404 → Construir todo (datos y escenas)** para regenerar todo. Las escenas ya están en el repositorio.
-3. Abre `Assets/_Project/Scenes/MainMenu.unity` y pulsa **Play**. Elige **Nueva partida**.
+## 4. Qué debes hacer tú en Unity para probarlo
+
+1. Abre el proyecto en Unity Hub (versión **6000.6.6f1**) y espera a que termine de importar.
+2. Abre `Assets/_Project/Scenes/Apartamento404.unity`.
+3. Pulsa **Play** y haz clic dentro de la ventana *Game*.
 4. Controles:
 
    | Tecla | Acción |
@@ -111,57 +74,38 @@ Las decisiones de esta sesión están en `Docs/DECISIONES.md`, secciones S1–S5
    | Mouse | Mirar |
    | E | Interactuar |
    | Tab | Expediente |
-   | Q | ALEX |
+   | Q | Panel de ALEX |
    | H | Hipótesis |
    | Esc | Cerrar panel |
    | Clic izquierdo sostenido | Girar el objeto en el modo inspección |
 
-5. **Recorrido del final verdadero del caso 1:**
-   1. **c1_s1 Apartamento:**
-      1. Inspecciona y guarda las 7 evidencias y analízalas con **Tab**.
-      2. Con **Q**, cuestiona la observación de ALEX sobre el balcón usando la **Cerradura**.
-      3. Habla con **Laura**: preséntale el **Teléfono** y luego pulsa **Hablarle con calma**.
-      4. Al despedirte, en la decisión del cuaderno elige **guardarlo fuera del sistema**.
-      5. Pulsa **H**, responde **Con una llave** y **las tres personas**, y en la decisión elige **"Revisar primero la portería y el sótano"**.
-   2. **c1_s3 Portería y sótano:**
-      1. Recoge todo y analiza el **DVR**: aparece la grabación original.
-      2. Gira el **overol** hasta ver el vidrio en la manga.
-      3. Con **Q**, cuestiona el ERROR 404 usando la **Grabación original**, y la observación sobre el overol usando el **Overol**.
-      4. A Hernán preséntale el **Recibo de la tienda**.
-      5. Pulsa **H**, responde **Andrés** y **Para simular un robo**, y luego **Terminar la escena**. Ve al café.
-   3. **c1_s2 Café:** recoge y analiza las 3 evidencias, pulsa **H** y responde **No, estaba en el café**. Luego **Terminar la escena** y ve a la Comisaría.
-   4. **c1_s4 Comisaría:**
-      1. A **Andrés** preséntale el **Registro del llavero**: te da su celular.
-      2. En el expediente (**Tab**), analiza el celular y haz el **Análisis profundo**.
-      3. En el **Expediente para la Fiscalía** acusa a **Andrés** con el **llavero**, el **overol** y el **celular**.
-6. Después del final, pulsa **Comenzar «Protocolo 404»** para jugar el caso 2. Pistas para su final secreto:
-   - La contraseña del portátil de Tomás es **LUCERO**: está en el boceto y en el post-it, y Elena también la sugiere.
-   - Las placas se leen con el **Análisis de laboratorio externo** de la cámara del parqueadero.
-   - A **Inés** preséntale el **libro de rondas** y elige **protegerla**: te da la copia espejo.
-   - Acusa a **Valeria**.
-7. Para correr las pruebas: **Window → General → Test Runner**. En **EditMode → Run All** deben pasar 37; en **PlayMode → Run All**, 6 (tardan un par de minutos porque cargan las escenas).
-8. En el Inspector no hay que configurar nada. Si quieres probar una escena suelta sin pasar por el menú, abre esa escena y dale Play: usará tu última partida guardada.
-9. Si algo falla, copia el primer error rojo de la consola para la próxima sesión.
+5. Recorrido sugerido:
+   1. Lee la intro y pulsa **Empezar**.
+   2. Apunta a cada objeto con brillo ámbar y pulsa **E**. Gíralo y pulsa **Guardar en expediente**. Hay 7: ventana, cerradura de la puerta, huella y colilla en el balcón, teléfono frente al sofá, escritorio y cámara del pasillo (arriba, sobre la puerta).
+   3. Pulsa **Tab** y **Analiza** cada evidencia. Al analizar la huella y la cámara, aparece un aviso de ALEX.
+   4. Pulsa **Q**. En la observación sobre el balcón, pulsa **Cuestionar** y elige **Ventana rota del balcón**: debe salir "Contradicción detectada".
+   5. Sal al pasillo y habla con **Laura**. Pulsa **Presentar evidencia → Teléfono bajo el sofá**. Luego aparece **Hablarle con calma**: púlsalo. Al **Despedirte**, se abre la decisión del cuaderno.
+   6. Pulsa **H** o usa el ascensor del pasillo. Responde las dos preguntas y pulsa **Tomar la decisión**.
+6. Para correr las pruebas: **Window → General → Test Runner**. En **EditMode → Run All** deben pasar 27; en **PlayMode → Run All**, 1.
+7. **En el Inspector no hay que configurar nada**: el builder dejó todo enlazado. Si quieres:
+   - En el objeto `GameContext`, *Start New Game* empieza una partida nueva en cada Play (está activo).
+   - `Assets/_Project/Data/AiSettings` → *Use Offline* debe quedar activo.
+8. Si borras o cambias algo y quieres regenerarlo, usa el menú **Caso404**:
+
+   | Opción | Qué hace |
+   |---|---|
+   | Generar datos caso 1 | Vuelve a crear los assets del caso 1 |
+   | Crear assets compartidos | Vuelve a crear el `UITheme`, `AiSettings` y los canales de eventos |
+   | Construir escena c1_s1 | Reemplaza la escena (se pierden los cambios hechos a mano) |
+   | Capturar vistas de c1_s1 | Guarda capturas en `Logs/preview_*.png` |
+
+9. Si algo se ve raro, revisa la consola y copia el primer error rojo para la próxima sesión.
 
 ## 5. Qué pedirme en la siguiente sesión
-1. **"Ajustemos lo que encontré jugando"**: velocidad, sensibilidad del mouse, textos que no caben, objetos difíciles de alcanzar.
-2. **"Escena Bootstrap persistente y opciones"** (volumen, sensibilidad, pantalla completa).
-3. **"Regla de Elena con la USB"** y repasar los textos que escribí por mi cuenta.
-4. **"Servidor proxy de IA en `Server/`"**, para que los personajes respondan preguntas libres (con la clave en una variable de entorno).
-5. **"Arte"**: instalar ProBuilder, las fuentes del `UITheme`, modelos low-poly (Kenney o Quaternius) e iluminación horneada.
 
----
-
-## Sesión 1 (resumen)
-Fases A–F: preparación del proyecto, ScriptableObjects y generador de datos del caso 1, núcleo (`GameState`, servicios, guardado, `EndingEvaluator`), jugador en primera persona con inspección, UI básica y la escena c1_s1 hasta `dec_c1_s1`. Commits `10af5de` a `836946b`.
-
----
-
-## Cierre de la sesión 2 (12:31 PM)
-
-El trabajo se detuvo a las 10:20 AM porque se alcanzó el límite de uso. Se retomó a las 12:31 PM, después de la hora límite (11:45), solo para cerrar este reporte. No hubo cambios de código después de las 10:20: el último commit de código es `02c618d` (glitch 404 y atajos de Editor).
-
-Estado final:
-- Fases A a L completas. El caso 1 y el caso 2 se juegan de principio a fin, incluido el final secreto.
-- 40 pruebas EditMode y 6 PlayMode en verde. Las pruebas explícitas de capturas y del proxy también pasaron.
-- Lo pendiente y los pasos para probar están en las secciones 2 y 4 de este reporte.
+1. **"Revisemos tu prueba de c1_s1"**: me cuentas qué se sintió mal (velocidad, sensibilidad del mouse, textos que no caben) y lo ajusto.
+2. **"Construye c1_s3 Portería y sótano"**: es la escena con las pruebas clave contra Andrés (llavero, DVR y grabación original, overol con detalle oculto, portátil), más Hernán, Andrés y la opción de la llave maestra.
+3. **"Construye c1_s2 Café La Esquina"**: es corta (3 evidencias y Carlos).
+4. **"Construye la Comisaría con la acusación y las pantallas de los 3 finales"**: así el caso 1 queda completo de principio a fin.
+5. **"Agrega la escena Bootstrap, el menú principal y Continuar"**.
+6. Opcional: aprobar la instalación de ProBuilder y las fuentes, y luego el proxy de IA en `Server/`.
