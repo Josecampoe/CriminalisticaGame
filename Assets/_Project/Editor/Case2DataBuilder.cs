@@ -244,10 +244,10 @@ namespace Caso404.EditorTools
             };
             elena.AttitudeVariants = new[]
             {
-                new AttitudeVariant { Condition = Cond(allFlags: new[] { fEndVerdadero }), Text = "Confía en Rivera y comparte todo de inmediato." },
-                new AttitudeVariant { Condition = Cond(allFlags: new[] { fEndIncompleto }), Text = "Es cooperativa, pero cautelosa." },
+                new AttitudeVariant { Condition = Cond(allFlags: new[] { fEndVerdadero }), Text = "(Elena confía en ti y comparte todo de inmediato.)" },
+                new AttitudeVariant { Condition = Cond(allFlags: new[] { fEndIncompleto }), Text = "(Elena coopera, pero con cautela.)" },
                 new AttitudeVariant { Condition = Cond(allFlags: new[] { fEndEngano }), Text = "Metieron preso a Carlos por algo que no hizo." },
-                new AttitudeVariant { Condition = Cond(allFlags: new[] { fCuaderno }), Text = "Laura me dijo que guardaste mi cuaderno fuera del sistema. Gracias." },
+                new AttitudeVariant { Condition = Cond(allFlags: new[] { fCuaderno }), Text = "Laura me dijo que guardaste mi cuaderno fuera del sistema. Gracias.", AlexTrustDelta = -5 },
             };
             Dirty(elena);
 
