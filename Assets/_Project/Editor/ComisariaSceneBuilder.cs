@@ -66,6 +66,20 @@ namespace Caso404.EditorTools
             Npc("laura", new Vector3(7f, 0f, 4.8f), 90f, seated: true);
             Npc("hernan", new Vector3(9f, 0f, 3.2f), 270f, seated: true);
             Npc("andres", new Vector3(9f, 0f, 4.8f), 270f, seated: true);
+            // Elenco del caso 2 (la escena es compartida; cada personaje solo aparece si el caso en curso lo lista).
+            Npc("sebastian", new Vector3(7f, 0f, 3.2f), 90f, seated: true, caseId: "c2");
+            Npc("valeria", new Vector3(7f, 0f, 4.8f), 90f, seated: true, caseId: "c2");
+            Npc("ines", new Vector3(9f, 0f, 3.2f), 270f, seated: true, caseId: "c2");
+            Npc("elena", new Vector3(-3.6f, 0f, 5.2f), 120f, caseId: "c2");
+            var c2s4 = Db.FindCase("c2")?.FindScene("c2_s4");
+            if (c2s4 != null)
+            {
+                var so = new SerializedObject(Game);
+                var list = so.FindProperty("_alternativeScenes");
+                list.arraySize = 1;
+                list.GetArrayElementAtIndex(0).objectReferenceValue = c2s4;
+                so.ApplyModifiedPropertiesWithoutUndo();
+            }
 
             Finish(scene, ScenePath);
         }
