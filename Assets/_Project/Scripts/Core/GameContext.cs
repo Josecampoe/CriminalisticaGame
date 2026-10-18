@@ -19,6 +19,8 @@ namespace Caso404.Core
     {
         [SerializeField] private GameDatabase _database;
         [SerializeField] private SceneData _scene;
+        [Tooltip("Otras versiones de esta escena para otros casos (la Comisaría es la misma escena en los dos casos).")]
+        [SerializeField] private System.Collections.Generic.List<SceneData> _alternativeScenes = new();
         [Tooltip("Si está activo, empieza una partida nueva al entrar (útil para la primera escena y para probar).")]
         [SerializeField] private bool _startNewGame = true;
         [SerializeField] private AiSettings _aiSettings;
@@ -26,7 +28,7 @@ namespace Caso404.Core
         [SerializeField] private StringEventChannel _decisionMadeChannel;
 
         public GameDatabase Database => _database;
-        public SceneData Scene => _scene;
+        public SceneData Scene { get; private set; }
         public CaseData Case { get; private set; }
         public GameStateService State { get; private set; }
         public EvidenceService Evidence { get; private set; }
@@ -47,11 +49,15 @@ namespace Caso404.Core
                 enabled = false;
                 return;
             }
-            Case = _database.FindCase(_scene.CaseId);
             Saves = new SaveService();
 
             GameState state = null;
             if (!_startNewGame && Saves.TryLoad(out var loaded)) state = loaded;
+            // Escena compartida: se usa la versión del caso en curso (ej. c2_s4 en la Comisaría durante el caso 2).
+            Scene = _scene;
+            if (state != null && state.currentCaseId != _scene.CaseId)
+                Scene = _alternativeScenes.Find(s => s != null && s.CaseId == state.currentCaseId) ?? _scene;
+            Case = _database.FindCase(Scene.CaseId);
             state ??= new GameState { alexTrust = _database.Alex != null ? _database.Alex.StartTrust : GameState.DefaultAlexTrust };
 
             State = new GameStateService(state);
@@ -64,10 +70,10 @@ namespace Caso404.Core
             AiClient = AiClientFactory.Create(_aiSettings);
             Dialogue = new DialogueService(State, Evidence, AiClient, Case);
 
-            State.SetCurrentScene(Case.Id, _scene.Id);
+            State.SetCurrentScene(Case.Id, Scene.Id);
             Evidence.EvidenceCollected += OnEvidenceCollected;
             Decisions.DecisionMade += OnDecisionMade;
-            GameLog.Info($"Escena {_scene.Id} lista. Confianza en ALEX: {State.AlexTrust}");
+            GameLog.Info($"Escena {Scene.Id} lista. Confianza en ALEX: {State.AlexTrust}");
         }
 
         void OnDestroy()
