@@ -27,6 +27,7 @@ namespace Caso404.Data
         [SerializeField] private string _password;
         [SerializeField, TextArea(2, 6)] private string _resultText;
         [SerializeField, TextArea] private string _alexComment;
+        [SerializeField] private bool _alexGlitch;
         [SerializeField] private List<FlagData> _setsFlags = new();
 
         public ExtraAnalysisKind Kind { get => _kind; internal set => _kind = value; }
@@ -35,6 +36,8 @@ namespace Caso404.Data
         public string ResultText { get => _resultText; internal set => _resultText = value; }
         /// <summary>Lo que dice ALEX al ver el resultado (opcional).</summary>
         public string AlexComment { get => _alexComment; internal set => _alexComment = value; }
+        /// <summary>Al completarse, la interfaz de ALEX hace glitch y muestra "404" medio segundo (GUION §4.5, carpeta directiva_404).</summary>
+        public bool AlexGlitch { get => _alexGlitch; internal set => _alexGlitch = value; }
         public IReadOnlyList<FlagData> SetsFlags { get => _setsFlags; internal set => _setsFlags = new(value); }
     }
 
