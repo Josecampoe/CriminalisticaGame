@@ -17,6 +17,7 @@ namespace Caso404.Data
         [SerializeField] private bool _letPlayerChooseNextScene;
         [SerializeField, TextArea(2, 5)] private string _resultText;
         [SerializeField] private bool _resultSpokenByAlex;
+        [SerializeField] private List<EvidenceData> _grantsEvidence = new();
 
         public string Id { get => _id; internal set => _id = value; }
         public string Text { get => _text; internal set => _text = value; }
@@ -30,6 +31,8 @@ namespace Caso404.Data
         /// <summary>Texto que se muestra tras elegir (ej. la nota del cuaderno).</summary>
         public string ResultText { get => _resultText; internal set => _resultText = value; }
         public bool ResultSpokenByAlex { get => _resultSpokenByAlex; internal set => _resultSpokenByAlex = value; }
+        /// <summary>Evidencias que entrega esta opción (si están disponibles; ej. la copia espejo).</summary>
+        public IReadOnlyList<EvidenceData> GrantsEvidence { get => _grantsEvidence; internal set => _grantsEvidence = new(value); }
     }
 
     /// <summary>Decisión (dec_). Las que afectan el final son irreversibles y piden confirmación.</summary>
