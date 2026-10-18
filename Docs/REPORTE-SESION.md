@@ -21,6 +21,20 @@ Todo se verificó en modo batch con **37 pruebas EditMode** y **6 pruebas PlayMo
 | K | `42562f0` | **Pruebas PlayMode del caso 1 completo**: final verdadero, verdadero con Carlos detenido, incompleto y engaño. |
 | L | `863387c`, `6f69458`, `54b1502` | **Caso 2 completo:** <ul><li>Datos: 15 evidencias, 11 mentiras, 4 personajes con Elena como aliada, 3 decisiones y 4 finales.</li><li>Escenas: **c2_s1 Sala de servidores B**, **c2_s2 Piso ejecutivo** y **c2_s3 Caseta y parqueadero**, con la Comisaría compartida.</li><li>Mecánicas: contraseña LUCERO, laboratorio externo para las placas, la copia espejo que entrega Inés, el testimonio de Inés como prueba sólida y el final secreto con `dec_c2_alex`.</li><li>Paso del caso 1 al 2 conservando flags, finales y `alexTrust`.</li><li>10 pruebas EditMode y 2 PlayMode nuevas.</li></ul> |
 
+**Extras después de las fases (hasta las 10:20 AM):**
+- Regla de Elena con la USB.
+- Línea de objetivo en el HUD y menú de pausa con Esc.
+- **Opciones** en el menú (sensibilidad del mouse, invertir Y, pantalla completa).
+- Revisión visual de la UI con capturas (`UiScreenshots`), que corrigió el expediente, la inspección de objetos planos y el HUD encimado.
+- Sonidos generados por código y sacudida de cámara en las contradicciones.
+- Glitch "404" al abrir `directiva_404`.
+- **Proxy de IA en `Server/`** (Node, sin dependencias, clave por variable de entorno, con modo de prueba); el `HttpAiClient` ya lo usa y se probó contra el modo de prueba.
+- Prueba de integridad de las 8 escenas.
+- `Docs/ARQUITECTURA.md`, para la sustentación.
+- Atajos **Caso404 → Jugar desde el menú** (Ctrl+Shift+P) y **Borrar partida guardada**.
+
+Estado final de las pruebas: **40 EditMode y 6 PlayMode en verde**, más 2 pruebas explícitas (capturas y proxy) que también pasaron.
+
 Las decisiones de esta sesión están en `Docs/DECISIONES.md`, secciones S1–S5, G1–G4, H1–H3, I1–I6, J1–J4, K1–K2 y L1–L19.
 
 ## 2. Qué falló o quedó pendiente
@@ -33,8 +47,8 @@ Las decisiones de esta sesión están en `Docs/DECISIONES.md`, secciones S1–S5
 **Pendiente**
 - **Prueba humana con teclado y mouse** de todo el recorrido (ver sección 4).
 - **Escena Bootstrap persistente.** Hoy el estado pasa entre escenas por el archivo de guardado. Funciona, pero cada escena crea sus propios servicios.
-- **Elena en el final del engaño**: el guion dice que solo coopera si le muestras la USB. Hoy solo cambia su saludo (L19).
-- **IA real**: el `HttpAiClient` está preparado, pero falta el servidor proxy en `Server/`. Todo funciona con las frases de respaldo del guion.
+- Elena en el final del engaño: resuelto en M1.
+- **IA real**: el proxy de `Server/` existe, pero solo se probó en modo de prueba (no había clave). Para usarlo, define `ANTHROPIC_API_KEY`, arranca `node Server/proxy.mjs` y desmarca *Use Offline* en `AiSettings`.
 - **Arte**: el greybox es de primitivas porque ProBuilder no está instalado. Faltan las fuentes Special Elite, Inter e IBM Plex, la iluminación horneada, el contorno de resaltado, los sonidos y la sacudida de pantalla.
 - Algunas frases las escribí yo porque el guion no las trae (B10, G4, L7). Revísalas para la sustentación.
 
