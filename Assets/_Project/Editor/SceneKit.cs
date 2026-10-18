@@ -41,6 +41,7 @@ namespace Caso404.EditorTools
             ScenesFolder + "/CafeLaEsquina.unity",
             ScenesFolder + "/PorteriaSotano.unity",
             ScenesFolder + "/Comisaria.unity",
+            ScenesFolder + "/ServidoresB.unity",
         };
 
         public static GameDatabase Db { get; private set; }
@@ -220,9 +221,9 @@ namespace Caso404.EditorTools
             return go;
         }
 
-        public static void Npc(string characterId, Vector3 position, float yaw, bool seated = false)
+        public static void Npc(string characterId, Vector3 position, float yaw, bool seated = false, string caseId = null)
         {
-            var profile = Case.FindCharacter(characterId);
+            var profile = (caseId == null ? Case : Db.FindCase(caseId)).FindCharacter(characterId);
             if (profile == null) { Debug.LogError($"[Caso404] No existe el personaje {characterId}"); return; }
             var npc = new GameObject($"NPC {profile.DisplayName}");
             npc.transform.position = position;
