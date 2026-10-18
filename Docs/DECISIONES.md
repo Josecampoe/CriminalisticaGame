@@ -190,3 +190,11 @@ Registro de decisiones tomadas durante el desarrollo, con su motivo. Cuando el g
 | L17 | Las actitudes de Elena salen como saludo al hablarle. Si guardaste el cuaderno fuera del sistema, su frase baja `alexTrust` en 5 una sola vez (se marca con un flag `att_elena_n`). Las actitudes que no son frases del guion van entre paréntesis, como indicación. | GUION §4.3. |
 | L18 | Nuevas pruebas PlayMode del caso 2: **final secreto** (con `flag_c1_pista_nx`, hasta `dec_c2_alex`, el resultado y los créditos) y **engaño con tiempo perdido** (Sebastián no está en su oficina y la copia espejo ya no existe). Empiezan desde una partida guardada al terminar el caso 1, con *Continuar*. | Comprueba el caso 2 completo sin repetir el caso 1. |
 | L19 | Pendiente: Elena "solo coopera si le muestras `ev_c2_usb_elena`" cuando el caso 1 terminó en engaño. Hoy solo cambia su saludo. | Hace falta una regla de diálogo nueva (bloquear temas hasta presentar una evidencia). |
+
+## Mejoras para la prueba con jugador
+
+| # | Decisión | Motivo |
+|---|---|---|
+| M1 | Regla de Elena (resuelve L19): si el caso 1 terminó en engaño, Elena se niega a hablar (*"Metieron preso a Carlos por algo que no hizo. No tengo nada que hablar con la policía."*) y no ofrece sus temas hasta que le presentas su USB analizada. La segunda frase la agregué yo. | GUION §4.3: "Solo coopera si el jugador le muestra `ev_c2_usb_elena`". |
+| M2 | En el HUD, arriba a la izquierda, hay una línea de **objetivo** que se calcula a partir del estado: analizar evidencias nuevas, completar la hipótesis, tomar la decisión, terminar la escena o acusar. También dice cuántos objetos faltan por revisar en la escena. | Para que en la primera prueba no te pierdas. Solo lee el estado: no revela respuestas. |
+| M3 | Esc sin ningún panel abierto abre un menú de **Pausa** (Continuar / Guardar y salir al menú). `UIManager.LastCloseFrame` evita que Esc cierre un panel y abra la pausa con la misma pulsación. | Hacía falta una forma de volver al menú en medio de una escena. |
