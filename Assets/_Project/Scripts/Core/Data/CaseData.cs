@@ -11,7 +11,6 @@ namespace Caso404.Data
         [SerializeField] private string _id;
         [SerializeField] private string _title;
         [SerializeField, TextArea(3, 6)] private string _introText;
-        [SerializeField, TextArea(8, 30)] private string _introLetter;
         [SerializeField, TextArea] private string _alexIntroLine;
         [SerializeField] private FallbackLines _alexLines = new();
         [SerializeField] private List<SceneData> _scenes = new();
@@ -26,16 +25,10 @@ namespace Caso404.Data
         [SerializeField] private List<EndingData> _endings = new();
         [SerializeField] private List<EvidenceData> _solidProofs = new();
         [SerializeField] private int _proofsToChoose = 3;
-        [SerializeField] private List<CharacterProfile> _allies = new();
-        [SerializeField] private List<FlagData> _solidProofFlags = new();
-        [SerializeField] private List<EvidenceRequirement> _solidProofRequirements = new();
-        [SerializeField, TextArea] private string _alexLowTrustIntroLine;
 
         public string Id { get => _id; internal set => _id = value; }
         public string Title { get => _title; internal set => _title = value; }
         public string IntroText { get => _introText; internal set => _introText = value; }
-        /// <summary>Carta de contexto de la Comisaria Lozano que se muestra antes de la primera escena del caso (vacía = sin carta).</summary>
-        public string IntroLetter { get => _introLetter; internal set => _introLetter = value; }
         public string AlexIntroLine { get => _alexIntroLine; internal set => _alexIntroLine = value; }
         /// <summary>Frases de respaldo de ALEX en este caso (diálogo libre sin conexión).</summary>
         public FallbackLines AlexLines { get => _alexLines; internal set => _alexLines = value; }
@@ -53,19 +46,6 @@ namespace Caso404.Data
         /// <summary>Pruebas sólidas contra el culpable (GUION §3.6).</summary>
         public IReadOnlyList<EvidenceData> SolidProofs { get => _solidProofs; internal set => _solidProofs = new(value); }
         public int ProofsToChoose { get => _proofsToChoose; internal set => _proofsToChoose = value; }
-        /// <summary>Personajes que no se pueden acusar (ej. Elena en el caso 2).</summary>
-        public IReadOnlyList<CharacterProfile> Allies { get => _allies; internal set => _allies = new(value); }
-        /// <summary>Sospechosos y aliados.</summary>
-        public IEnumerable<CharacterProfile> AllCharacters => _suspects.Concat(_allies).Where(c => c != null);
-        /// <summary>Flags que cuentan como prueba sólida sin elegirlos (ej. flag_c2_ines_testigo).</summary>
-        public IReadOnlyList<FlagData> SolidProofFlags { get => _solidProofFlags; internal set => _solidProofFlags = new(value); }
-        /// <summary>Pruebas sólidas que solo cuentan con un flag (ej. la cámara del parqueadero con análisis externo).</summary>
-        public IReadOnlyList<EvidenceRequirement> SolidProofRequirements { get => _solidProofRequirements; internal set => _solidProofRequirements = new(value); }
-        /// <summary>Lo que dice ALEX al empezar el caso si alexTrust &lt; 30.</summary>
-        public string AlexLowTrustIntroLine { get => _alexLowTrustIntroLine; internal set => _alexLowTrustIntroLine = value; }
-
-        /// <summary>Busca un personaje (sospechoso o aliado).</summary>
-        public CharacterProfile FindCharacter(string id) => AllCharacters.FirstOrDefault(c => c.Id == id);
 
         public EvidenceData FindEvidence(string id) => _evidence.FirstOrDefault(e => e != null && e.Id == id);
         public LieData FindLie(string id) => _lies.FirstOrDefault(l => l != null && l.Id == id);

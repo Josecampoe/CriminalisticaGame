@@ -10,12 +10,9 @@ namespace Caso404.Data
     {
         [SerializeField] private List<CaseData> _cases = new();
         [SerializeField] private AlexProfile _alex;
-        [SerializeField, TextArea(2, 5)] private string _introText;
 
         public IReadOnlyList<CaseData> Cases { get => _cases; internal set => _cases = new(value); }
         public AlexProfile Alex { get => _alex; internal set => _alex = value; }
-        /// <summary>Intro del juego (GUION §6).</summary>
-        public string IntroText { get => _introText; internal set => _introText = value; }
 
         /// <summary>Busca un caso por id.</summary>
         public CaseData FindCase(string caseId) => _cases.FirstOrDefault(c => c != null && c.Id == caseId);
