@@ -2,10 +2,7 @@
     "name": "Caso404.Editor",
     "rootNamespace": "Caso404.EditorTools",
     "references": [
-        "Caso404.Runtime",
-        "Unity.TextMeshPro",
-        "UnityEngine.UI",
-        "Unity.InputSystem"
+        "Caso404.Runtime"
     ],
     "includePlatforms": [
         "Editor"
