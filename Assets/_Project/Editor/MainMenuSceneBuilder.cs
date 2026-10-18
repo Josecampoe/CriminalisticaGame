@@ -35,7 +35,7 @@ namespace Caso404.EditorTools
         }
 
         /// <summary>Regenera datos, assets compartidos y todas las escenas del caso 1.</summary>
-        [MenuItem("Caso404/Construir todo (datos + escenas del caso 1)")]
+        [MenuItem("Caso404/Construir todo (datos y escenas)")]
         public static void BuildAll()
         {
             Case1DataBuilder.Build();
@@ -46,6 +46,7 @@ namespace Caso404.EditorTools
             CafeSceneBuilder.Build();
             PorteriaSceneBuilder.Build();
             ComisariaSceneBuilder.Build();
+            ServidoresSceneBuilder.Build();
             RefreshBuildSettings();
             Debug.Log("[Caso404] Todo construido.");
         }
