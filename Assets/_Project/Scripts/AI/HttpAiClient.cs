@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,12 +19,6 @@ namespace Caso404.AI
         class Payload
         {
             public string characterId;
-            public string characterName;
-            public string role;
-            public string personality;
-            public List<string> facts;
-            public List<string> lies;
-            public List<string> styleExamples;
             public string topic;
             public string question;
             public string sceneId;
@@ -47,15 +40,6 @@ namespace Caso404.AI
             var payload = new Payload
             {
                 characterId = request.Character.Id,
-                characterName = request.Character.DisplayName,
-                role = request.Character.Role,
-                personality = request.Character.Personality,
-                // Solo lo que el personaje sabe; sus secretos únicamente si el jugador ya los descubrió.
-                facts = request.Character.KnownFacts
-                    .Where(f => request.Character.Secrets.All(s => s.FactId != f.Id) || request.KnownFacts.Contains(f.Id))
-                    .Select(f => $"{f.Id}: {f.Text}").ToList(),
-                lies = request.Character.Lies.Where(l => l != null).Select(l => $"{l.Id}: {l.Statement}").ToList(),
-                styleExamples = new List<string> { request.Character.Fallback.Crime.Text, request.Character.Fallback.OtherPerson.Text, request.Character.Fallback.Evidence.Text },
                 topic = request.Topic.ToString(),
                 question = Truncate(request.Question, _settings.MaxQuestionLength),
                 sceneId = request.SceneId,
