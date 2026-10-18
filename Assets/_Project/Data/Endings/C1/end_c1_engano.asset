@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93be8a371aaedb5498a4191795509819, type: 3}
+  m_Name: end_c1_engano
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.EndingData
+  _id: end_c1_engano
+  _caseId: c1
+  _priority: 3
+  _title: "La versi\xF3n de ALEX"
+  _requirement:
+    _accusedAnyOf:
+    - {fileID: 11400000, guid: a31aa0a5e8fc6234d868ccf200bf05a4, type: 2}
+    _minSolidProofs: 0
+    _maxSolidProofs: -1
+    _minAlexContradictions: 0
+    _maxAlexContradictions: -1
+    _extra:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+  _epilogue: "Carlos va a la c\xE1rcel. ALEX: \"Excelente trabajo. Formamos un gran equipo.\" En la \xFAltima imagen, la c\xE1mara del caf\xE9 muestra a Carlos a las 10:32. Nadie la vuelve a mirar."
+  _variants: []
+  _closingText: "Tres meses despu\xE9s..."
+  _followUpDecision: {fileID: 0}
