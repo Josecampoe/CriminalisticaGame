@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 264639d3778ed5c45b27ed3f68d2b4d6, type: 3}
+  m_Name: end_c1_verdadero
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.FlagData
+  _id: end_c1_verdadero
+  _description: "El caso 1 termin\xF3 con el final verdadero."
+  _persistsToNextCase: 1
