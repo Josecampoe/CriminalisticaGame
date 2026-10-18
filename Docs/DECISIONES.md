@@ -84,3 +84,17 @@ Registro de decisiones tomadas durante el desarrollo, con su motivo. Cuando el g
 - **Panel de ALEX**: lateral derecho, borde cian → última frase de ALEX → preguntas rápidas → tarjetas de observaciones con **Cuestionar** (rojo) y Aceptar (cian). Las refutadas aparecen tachadas.
 - **Tablero de hipótesis**: preguntas sobre papel → opciones (bloqueadas en gris con lo que falta analizar) → Responder → **Tomar la decisión** (rojo, abajo a la derecha).
 - **Decisión**: pregunta grande → recomendación de ALEX en cian → opciones grandes → confirmación si es irreversible.
+
+## Fase F — Escena c1_s1 "Apartamento 404"
+
+| # | Decisión | Motivo |
+|---|---|---|
+| F1 | La escena la arma por completo `Apartment404SceneBuilder` (menú *Caso404/Construir escena c1_s1*). Al volver a ejecutarlo, la escena se reemplaza. | Es reproducible y no hubo que editar el `.unity` a mano. Ojo: si la modificas a mano en el Editor y vuelves a ejecutar el builder, se pierden tus cambios. |
+| F2 | Distribución: sala de 8×6 m, balcón al norte (5×2 m, con la ventana rota y una puerta abierta al lado) y pasillo al sur (10×2 m) con la puerta del 403, la cámara y el ascensor. | Corresponde al ambiente del guion: sala desordenada, ventana del balcón rota, escritorio vacío y Laura en el pasillo. |
+| F3 | Ubicación de las evidencias: ventana (pared norte), cerradura (puerta de entrada), huella y colilla (balcón), teléfono (delante del sofá), escritorio con marca de polvo, cargador y fotos con el cuaderno rojo (pared este), cámara (pasillo, sobre la puerta del 404). | Todas se alcanzan desde la altura de los ojos y quedan dentro del alcance del rayo (2.5 m). |
+| F4 | El rayo de interacción también choca con la capa Default. | Así no se puede interactuar a través de paredes. |
+| F5 | Para cerrar la escena se usa el ascensor del pasillo ("Repasar el caso y decidir") o la tecla H. | El jugador necesita un punto claro donde terminar. |
+| F6 | Iluminación en tiempo real: luz direccional gris de mañana, lámpara cálida en la sala, fluorescente frío en el pasillo y niebla ligera. Sin iluminación horneada. | Hornear en modo batch es lento y el greybox va a cambiar. Hornearla queda pendiente para cuando llegue el arte. |
+| F7 | `SampleScene` se quitó de Build Settings, pero no se borró. Apartamento404 es la escena 0. | La regla era no borrar archivos que no creé yo. |
+| F8 | Se agregó una prueba PlayMode de humo (`Apartment404SmokeTest`) que recorre la escena hasta `dec_c1_s1`. Necesita gráficos: no corre con `-nographics`. | Es la única forma de comprobar la escena sin abrir el Editor. El modo inspección usa una RenderTexture, que no se puede crear sin GPU. |
+| F9 | `ScenePreviewCapture` guarda capturas de la escena en `Logs/preview_*.png`. | Sirve para revisar el greybox sin abrir el Editor. |
