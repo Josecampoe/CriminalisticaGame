@@ -62,3 +62,4 @@ MonoBehaviour:
   _requiredCompletedSceneIds:
   - c1_s2
   - c1_s3
+  _hasAccusation: 1
