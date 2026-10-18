@@ -55,8 +55,6 @@ namespace Caso404.Data
         [SerializeField] private bool _requiresCalmApproach;
         [SerializeField] private bool _onlyInEnding;
         [SerializeField] private List<FlagData> _setsFlags = new();
-        [SerializeField] private EvidenceData _revealedByEvidence;
-        [SerializeField] private List<string> _alsoRevealsFactIds = new();
         [SerializeField] private DecisionData _triggersDecision;
 
         public string FactId { get => _factId; internal set => _factId = value; }
@@ -68,27 +66,7 @@ namespace Caso404.Data
         /// <summary>Solo se revela en un final (ej. la confesión de Andrés).</summary>
         public bool OnlyInEnding { get => _onlyInEnding; internal set => _onlyInEnding = value; }
         public IReadOnlyList<FlagData> SetsFlags { get => _setsFlags; internal set => _setsFlags = new(value); }
-        /// <summary>Se revela al presentarle esta evidencia analizada (ej. el chat de Kairos a Sebastián).</summary>
-        public EvidenceData RevealedByEvidence { get => _revealedByEvidence; internal set => _revealedByEvidence = value; }
-        /// <summary>Otros hechos que cuenta al revelar el secreto (ej. la coartada del bar).</summary>
-        public IReadOnlyList<string> AlsoRevealsFactIds { get => _alsoRevealsFactIds; internal set => _alsoRevealsFactIds = new(value); }
         public DecisionData TriggersDecision { get => _triggersDecision; internal set => _triggersDecision = value; }
-    }
-
-    /// <summary>Tema extra de conversación que aparece al cumplirse una condición (ej. "Preguntar por la llave maestra").</summary>
-    [Serializable]
-    public class ExtraTopic
-    {
-        [SerializeField] private string _id;
-        [SerializeField] private string _label;
-        [SerializeField] private Condition _condition = new();
-        [SerializeField] private FallbackLine _line = new();
-
-        public string Id { get => _id; internal set => _id = value; }
-        /// <summary>Texto del botón.</summary>
-        public string Label { get => _label; internal set => _label = value; }
-        public Condition Condition { get => _condition; internal set => _condition = value; }
-        public FallbackLine Line { get => _line; internal set => _line = value; }
     }
 
     /// <summary>Variante de actitud según el estado (ej. Elena según el final del caso 1).</summary>
@@ -97,12 +75,9 @@ namespace Caso404.Data
     {
         [SerializeField] private Condition _condition = new();
         [SerializeField, TextArea] private string _text;
-        [SerializeField] private int _alexTrustDelta;
 
         public Condition Condition { get => _condition; internal set => _condition = value; }
         public string Text { get => _text; internal set => _text = value; }
-        /// <summary>Cambio de confianza en ALEX la primera vez que se muestra (ej. −5 por el cuaderno).</summary>
-        public int AlexTrustDelta { get => _alexTrustDelta; internal set => _alexTrustDelta = value; }
     }
 
     /// <summary>Perfil de un personaje: lo que sabe, lo que miente y cómo habla. La IA solo le da voz.</summary>
@@ -122,10 +97,6 @@ namespace Caso404.Data
         [SerializeField] private List<SecretEntry> _secrets = new();
         [SerializeField] private FallbackLines _fallback = new();
         [SerializeField] private List<AttitudeVariant> _attitudeVariants = new();
-        [SerializeField] private List<ExtraTopic> _extraTopics = new();
-        [SerializeField] private Condition _refusesUnless = new();
-        [SerializeField] private EvidenceData _cooperatesAfterSeeing;
-        [SerializeField, TextArea] private string _refusalLine;
 
         public string Id { get => _id; internal set => _id = value; }
         public string DisplayName { get => _displayName; internal set => _displayName = value; }
@@ -141,13 +112,6 @@ namespace Caso404.Data
         public IReadOnlyList<SecretEntry> Secrets { get => _secrets; internal set => _secrets = new(value); }
         public FallbackLines Fallback { get => _fallback; internal set => _fallback = value; }
         public IReadOnlyList<AttitudeVariant> AttitudeVariants { get => _attitudeVariants; internal set => _attitudeVariants = new(value); }
-        public IReadOnlyList<ExtraTopic> ExtraTopics { get => _extraTopics; internal set => _extraTopics = new(value); }
-        /// <summary>Si esta condición se cumple, el personaje no coopera hasta ver <see cref="CooperatesAfterSeeing"/> (vacía = siempre coopera).</summary>
-        public Condition RefusesUnless { get => _refusesUnless; internal set => _refusesUnless = value; }
-        /// <summary>Evidencia que hay que presentarle para que coopere (ej. la USB a Elena).</summary>
-        public EvidenceData CooperatesAfterSeeing { get => _cooperatesAfterSeeing; internal set => _cooperatesAfterSeeing = value; }
-        /// <summary>Lo que dice mientras no coopera.</summary>
-        public string RefusalLine { get => _refusalLine; internal set => _refusalLine = value; }
 
         /// <summary>Busca el texto de un hecho propio por id (null si no lo conoce).</summary>
         public FactEntry FindFact(string factId) => _knownFacts.Find(f => f.Id == factId);
