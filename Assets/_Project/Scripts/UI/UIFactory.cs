@@ -57,58 +57,6 @@ namespace Caso404.UI
             return img;
         }
 
-        /// <summary>True si el jugador está escribiendo en un campo de texto (los atajos de teclado no deben actuar).</summary>
-        public static bool IsTyping()
-        {
-            var selected = UnityEngine.EventSystems.EventSystem.current != null ? UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject : null;
-            return selected != null && selected.TryGetComponent<TMP_InputField>(out var field) && field.isFocused;
-        }
-
-        /// <summary>Convierte un panel en una hoja de papel: textura envejecida y sombra (parece un objeto sobre la mesa).</summary>
-        public static Image AsPaper(Image img, UITheme theme)
-        {
-            if (theme.PaperSprite != null)
-            {
-                img.sprite = theme.PaperSprite;
-                img.type = Image.Type.Simple;
-                img.color = Color.white;
-            }
-            var shadow = img.gameObject.AddComponent<Shadow>();
-            shadow.effectColor = new Color(0f, 0f, 0f, 0.55f);
-            shadow.effectDistance = new Vector2(10f, -12f);
-            return img;
-        }
-
-        /// <summary>Convierte un panel en una pantalla: líneas de barrido y un borde con brillo del color dado.</summary>
-        public static Image AsScreen(Image img, UITheme theme, Color glow)
-        {
-            if (theme.ScreenSprite != null)
-            {
-                img.sprite = theme.ScreenSprite;
-                img.type = Image.Type.Simple;
-                img.color = new Color(1f, 1f, 1f, img.color.a);
-            }
-            var outline = img.gameObject.AddComponent<Outline>();
-            outline.effectColor = UITheme.WithAlpha(glow, 0.35f);
-            outline.effectDistance = new Vector2(3f, 3f);
-            return img;
-        }
-
-        /// <summary>Sello de tinta rotado (ej. "EVIDENCIA"), como los de un expediente real.</summary>
-        public static TextMeshProUGUI Stamp(Transform parent, string text, UITheme theme, float size, float angle)
-        {
-            var stamp = Text(parent, "Sello", text, theme.TitleFont, size, UITheme.WithAlpha(theme.AccentRed, 0.55f), TextAlignmentOptions.Center);
-            stamp.fontStyle = FontStyles.Bold;
-            stamp.characterSpacing = 6f;
-            stamp.raycastTarget = false;
-            stamp.rectTransform.localRotation = Quaternion.Euler(0, 0, angle);
-            var border = stamp.gameObject.AddComponent<Outline>();
-            border.effectColor = UITheme.WithAlpha(theme.AccentRed, 0.3f);
-            var ignore = stamp.gameObject.AddComponent<LayoutElement>();
-            ignore.ignoreLayout = true;
-            return stamp;
-        }
-
         /// <summary>Texto TextMeshPro con el tema.</summary>
         public static TextMeshProUGUI Text(Transform parent, string name, string text, TMP_FontAsset font, float size, Color color,
             TextAlignmentOptions align = TextAlignmentOptions.TopLeft)
