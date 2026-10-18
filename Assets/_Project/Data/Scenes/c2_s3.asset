@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec4b29b1d066997429b8fa8401ac128b, type: 3}
+  m_Name: c2_s3
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.SceneData
+  _id: c2_s3
+  _caseId: c2
+  _unitySceneName: CasetaSeguridad
+  _displayName: Caseta de seguridad y parqueadero
+  _ambience: "Caseta con monitores, termo de tinto, servidor peque\xF1o en una esquina, parqueadero subterr\xE1neo."
+  _introText: 
+  _evidence:
+  - {fileID: 11400000, guid: 3e82efb553da60e439f5ac82bd89795d, type: 2}
+  - {fileID: 11400000, guid: b647b4d63a01b7b40b5190fdb75c624d, type: 2}
+  - {fileID: 11400000, guid: 1d786724408d38c45aa482e089d9df18, type: 2}
+  - {fileID: 11400000, guid: 3c0806b0b318d424d86978907fc19d53, type: 2}
+  _characters:
+  - _character: {fileID: 11400000, guid: 61b4d049ccd90414d9c94f1bb9038981, type: 2}
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+  _hypothesis: {fileID: 11400000, guid: c14ed7a6f76e9d047858e69feefb5a24, type: 2}
+  _closingDecision: {fileID: 0}
+  _requiredCompletedSceneIds: []
+  _hasAccusation: 0

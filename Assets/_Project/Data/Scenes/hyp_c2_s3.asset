@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00c5986fe47059d41bd4988a04d126c6, type: 3}
+  m_Name: hyp_c2_s3
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.HypothesisData
+  _id: hyp_c2_s3
+  _sceneId: c2_s3
+  _questions:
+  - _id: hyp_c2_s3_q1
+    _text: "\xBFPor qu\xE9 no hay video del piso 12?"
+    _multiSelect: 0
+    _options:
+    - _id: falla
+      _text: "Falla t\xE9cnica"
+      _unlockCondition:
+        _allEvidenceAnalyzed: []
+        _anyEvidenceAnalyzed: []
+        _allFlags: []
+        _anyFlags: []
+        _noneFlags: []
+        _exposedLies: []
+        _knownFactIds: []
+      _isCorrect: 0
+    - _id: apagada
+      _text: "La apagaron a prop\xF3sito"
+      _unlockCondition:
+        _allEvidenceAnalyzed: []
+        _anyEvidenceAnalyzed:
+        - {fileID: 11400000, guid: 3e82efb553da60e439f5ac82bd89795d, type: 2}
+        - {fileID: 11400000, guid: b647b4d63a01b7b40b5190fdb75c624d, type: 2}
+        _allFlags: []
+        _anyFlags: []
+        _noneFlags: []
+        _exposedLies: []
+        _knownFactIds: []
+      _isCorrect: 1
+    _onCorrectSetFlags: []
