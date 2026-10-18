@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Caso404.AI;
-using Caso404.Characters;
 using Caso404.Core;
 using Caso404.Core.Events;
 using Caso404.Data;
@@ -42,9 +41,6 @@ namespace Caso404.EditorTools
             ScenesFolder + "/CafeLaEsquina.unity",
             ScenesFolder + "/PorteriaSotano.unity",
             ScenesFolder + "/Comisaria.unity",
-            ScenesFolder + "/ServidoresB.unity",
-            ScenesFolder + "/PisoEjecutivo.unity",
-            ScenesFolder + "/CasetaSeguridad.unity",
         };
 
         public static GameDatabase Db { get; private set; }
@@ -224,67 +220,20 @@ namespace Caso404.EditorTools
             return go;
         }
 
-        /// <summary>
-        /// Personaje con su modelo 3D (prefab de CharacterArtBuilder), collider para hablarle, CharacterNpc y resaltado.
-        /// Si está sentado se crea también su silla. Si el prefab no existe, usa el muñeco de primitivas de antes.
-        /// </summary>
-        public static GameObject Npc(string characterId, Vector3 position, float yaw, bool seated = false, string caseId = null, string chairMaterial = "dark", bool withChair = true)
+        public static void Npc(string characterId, Vector3 position, float yaw, bool seated = false)
         {
-            var profile = (caseId == null ? Case : Db.FindCase(caseId)).FindCharacter(characterId);
-            if (profile == null) { Debug.LogError($"[Caso404] No existe el personaje {characterId}"); return null; }
+            var profile = Case.Suspects.FirstOrDefault(c => c.Id == characterId);
+            if (profile == null) { Debug.LogError($"[Caso404] No existe el personaje {characterId}"); return; }
             var npc = new GameObject($"NPC {profile.DisplayName}");
             npc.transform.position = position;
             npc.transform.rotation = Quaternion.Euler(0, yaw, 0);
             npc.layer = InteractableLayer;
-            var col = npc.AddComponent<CapsuleCollider>();
-            col.height = seated ? 1.35f : 1.75f;
-            col.radius = seated ? 0.4f : 0.3f;
-            col.center = new Vector3(0, col.height / 2f, seated ? 0.1f : 0f);
-
-            var talk = npc.AddComponent<CharacterNpc>();
-            Set(talk, "_profile", profile);
-            Set(talk, "_game", Game);
-            SetBool(talk, "_turnBody", !seated); // sentado solo gira la cabeza
-            npc.AddComponent<Highlightable>();
-
-            if (seated && withChair) Chair(npc.transform, chairMaterial);
-
-            var prefab = CharacterArtBuilder.LoadPrefab(characterId);
-            if (prefab != null)
-            {
-                var model = (GameObject)PrefabUtility.InstantiatePrefab(prefab, npc.transform);
-                model.name = "Modelo";
-                model.transform.localPosition = Vector3.zero;
-                model.transform.localRotation = Quaternion.identity;
-                var anim = model.GetComponent<NpcAnimator>();
-                Set(anim, "_npc", talk);
-                SetBool(anim, "_seated", seated);
-                var head = model.GetComponent<Animator>().GetBoneTransform(HumanBodyBones.Head);
-                Set(talk, "_head", head != null ? head : model.transform);
-                foreach (var r in model.GetComponentsInChildren<Renderer>()) r.shadowCastingMode = ShadowCastingMode.On;
-                return npc;
-            }
-            Debug.LogWarning($"[Caso404] Falta el prefab de {characterId}: usa Caso404/Arte/Construir personajes. Se pone un muñeco de primitivas.");
-            PrimitiveDummy(npc, profile, seated, talk);
-            return npc;
-        }
-
-        /// <summary>Silla bajo un personaje sentado (asiento a 0.46 m, respaldo detrás).</summary>
-        static void Chair(Transform npc, string material)
-        {
-            // Fuera del NPC: no se resalta con él y queda vacía si el personaje no está en la escena.
-            var chair = Group($"Silla ({npc.name})");
-            var seat = Box("Asiento", chair, npc.TransformPoint(new Vector3(0, 0.43f, 0.08f)), new Vector3(0.46f, 0.06f, 0.46f), material, rotY: npc.eulerAngles.y);
-            Box("Respaldo", chair, npc.TransformPoint(new Vector3(0, 0.75f, -0.17f)), new Vector3(0.46f, 0.6f, 0.05f), material, rotY: npc.eulerAngles.y);
-            foreach (var x in new[] { -0.2f, 0.2f })
-                foreach (var z in new[] { -0.13f, 0.29f })
-                    Box("Pata", chair, npc.TransformPoint(new Vector3(x, 0.2f, z)), new Vector3(0.04f, 0.4f, 0.04f), "metal", rotY: npc.eulerAngles.y, keepCollider: false);
-            seat.layer = 0;
-        }
-
-        static void PrimitiveDummy(GameObject npc, CharacterProfile profile, bool seated, CharacterNpc talk)
-        {
             float drop = seated ? 0.4f : 0f;
+            var col = npc.AddComponent<CapsuleCollider>();
+            col.height = 1.7f - drop;
+            col.radius = 0.3f;
+            col.center = new Vector3(0, (1.7f - drop) / 2f, 0);
+
             var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             body.name = "Cuerpo";
             Object.DestroyImmediate(body.GetComponent<Collider>());
@@ -307,7 +256,12 @@ namespace Caso404.EditorTools
             nose.transform.localPosition = new Vector3(0, 1.57f - drop, 0.13f);
             nose.transform.localRotation = Quaternion.identity;
             nose.layer = InteractableLayer;
+
+            var talk = npc.AddComponent<CharacterNpc>();
+            Set(talk, "_profile", profile);
+            Set(talk, "_game", Game);
             Set(talk, "_head", head.transform);
+            npc.AddComponent<Highlightable>();
         }
 
         public static void SpawnPlayer(Vector3 position, float yaw)
@@ -330,7 +284,6 @@ namespace Caso404.EditorTools
             cam.nearClipPlane = 0.05f;
             cam.fieldOfView = 65f;
             camGo.AddComponent<AudioListener>();
-            Set(camGo.AddComponent<CameraShake>(), "_game", Game);
 
             var fps = player.AddComponent<FirstPersonController>();
             Set(fps, "_input", _input);
@@ -379,7 +332,6 @@ namespace Caso404.EditorTools
         {
             var canvas = CreateCanvas("UI");
             var systems = new GameObject("UISystems");
-            Set(systems.AddComponent<AudioFeedback>(), "_game", Game);
             var ui = systems.AddComponent<UIManager>();
             Set(ui, "_input", _input);
             Set(ui, "_modalChannel", _modal);
@@ -388,7 +340,6 @@ namespace Caso404.EditorTools
             Set(hud, "_theme", Theme);
             Set(hud, "_game", Game);
             Set(hud, "_interactor", _interactor);
-            Set(hud, "_uiModalChannel", _modal);
 
             var inspectionView = Panel<InspectionView>(canvas.transform, "InspectionView", ui);
             Set(inspectionView, "_inspection", _inspection);
@@ -535,8 +486,7 @@ namespace Caso404.EditorTools
             }
             if (color != null)
             {
-                if (key == "glass") MakeTransparent(mat);
-                mat.SetColor("_BaseColor", key == "glass" ? new Color(color.Value.r, color.Value.g, color.Value.b, 0.22f) : color.Value);
+                mat.SetColor("_BaseColor", color.Value);
                 mat.SetFloat("_Smoothness", smooth);
                 mat.SetFloat("_Metallic", metal);
                 mat.enableInstancing = true;
@@ -544,19 +494,6 @@ namespace Caso404.EditorTools
             }
             Materials[key] = mat;
             return mat;
-        }
-
-        /// <summary>URP Lit transparente (vidrios: se ve la ciudad a través).</summary>
-        static void MakeTransparent(Material mat)
-        {
-            mat.SetFloat("_Surface", 1f);
-            mat.SetFloat("_Blend", 0f);
-            mat.SetFloat("_ZWrite", 0f);
-            mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
-            mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
-            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-            mat.renderQueue = (int)RenderQueue.Transparent;
-            mat.SetOverrideTag("RenderType", "Transparent");
         }
 
         // ================= Serialización =================

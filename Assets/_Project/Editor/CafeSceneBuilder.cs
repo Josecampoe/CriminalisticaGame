@@ -70,9 +70,9 @@ namespace Caso404.EditorTools
 
             SpawnPlayer(new Vector3(0f, 0.05f, 0.9f), 0f);
             Npc("carlos", new Vector3(2.55f, 0f, 3.2f), 180f, seated: true);
+            Box("Silla de Carlos", env, new Vector3(2.55f, 0.22f, 3.2f), new Vector3(0.45f, 0.44f, 0.45f), "wood");
             Trigger<SceneCloseTrigger>("Puerta del café (repasar el caso)", new Vector3(0f, 1.05f, -0.05f), new Vector3(1.1f, 2.1f, 0.08f), "glass", "Repasar el caso (hipótesis)");
 
-            CityKit.Surround(0f, true, 12); // planta baja, de noche
             Finish(scene, ScenePath);
         }
 
