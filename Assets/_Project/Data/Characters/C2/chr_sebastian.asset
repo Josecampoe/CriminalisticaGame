@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8dac0d6a92d79142a22c279081ae8dd, type: 3}
+  m_Name: chr_sebastian
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.CharacterProfile
+  _id: sebastian
+  _displayName: "Sebasti\xE1n Ortiz"
+  _age: 27
+  _role: Ingeniero junior de Nexo Analytics
+  _caseId: c2
+  _personality: "Brillante, arrogante y sarc\xE1stico. Odia a la polic\xEDa. Cuando se siente acorralado, ataca."
+  _portrait: {fileID: 0}
+  _placeholderColor: {r: 0.25, g: 0.35, b: 0.25, a: 1}
+  _knownFacts:
+  - _id: f_c2_seb_discusion
+    _text: "Discuti\xF3 con Tom\xE1s a las 9:00."
+  - _id: f_c2_seb_bar
+    _text: Estuvo en El Muelle de 10:40 a 1:15.
+  - _id: f_c2_seb_kairos
+    _text: "Vend\xEDa c\xF3digo de Nexo a la empresa rival Kairos Labs. Por eso discuti\xF3 con Tom\xE1s."
+  _lies:
+  - {fileID: 11400000, guid: f8ce70da9335d484aa09203441379066, type: 2}
+  - {fileID: 11400000, guid: 0f4dea0d5207e2d45bb1b43bc7ac7a19, type: 2}
+  _secrets:
+  - _factId: f_c2_seb_kairos
+    _revealText: "\xA1S\xED, discutimos! Me pill\xF3 vendiendo c\xF3digo, \xBFcontento(a)? Pero a las once yo estaba en El Muelle. Revise mis pagos."
+    _unlockCondition:
+      _allEvidenceAnalyzed:
+      - {fileID: 11400000, guid: dd6ad4a2794e8c64ea8facb0346d198d, type: 2}
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+    _requiresCalmApproach: 0
+    _onlyInEnding: 0
+    _setsFlags: []
+    _revealedByEvidence: {fileID: 11400000, guid: dd6ad4a2794e8c64ea8facb0346d198d, type: 2}
+    _alsoRevealsFactIds:
+    - f_c2_seb_bar
+    - f_c2_seb_discusion
+    _triggersDecision: {fileID: 0}
+  _fallback:
+    _crime:
+      _text: "Tom\xE1s era el \xFAnico decente en esa empresa. No tengo nada m\xE1s que decir."
+      _revealsFactIds: []
+    _otherPerson:
+      _text: "\xBFValeria? Esa mujer no hace nada sin calcularlo tres veces."
+      _revealsFactIds: []
+    _evidence:
+      _text: "Wow, una nota. Arr\xE9stenme."
+      _revealsFactIds: []
+    _press:
+      _text: "\xA1S\xED, discutimos! Me pill\xF3 vendiendo c\xF3digo, \xBFcontento(a)? Pero a las once yo estaba en El Muelle. Revise mis pagos."
+      _revealsFactIds: []
+  _attitudeVariants: []
+  _extraTopics: []

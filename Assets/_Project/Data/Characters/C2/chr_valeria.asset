@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8dac0d6a92d79142a22c279081ae8dd, type: 3}
+  m_Name: chr_valeria
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.CharacterProfile
+  _id: valeria
+  _displayName: Valeria Duarte
+  _age: 50
+  _role: Directora de operaciones de Nexo Analytics
+  _caseId: c2
+  _personality: "Elegante, fr\xEDa y siempre en control. Habla como en una rueda de prensa. Nunca levanta la voz."
+  _portrait: {fileID: 0}
+  _placeholderColor: {r: 0.35, g: 0.2, b: 0.3, a: 1}
+  _knownFacts: []
+  _lies:
+  - {fileID: 11400000, guid: 287eec7fb8e5ce94e8eac2c320b0ffd9, type: 2}
+  - {fileID: 11400000, guid: 0af7e57d65fac8743b5df6412551fefe, type: 2}
+  - {fileID: 11400000, guid: ff9182f89149f924bbacc91f76d6cdd0, type: 2}
+  _secrets: []
+  _fallback:
+    _crime:
+      _text: "Lamentamos profundamente lo de Tom\xE1s. Fue una tragedia t\xE9cnica."
+      _revealsFactIds: []
+    _otherPerson:
+      _text: "Sebasti\xE1n ten\xEDa problemas de conducta. Tom\xE1s iba a despedirlo."
+      _revealsFactIds: []
+    _evidence:
+      _text: Le sugiero que eso lo revise nuestro equipo legal.
+      _revealsFactIds: []
+    _press:
+      _text: Cuide sus palabras. Nexo Analytics financia la mitad de los equipos de su unidad.
+      _revealsFactIds: []
+  _attitudeVariants: []
+  _extraTopics: []
