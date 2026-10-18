@@ -204,3 +204,14 @@ Registro de decisiones tomadas durante el desarrollo, con su motivo. Cuando el g
 | M7 | En el modo inspección, los objetos planos (huella, papeles, teléfono) se inclinan hacia la cámara al abrirse. | Se veían de canto, como una línea. |
 | M8 | En la acusación, el resultado del análisis de cada prueba se muestra al 85 % del tamaño (antes, 70 %). | Era ilegible. |
 | M9 | **Opciones** en el menú principal: sensibilidad del mouse (de 0.25x a 3.3x), invertir eje Y y pantalla completa. Se guardan en `PlayerPrefs` (`GameSettings`), no en el `GameState`. El controlador las lee al empezar y al cerrar paneles, no en cada frame. | Son preferencias de la máquina del jugador, no de la partida. Te sirven si la cámara se siente rápida o lenta en tu prueba. |
+
+## Proxy de IA (`Server/`)
+
+| # | Decisión | Motivo |
+|---|---|---|
+| P1 | El proxy está en `Server/proxy.mjs` (Node 18 o superior), con `fetch` nativo y **sin dependencias**, en vez del SDK oficial `@anthropic-ai/sdk`. | La regla de la sesión era no instalar nada. El SDK exigiría `npm install`. Si después quieres el SDK, el cambio se limita a la función `askClaude`. |
+| P2 | La clave se lee solo de la variable de entorno `ANTHROPIC_API_KEY`. Si falta, el proxy arranca en **modo de prueba** y responde un texto fijo sin llamar a la API. | CLAUDE.md: nunca poner claves en el código ni en el repositorio. El modo de prueba permite verificar la conexión sin gastar ni tener clave. |
+| P3 | Modelo por defecto `claude-haiku-5-5`, configurable con `ANTHROPIC_MODEL` o con `AiSettings.Model`. Esfuerzo `low` y `max_tokens` 2048. | La skill `dialogo-ia` pide un modelo rápido y económico para respuestas de 1 a 3 frases. |
+| P4 | La respuesta usa **structured outputs** (`output_config.format` con un JSON Schema): `reply`, `emotion` (solo las 6 permitidas), `usedFactIds`, `usedLieIds`, `revealedSecretIds`. Si la API se niega (`refusal`) o la respuesta llega cortada (`max_tokens`), el proxy devuelve un error 502 y el juego usa la frase de respaldo. | El JSON siempre es válido, y el juego lo vuelve a validar (`AiReplyValidator`). |
+| P5 | El `HttpAiClient` envía el perfil del personaje: nombre, rol, personalidad, hechos (los secretos solo si el jugador ya los conoce), mentiras permitidas y frases de ejemplo. También envía la escena, las evidencias analizadas y las últimas 8 líneas. | Regla de oro: la IA solo recibe lo que el personaje sabe. |
+| P6 | `HttpProxyTests` (PlayMode, `[Explicit]`) prueba el `HttpAiClient` real contra el proxy en modo de prueba. Pasó en esta sesión. Para correrla hay que encender antes el proxy. | Verifica la conexión de punta a punta sin clave. La llamada real a la API no se probó, porque no hay clave en esta sesión. |
