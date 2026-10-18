@@ -222,7 +222,7 @@ namespace Caso404.EditorTools
 
         public static void Npc(string characterId, Vector3 position, float yaw, bool seated = false)
         {
-            var profile = Case.Suspects.FirstOrDefault(c => c.Id == characterId);
+            var profile = Case.FindCharacter(characterId);
             if (profile == null) { Debug.LogError($"[Caso404] No existe el personaje {characterId}"); return; }
             var npc = new GameObject($"NPC {profile.DisplayName}");
             npc.transform.position = position;
