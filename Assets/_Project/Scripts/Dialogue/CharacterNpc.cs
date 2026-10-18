@@ -1,3 +1,4 @@
+using System.Linq;
 using Caso404.Core;
 using Caso404.Data;
 using Caso404.Interaction;
@@ -27,6 +28,13 @@ namespace Caso404.Dialogue
         void Awake()
         {
             if (_profile == null || _game == null) GameLog.Error($"{name}: asigna CharacterProfile y GameContext.", this);
+        }
+
+        void Start()
+        {
+            // Presencia condicional según la escena (ej. Carlos no está en el café si fue detenido).
+            var presence = _game != null ? _game.Scene.Characters.FirstOrDefault(p => p.Character == _profile) : null;
+            if (presence != null && !presence.Condition.Evaluate(_game.State)) gameObject.SetActive(false);
         }
 
         void OnEnable()
