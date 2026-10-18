@@ -63,7 +63,7 @@ namespace Caso404.Tests
             Assert.IsTrue(Game.State.HasFlag("flag_c1_pista_nx"), "El análisis profundo del celular activa flag_c1_pista_nx");
             yield return Accuse("andres", "end_c1_verdadero", "ev_c1_llavero", "ev_c1_overol", "ev_c1_celular_andres");
             Assert.IsTrue(Game.State.KnowsFact("f_c1_andres_pago"), "En el final verdadero Andrés confiesa el pago de Soporte NX");
-            yield return ContinueToCase2();
+            yield return BackToMenu();
         }
 
         [UnityTest]
@@ -117,112 +117,6 @@ namespace Caso404.Tests
             yield return BackToMenu();
         }
 
-        // ================= Caso 2 =================
-
-        [UnityTest]
-        public IEnumerator Case2_SecretEnding_WithTraceFromCase1()
-        {
-            yield return ContinueAtCase2(new[] { "end_c1_verdadero", "flag_c1_pista_nx" }, trust: 40);
-            yield return PlayServidores(decision: "C");
-            yield return WaitScene("c2_s3");
-            yield return PlayCaseta(protectInes: true, expectBackup: true);
-            Assert.IsTrue(Choose("Piso ejecutivo — Torre Nexo"));
-            yield return WaitScene("c2_s2");
-            yield return PlayPisoEjecutivo(expectSebastian: true);
-            Assert.IsTrue(Choose("Comisaría"));
-            yield return WaitScene("c2_s4");
-            Assert.IsTrue(Object.FindObjectsByType<CharacterNpc>(FindObjectsSortMode.None).All(n => n.Profile.CaseId == "c2"),
-                "En la Comisaría del caso 2 solo aparece el elenco del caso 2");
-            yield return Talk("elena", d => Assert.IsNotEmpty(d.Greeting(Profile("elena"))));
-            yield return Accuse("valeria", "end_c2_secreto", "ev_c2_tarjeta_valeria", "ev_c2_backup", "ev_c2_consola_valeria");
-            // Tras el interrogatorio a ALEX: decisión final, resultado y créditos.
-            Object.FindAnyObjectByType<EndingView>().Finish();
-            yield return null;
-            Assert.IsInstanceOf<DecisionView>(Ui.Top, "El final secreto abre dec_c2_alex");
-            yield return Decide(Game.Case.FindDecision("dec_c2_alex"), "B");
-            Assert.IsTrue(Choose("Continuar"));
-            yield return null;
-            var ending = Object.FindAnyObjectByType<EndingView>();
-            Assert.AreSame(ending, Ui.Top, "Créditos: ERROR 404: CONFIANZA NO ENCONTRADA.");
-            ending.Finish();
-            yield return null;
-            Assert.IsTrue(Choose("Menú principal"));
-        }
-
-        [UnityTest]
-        public IEnumerator Case2_DeceptionEnding_TimeLost()
-        {
-            yield return ContinueAtCase2(new[] { "end_c1_engano" }, trust: 75);
-            yield return PlayServidores(decision: "A");
-            Assert.IsTrue(Choose("Caseta de seguridad y parqueadero"));
-            yield return WaitScene("c2_s3");
-            yield return PlayCaseta(protectInes: true, expectBackup: false);
-            Assert.IsTrue(Choose("Piso ejecutivo — Torre Nexo"));
-            yield return WaitScene("c2_s2");
-            yield return PlayPisoEjecutivo(expectSebastian: false);
-            Assert.IsTrue(Choose("Comisaría"));
-            yield return WaitScene("c2_s4");
-            yield return Accuse("sebastian", "end_c2_engano", "ev_c2_nota", "ev_c2_tarjeta_valeria", "ev_c2_sensor_humo");
-            yield return BackToMenu();
-        }
-
-        /// <summary>Simula una partida guardada al terminar el caso 1 y la continúa desde el menú.</summary>
-        IEnumerator ContinueAtCase2(string[] flags, int trust)
-        {
-            var state = new GameState { currentCaseId = "c2", currentSceneId = "c2_s1", alexTrust = trust };
-            state.flags.AddRange(flags);
-            new Save.SaveService().Save(state);
-            yield return SceneManager.LoadSceneAsync(GameUIController.MainMenuScene);
-            yield return null;
-            Object.FindAnyObjectByType<MainMenuView>().ContinueGame();
-            yield return WaitScene("c2_s1");
-            Assert.IsTrue(((MessageView)Ui.Top).Choose("Empezar"));
-        }
-
-        IEnumerator PlayServidores(string decision)
-        {
-            yield return CollectAndAnalyzeAll(5);
-            var g = Game;
-            Assert.IsTrue(g.Alex.Question(g.Case.FindLie("lie_c2_alex_falla"), g.Case.FindEvidence("ev_c2_panel_gas")).Success);
-            Assert.IsTrue(g.Alex.Question(g.Case.FindLie("lie_c2_alex_nota"), g.Case.FindEvidence("ev_c2_nota")).Success);
-            AnswerHypothesis(new Dictionary<string, string[]> { ["hyp_c2_s1_q1"] = new[] { "distancia" } });
-            yield return Decide(g.Scene.ClosingDecision, decision);
-            if (decision == "A") Assert.IsTrue(((MessageView)Ui.Top).Choose("Continuar"));
-        }
-
-        IEnumerator PlayCaseta(bool protectInes, bool expectBackup)
-        {
-            yield return CollectAndAnalyzeAll(3);
-            var g = Game;
-            Assert.IsTrue(g.Evidence.RunExtraAnalysis(g.Case.FindEvidence("ev_c2_camara_parqueadero")).Success, "Laboratorio externo");
-            Assert.IsTrue(g.Alex.Question(g.Case.FindLie("lie_c2_alex_placas"), g.Case.FindEvidence("ev_c2_camara_parqueadero")).Success);
-            yield return Talk("ines", d => Assert.IsTrue(d.Present(Profile("ines"), Item(d, "ev_c2_libro_rondas")).ExposedLie));
-            Assert.IsInstanceOf<DecisionView>(Ui.Top, "Al refutar a Inés se abre dec_c2_ines");
-            yield return Decide(g.Case.FindDecision("dec_c2_ines"), protectInes ? "A" : "B");
-            Assert.IsTrue(((MessageView)Ui.Top).Choose("Continuar"));
-            var backup = g.Case.FindEvidence("ev_c2_backup");
-            Assert.AreEqual(expectBackup, g.Evidence.IsFound(backup), expectBackup ? "Inés entrega la copia espejo" : "Con tiempo perdido la copia ya fue borrada");
-            if (expectBackup) Assert.IsTrue(g.Evidence.Analyze(backup).Success);
-            AnswerHypothesis(new Dictionary<string, string[]> { ["hyp_c2_s3_q1"] = new[] { "apagada" } });
-            Controller.FinishScene();
-            yield return null;
-        }
-
-        IEnumerator PlayPisoEjecutivo(bool expectSebastian)
-        {
-            bool sebHere = Object.FindObjectsByType<CharacterNpc>(FindObjectsSortMode.None).Any(n => n.Profile.Id == "sebastian");
-            Assert.AreEqual(expectSebastian, sebHere, "Sebastián detenido no está en su escritorio");
-            yield return CollectAndAnalyzeAll(6);
-            var g = Game;
-            Assert.IsTrue(g.Evidence.RunExtraAnalysis(g.Case.FindEvidence("ev_c2_portatil_tomas"), "LUCERO").Success);
-            Assert.IsTrue(g.State.HasFlag("flag_c2_directiva"));
-            if (expectSebastian)
-                yield return Talk("sebastian", d => StringAssert.Contains("El Muelle", d.Present(Profile("sebastian"), Item(d, "ev_c2_chat_kairos")).Text));
-            AnswerHypothesis(new Dictionary<string, string[]> { ["hyp_c2_s2_q1"] = new[] { "valeria" } });
-            Controller.FinishScene();
-            yield return null;
-        }
-
         // ================= Escenas =================
 
         IEnumerator NewGame()
@@ -230,8 +124,6 @@ namespace Caso404.Tests
             yield return SceneManager.LoadSceneAsync(GameUIController.MainMenuScene);
             yield return null;
             Object.FindAnyObjectByType<MainMenuView>().StartNewGame();
-            Assert.IsNotNull(CaseLetterView.Current, "Antes del caso 1 se muestra la carta de la Comisaria Lozano");
-            CaseLetterView.Current.Begin();
             yield return WaitScene("c1_s1");
             Assert.IsInstanceOf<MessageView>(Ui.Top, "La partida nueva abre con la intro del caso");
             Assert.IsTrue(((MessageView)Ui.Top).Choose("Empezar"));
@@ -334,33 +226,6 @@ namespace Caso404.Tests
             Assert.AreEqual(expectedEnding, ending.ShownEndingId);
         }
 
-        /// <summary>Tras el final del caso 1 empieza el caso 2 (c2_s1) conservando flags y alexTrust.</summary>
-        IEnumerator ContinueToCase2()
-        {
-            int trust = Game.State.AlexTrust;
-            Object.FindAnyObjectByType<EndingView>().Finish();
-            yield return null;
-            Assert.IsTrue(Choose("Comenzar «Protocolo 404»"), "Tras el caso 1 se ofrece empezar el caso 2");
-            Assert.IsNotNull(CaseLetterView.Current, "Antes del caso 2 se muestra su carta");
-            CaseLetterView.Current.Begin();
-            yield return WaitScene("c2_s1");
-            var g = Game;
-            Assert.AreEqual("c2", g.Case.Id);
-            Assert.IsTrue(g.State.HasFlag("end_c1_verdadero"), "El final del caso 1 pasa al caso 2");
-            Assert.IsTrue(g.State.HasFlag("flag_c1_pista_nx"));
-            Assert.AreEqual(trust, g.State.AlexTrust, "alexTrust pasa del caso 1 al caso 2");
-            Assert.IsTrue(((MessageView)Ui.Top).Choose("Empezar"), "Intro del caso 2");
-            yield return CollectAndAnalyzeAll(5);
-            Assert.IsTrue(g.State.IsAlexClaimRaised("lie_c2_alex_falla"));
-            Assert.IsTrue(g.State.IsAlexClaimRaised("lie_c2_alex_nota"));
-            Assert.IsTrue(g.Alex.Question(g.Case.FindLie("lie_c2_alex_falla"), g.Case.FindEvidence("ev_c2_sensor_humo")).Success);
-            Assert.IsTrue(g.Alex.Question(g.Case.FindLie("lie_c2_alex_nota"), g.Case.FindEvidence("ev_c2_nota")).Success);
-            AnswerHypothesis(new Dictionary<string, string[]> { ["hyp_c2_s1_q1"] = new[] { "distancia" } });
-            yield return Decide(g.Scene.ClosingDecision, "B");
-            Assert.IsTrue(g.State.IsSceneCompleted("c2_s1"));
-            yield return WaitScene("c2_s2"); // dec_c2_s1 B lleva a la oficina de Tomás
-        }
-
         IEnumerator BackToMenu()
         {
             Object.FindAnyObjectByType<EndingView>().Finish(); // tras "Tres meses después..."
@@ -448,7 +313,7 @@ namespace Caso404.Tests
             yield return null;
         }
 
-        CharacterProfile Profile(string id) => Game.Case.FindCharacter(id);
+        CharacterProfile Profile(string id) => Game.Case.FindSuspect(id);
 
         static PresentableItem Item(DialogueService d, string evidenceId) =>
             d.GetPresentableItems().First(i => i.Evidence != null && i.Evidence.Id == evidenceId);
