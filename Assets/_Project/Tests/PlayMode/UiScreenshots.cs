@@ -45,6 +45,10 @@ namespace Caso404.Tests
             yield return SceneManager.LoadSceneAsync("MainMenu");
             yield return new WaitForSecondsRealtime(1.5f);
             yield return Shot("00_menu");
+            var options = Object.FindAnyObjectByType<MainMenuView>().transform.Find("Options");
+            options.gameObject.SetActive(true);
+            yield return Shot("00b_opciones");
+            options.gameObject.SetActive(false);
 
             Object.FindAnyObjectByType<MainMenuView>().StartNewGame();
             yield return WaitScene("c1_s1");
