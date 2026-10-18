@@ -96,3 +96,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8142425eb550f174bbadcbc94a17b3bb, type: 2}
   - {fileID: 11400000, guid: 005d711974179c14eb02e3ca46c816fe, type: 2}
   _proofsToChoose: 3
+  _allies: []
+  _solidProofFlags: []
+  _solidProofRequirements: []
+  _alexLowTrustIntroLine: 
