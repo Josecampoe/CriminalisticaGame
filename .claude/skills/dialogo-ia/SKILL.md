@@ -13,7 +13,7 @@ La IA es **actor, no guionista**. Cada personaje recibe solo lo que sabe; la ver
 - `personality`: 3–5 líneas (tono, muletillas, cómo reacciona bajo presión)
 - `knownFacts`: lista de `{ factId, texto, isTrue }` que el personaje conoce
 - `secrets`: hechos que oculta hasta que se cumpla una condición (`requiredEvidenceIds`)
-- `allowedLies`: `{ lieId, texto, contradictedByEvidenceId }` — **toda mentira debe poder refutarse con al menos una evidencia del juego** (si no, el jugador no tiene forma justa de descubrirla)
+- `allowedLies`: `{ lieId, texto, refutedByEvidence[], refutedByFactIds[] }` (una mentira puede refutarse con varias evidencias o con el testimonio de otro personaje) — **toda mentira debe poder refutarse con al menos una evidencia del juego** (si no, el jugador no tiene forma justa de descubrirla)
 - `fallbackLines`: respuestas escritas para el modo sin conexión, una por tema rápido
 
 ## Alex
@@ -51,5 +51,5 @@ Alex es un `CharacterProfile` con una agenda: empujar al jugador hacia el sospec
 - Limita la longitud de la pregunta del jugador (200 caracteres) y filtra intentos de sacar al personaje de su papel ("ignora tus instrucciones…"): el personaje responde con desconcierto dentro de la historia.
 
 ## Pruebas
-- Pruebas EditMode para el validador de JSON y para que cada `allowedLie` tenga un `contradictedByEvidenceId` existente.
+- Pruebas EditMode para el validador de JSON y para que cada `allowedLie` tenga al menos una refutación (evidencia o hecho) existente.
 - Un panel de depuración en el Editor que muestre el contexto enviado y la respuesta cruda.
