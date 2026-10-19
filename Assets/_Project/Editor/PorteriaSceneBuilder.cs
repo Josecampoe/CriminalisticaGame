@@ -119,6 +119,7 @@ namespace Caso404.EditorTools
             Npc("andres", new Vector3(7.2f, 0f, 6.6f), 180f);
             Trigger<SceneCloseTrigger>("Puerta de la calle (repasar el caso)", new Vector3(-3f, 1.1f, 0.12f), new Vector3(1.4f, 2.2f, 0.06f), "glass", "Repasar el caso (hipótesis)");
 
+            CityKit.Surround(0f, false, 33, 30f); // planta baja, día nublado
             Finish(scene, ScenePath);
         }
 

@@ -80,6 +80,7 @@ namespace Caso404.EditorTools
                 so.ApplyModifiedPropertiesWithoutUndo();
             }
 
+            CityKit.Surround(-4f, false, 7); // segundo piso
             Finish(scene, ScenePath);
         }
 

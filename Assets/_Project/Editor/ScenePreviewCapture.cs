@@ -39,6 +39,9 @@ namespace Caso404.EditorTools
             Shot("01_entrada", new Vector3(2.5f, 1.65f, 1.2f), new Vector3(10, -30, 0));
             Shot("04_balcon", new Vector3(0.3f, 1.65f, 7.3f), new Vector3(35, 200, 0));
             Shot("05_pasillo", new Vector3(3.5f, 1.65f, -1f), new Vector3(5, -100, 0));
+            Shot("06_ciudad_desde_balcon", new Vector3(0.5f, 1.65f, 7.4f), new Vector3(8, 20, 0));
+            EditorSceneManager.OpenScene(PisoEjecutivoSceneBuilder.ScenePath);
+            Shot("c2s2_ventanal", new Vector3(0f, 1.65f, 4.5f), new Vector3(2, 0, 0));
         }
 
         /// <summary>Fila con los 8 personajes (de pie, sentados y hablando) para revisar modelos, ropa y poses.</summary>
