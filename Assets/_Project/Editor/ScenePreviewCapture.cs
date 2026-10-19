@@ -39,10 +39,61 @@ namespace Caso404.EditorTools
             Shot("01_entrada", new Vector3(2.5f, 1.65f, 1.2f), new Vector3(10, -30, 0));
             Shot("04_balcon", new Vector3(0.3f, 1.65f, 7.3f), new Vector3(35, 200, 0));
             Shot("05_pasillo", new Vector3(3.5f, 1.65f, -1f), new Vector3(5, -100, 0));
+            Shot("06_ciudad_desde_balcon", new Vector3(0.5f, 1.65f, 7.4f), new Vector3(8, 20, 0));
+            EditorSceneManager.OpenScene(PisoEjecutivoSceneBuilder.ScenePath);
+            Shot("c2s2_ventanal", new Vector3(0f, 1.65f, 4.5f), new Vector3(2, 0, 0));
+        }
+
+        /// <summary>Fila con los 8 personajes (de pie, sentados y hablando) para revisar modelos, ropa y poses.</summary>
+        [MenuItem("Caso404/Capturar personajes")]
+        public static void CaptureCharacters()
+        {
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            floor.transform.localScale = new Vector3(3, 1, 2);
+            var sun = new GameObject("Sol").AddComponent<Light>();
+            sun.type = LightType.Directional;
+            sun.intensity = 1.2f;
+            sun.transform.rotation = Quaternion.Euler(40, 160, 0);
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+            RenderSettings.ambientLight = new Color(0.45f, 0.45f, 0.5f);
+            string[] ids = { "laura", "carlos", "hernan", "andres", "sebastian", "valeria", "ines", "elena" };
+            var idle = AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/_Project/Art/Characters/Animations/chr_idle.anim");
+            var talk = AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/_Project/Art/Characters/Animations/chr_talk.anim");
+            var sit = AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/_Project/Art/Characters/Animations/chr_sit_idle.anim");
+            for (int i = 0; i < ids.Length; i++)
+            {
+                var prefab = CharacterArtBuilder.LoadPrefab(ids[i]);
+                if (prefab == null) continue;
+                var a = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+                a.transform.position = new Vector3(-3.5f + i, 0, 0);
+                a.transform.rotation = Quaternion.Euler(0, 180, 0);
+                idle.SampleAnimation(a, 0.5f);
+                var b = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+                b.transform.position = new Vector3(-3.5f + i, 0, 3f);
+                b.transform.rotation = Quaternion.Euler(0, 180, 0);
+                (i % 2 == 0 ? sit : talk).SampleAnimation(b, 0.8f);
+            }
+            Shot("chr_fila", new Vector3(0, 1.3f, -5.2f), new Vector3(5, 0, 0));
+            Shot("chr_fila_atras", new Vector3(0, 1.5f, -2.2f), new Vector3(8, 0, 0));
+            Shot("chr_caras_1", new Vector3(-2f, 1.6f, -1.6f), new Vector3(3, 0, 0));
+            Shot("chr_caras_2", new Vector3(2f, 1.6f, -1.6f), new Vector3(3, 0, 0));
+            Shot("chr_espalda", new Vector3(0, 1.4f, 6f), new Vector3(5, 180, 0));
+        }
+
+        /// <summary>En modo edición el Animator no corre: aplica a cada personaje su pose de reposo (de pie o sentado).</summary>
+        static void PoseCharacters()
+        {
+            var idle = AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/_Project/Art/Characters/Animations/chr_idle.anim");
+            var sit = AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/_Project/Art/Characters/Animations/chr_sit_idle.anim");
+            if (idle == null || sit == null) return;
+            foreach (var npc in Object.FindObjectsByType<Caso404.Characters.NpcAnimator>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                (npc.Seated ? sit : idle).SampleAnimation(npc.gameObject, 0.5f);
         }
 
         static void Shot(string name, Vector3 pos, Vector3 euler)
         {
+            PoseCharacters();
             var go = new GameObject("PreviewCam");
             var cam = go.AddComponent<Camera>();
             cam.transform.SetPositionAndRotation(pos, Quaternion.Euler(euler));
