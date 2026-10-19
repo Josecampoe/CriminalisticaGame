@@ -42,6 +42,7 @@ namespace Caso404.EditorTools
             Case2DataBuilder.Build();
             SharedAssetsBuilder.Build();
             CharacterArtBuilder.Build();
+            CityKit.RebuildFarCity();
             Build();
             Apartment404SceneBuilder.Build();
             CafeSceneBuilder.Build();
