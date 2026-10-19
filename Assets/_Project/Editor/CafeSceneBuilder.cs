@@ -72,6 +72,7 @@ namespace Caso404.EditorTools
             Npc("carlos", new Vector3(2.55f, 0f, 3.2f), 180f, seated: true);
             Trigger<SceneCloseTrigger>("Puerta del café (repasar el caso)", new Vector3(0f, 1.05f, -0.05f), new Vector3(1.1f, 2.1f, 0.08f), "glass", "Repasar el caso (hipótesis)");
 
+            CityKit.Surround(0f, true, 12); // planta baja, de noche
             Finish(scene, ScenePath);
         }
 
