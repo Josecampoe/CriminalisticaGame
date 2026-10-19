@@ -1,8 +1,10 @@
 # Reporte de sesiones — El Caso 404
 
-## Sesión 4 (19 de octubre de 2026, hasta las 9:30 AM)
+## Sesión 4 (19 de octubre de 2026)
 
-**En resumen:** quedaron hechos la **tarea 1 (personajes)** y la **tarea 4 (cartas de contexto)**. Hay una **versión básica de la tarea 3 (ciudad)**, y se generaron el **build de Windows** y la **subida a GitHub** en ramas por integrante. **No alcanzó el tiempo** para la **tarea 2 (espacios más grandes)**.
+> **Actualización de las 11:30 AM:** quedaron hechas también la **tarea 2 (espacios más grandes)** y la **tarea 3 (ciudad completa)**, con iluminación horneada. Ver la tabla.
+
+**En resumen:** las **4 tareas están hechas**: personajes, espacios más grandes, ciudad y cartas de contexto. También se generaron el **build de Windows** y la **subida a GitHub** en ramas por integrante.
 
 ### Qué se hizo
 | Tarea | Estado | Detalle |
@@ -10,17 +12,17 @@
 | Subida a GitHub | Hecha | `tools/split_by_owner.py` reparte el trabajo en una rama por integrante, con commits pequeños firmados por cada uno y la fecha original. Verifica que fusionar las 3 ramas da exactamente el mismo proyecto. Ramas: `jose/base-juego`, `majo/docs-ui-datos`, `daniel/core-pruebas`; las de esta sesión son `jose/sesion4`, `majo/sesion4` y `daniel/sesion4`. |
 | 1. Personajes | Hecha | Los 8 personajes usan modelos humanoides de Quaternius en vez de cápsulas, con ropa según el guion, peinado, barba, gorra o placa, y escala según edad. Tienen animaciones de reposo, hablar, sentado y sentado hablando, creadas por código porque el paquete no trae ninguna. Al hablar, el personaje mira al jugador. Se conservan los colliders, `CharacterNpc` y el resaltado. Los sentados tienen su propia silla. |
 | 4. Cartas de contexto | Hecha | Antes de c1_s1 (**Nueva partida**) y antes de c2_s1 (**Comenzar «Protocolo 404»**): fondo oscuro, hoja de expediente, sello CONFIDENCIAL, máquina de escribir (un clic muestra todo) y el botón "Comenzar investigación". Usan los textos exactos que me diste. La Comisaria Lozano quedó agregada al guion (§1 y §6). |
-| Build de Windows | Hecho | `Builds/ElCaso404/ElCaso404.exe` (118 MB). Se regenera con **Caso404 → Build de Windows**. |
-| Capturas | Parcial | En `Docs/capturas/`: la carta del caso 1 (escribiéndose y completa), los personajes de pie, sentados y hablando, la ciudad desde el balcón, el ventanal nocturno, Carlos en el café y el interrogatorio. Faltan la carta del caso 2 y una captura de cada escena. |
-| 2. Espacios más grandes | **No se hizo** | El apartamento sigue del tamaño anterior. |
-| 3. Ciudad alrededor | **Básica** | `CityKit` pone alrededor de 6 escenas un suelo de calle (ya no hay piso infinito), un anillo de edificios de Kenney (detallados cerca y mallas simples lejos), montañas lejanas, cielo nublado o nocturno con ventanas que brillan y niebla en el borde. La calle está a la altura de cada piso: 12 m abajo en el apartamento y 36 m en el piso ejecutivo. Hay colliders invisibles en el balcón y en el ventanal del piso ejecutivo, que ahora es de vidrio transparente. **Falta:** andenes, faroles y carros (el kit de Kenney **solo trae edificios**), iluminación horneada, una vista nocturna más clara en el piso ejecutivo y la Comisaría de noche en el caso 2. |
+| Build de Windows | Hecho | `Builds/ElCaso404/ElCaso404.exe` (135 MB; la primera compilación tras hornear la luz tarda unos 30 min por las variantes de shaders). Se regenera con **Caso404 → Build de Windows**. |
+| Capturas | Hecha | En `Docs/capturas/`: la carta del caso 1 (escribiéndose y completa), los personajes, cada escena (`c1s1_*` … `c2s3_*`), la ciudad desde el balcón y los ventanales de noche. La carta del caso 2 usa la misma vista que la del caso 1 (solo cambia el texto) y no tiene captura propia. |
+| 2. Espacios más grandes | Hecha | **Apartamento 404:** pasillo del edificio con puertas 401–405, ascensor y ventana; sala-comedor, cocina abierta, estudio con el escritorio de Elena, pasillo interno, baño, habitación y balcón de 8 m. Las 7 evidencias quedaron repartidas por pasillo, entrada, sala, balcón y estudio. **Café:** salón más grande, trastienda con el monitor de la cámara y baño. **Sala de servidores:** 4 filas de racks y pasillo con ventanal. La portería y la Comisaría ganaron ventanas a la calle. El objetivo del HUD ahora pide recorrer el lugar al llegar. |
+| 3. Ciudad alrededor | Hecha | Valdora por cuadras alrededor de 7 escenas: andenes, calles con líneas, edificios de Kenney (detallados cerca y mallas simples lejos, en un prefab compartido), faroles, árboles, carros estacionados, montañas, cielo nublado (caso 1) o nocturno con ventanas encendidas (caso 2) y niebla en el borde. Ya no hay piso infinito. Se ve el edificio donde ocurre cada escena, con la calle a la altura correcta (12 m bajo el balcón, 36 m bajo el piso 12). Hay colliders invisibles en el balcón y los ventanales. La Comisaría queda de día en el caso 1 y de noche en el caso 2. **Iluminación horneada** (rebotes y oclusión ambiental) con **Caso404 → Hornear iluminación**. |
 
 Pruebas: **40 EditMode y 6 PlayMode en verde** antes y después de los cambios. Las PlayMode ahora también pasan por las dos cartas.
 
 ### Qué debes revisar tú
 1. **Cómo se ven los personajes.** Los cuerpos base del paquete gratuito son muy musculosos y la ropa queda ajustada, como un enterizo, porque está pintada sobre la piel. Si no te convence, la alternativa es un paquete con ropa modelada.
 2. **Las poses en el juego.** En Play los personajes deben estar en reposo; los sentados, en su silla; y al hablarles, gesticular y mirarte. Revisa sobre todo la Comisaría y el café.
-3. **La ciudad**: asómate al balcón del apartamento y al ventanal del piso ejecutivo; revisa que no haya bordes visibles ni caídas.
+3. **La ciudad y los espacios**: recorre el apartamento completo y asómate al balcón, a las vitrinas del café y al ventanal del piso 12. Revisa que no haya bordes visibles, caídas ni objetos difíciles de alcanzar. La sala de servidores es oscura a propósito ("frío" en el guion); dime si quieres más luz.
 4. **Las dos cartas**: que el texto se lea bien en tu pantalla y que el clic complete el texto.
 5. **El vestuario que elegí** sin que lo pidieras: Laura con uniforme de enfermera, Sebastián con buzo con capota y Elena con chaqueta y jeans (`DECISIONES.md`, N2).
 6. **Los PR en GitHub** (enlaces abajo). Te recomiendo fusionar primero las ramas de la subida inicial y después las de la sesión 4: las de la sesión 4 continúan a las anteriores y no tienen conflictos.
@@ -30,7 +32,9 @@ Pruebas: **40 EditMode y 6 PlayMode en verde** antes y después de los cambios. 
 - **En el ejecutable:** abre `Builds/ElCaso404/ElCaso404.exe`.
 
 ### Para la próxima sesión
-- **"Hagamos la tarea 2 y terminemos la 3"**: apartamento ampliado con pasillo 401–405 y ascensor, repartir las evidencias en el espacio, y completar la ciudad con andenes, faroles, carros, luz horneada y la Comisaría de noche en el caso 2.
+- **"Ajustemos lo que encontré jugando"**: distancias, luz, objetos difíciles de alcanzar, textos.
+- Si quieres personajes con ropa modelada en 3D, habría que conseguir un paquete con ropa (el gratuito solo trae cuerpos base).
+- **Importante al regenerar escenas:** después de **Caso404 → Construir todo**, ejecuta **Caso404 → Hornear iluminación (todas las escenas)**.
 - Capturas de cada escena y de la carta del caso 2 (necesita jugar el caso 1 hasta el final o una prueba que llegue ahí).
 
 ---
