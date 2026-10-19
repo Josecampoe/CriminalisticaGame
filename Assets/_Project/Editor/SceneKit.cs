@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Caso404.AI;
+using Caso404.Characters;
 using Caso404.Core;
 using Caso404.Core.Events;
 using Caso404.Data;
@@ -223,20 +224,67 @@ namespace Caso404.EditorTools
             return go;
         }
 
-        public static void Npc(string characterId, Vector3 position, float yaw, bool seated = false, string caseId = null)
+        /// <summary>
+        /// Personaje con su modelo 3D (prefab de CharacterArtBuilder), collider para hablarle, CharacterNpc y resaltado.
+        /// Si está sentado se crea también su silla. Si el prefab no existe, usa el muñeco de primitivas de antes.
+        /// </summary>
+        public static GameObject Npc(string characterId, Vector3 position, float yaw, bool seated = false, string caseId = null, string chairMaterial = "dark", bool withChair = true)
         {
             var profile = (caseId == null ? Case : Db.FindCase(caseId)).FindCharacter(characterId);
-            if (profile == null) { Debug.LogError($"[Caso404] No existe el personaje {characterId}"); return; }
+            if (profile == null) { Debug.LogError($"[Caso404] No existe el personaje {characterId}"); return null; }
             var npc = new GameObject($"NPC {profile.DisplayName}");
             npc.transform.position = position;
             npc.transform.rotation = Quaternion.Euler(0, yaw, 0);
             npc.layer = InteractableLayer;
-            float drop = seated ? 0.4f : 0f;
             var col = npc.AddComponent<CapsuleCollider>();
-            col.height = 1.7f - drop;
-            col.radius = 0.3f;
-            col.center = new Vector3(0, (1.7f - drop) / 2f, 0);
+            col.height = seated ? 1.35f : 1.75f;
+            col.radius = seated ? 0.4f : 0.3f;
+            col.center = new Vector3(0, col.height / 2f, seated ? 0.1f : 0f);
 
+            var talk = npc.AddComponent<CharacterNpc>();
+            Set(talk, "_profile", profile);
+            Set(talk, "_game", Game);
+            SetBool(talk, "_turnBody", !seated); // sentado solo gira la cabeza
+            npc.AddComponent<Highlightable>();
+
+            if (seated && withChair) Chair(npc.transform, chairMaterial);
+
+            var prefab = CharacterArtBuilder.LoadPrefab(characterId);
+            if (prefab != null)
+            {
+                var model = (GameObject)PrefabUtility.InstantiatePrefab(prefab, npc.transform);
+                model.name = "Modelo";
+                model.transform.localPosition = Vector3.zero;
+                model.transform.localRotation = Quaternion.identity;
+                var anim = model.GetComponent<NpcAnimator>();
+                Set(anim, "_npc", talk);
+                SetBool(anim, "_seated", seated);
+                var head = model.GetComponent<Animator>().GetBoneTransform(HumanBodyBones.Head);
+                Set(talk, "_head", head != null ? head : model.transform);
+                foreach (var r in model.GetComponentsInChildren<Renderer>()) r.shadowCastingMode = ShadowCastingMode.On;
+                return npc;
+            }
+            Debug.LogWarning($"[Caso404] Falta el prefab de {characterId}: usa Caso404/Arte/Construir personajes. Se pone un muñeco de primitivas.");
+            PrimitiveDummy(npc, profile, seated, talk);
+            return npc;
+        }
+
+        /// <summary>Silla bajo un personaje sentado (asiento a 0.46 m, respaldo detrás).</summary>
+        static void Chair(Transform npc, string material)
+        {
+            // Fuera del NPC: no se resalta con él y queda vacía si el personaje no está en la escena.
+            var chair = Group($"Silla ({npc.name})");
+            var seat = Box("Asiento", chair, npc.TransformPoint(new Vector3(0, 0.43f, 0.08f)), new Vector3(0.46f, 0.06f, 0.46f), material, rotY: npc.eulerAngles.y);
+            Box("Respaldo", chair, npc.TransformPoint(new Vector3(0, 0.75f, -0.17f)), new Vector3(0.46f, 0.6f, 0.05f), material, rotY: npc.eulerAngles.y);
+            foreach (var x in new[] { -0.2f, 0.2f })
+                foreach (var z in new[] { -0.13f, 0.29f })
+                    Box("Pata", chair, npc.TransformPoint(new Vector3(x, 0.2f, z)), new Vector3(0.04f, 0.4f, 0.04f), "metal", rotY: npc.eulerAngles.y, keepCollider: false);
+            seat.layer = 0;
+        }
+
+        static void PrimitiveDummy(GameObject npc, CharacterProfile profile, bool seated, CharacterNpc talk)
+        {
+            float drop = seated ? 0.4f : 0f;
             var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             body.name = "Cuerpo";
             Object.DestroyImmediate(body.GetComponent<Collider>());
@@ -259,12 +307,7 @@ namespace Caso404.EditorTools
             nose.transform.localPosition = new Vector3(0, 1.57f - drop, 0.13f);
             nose.transform.localRotation = Quaternion.identity;
             nose.layer = InteractableLayer;
-
-            var talk = npc.AddComponent<CharacterNpc>();
-            Set(talk, "_profile", profile);
-            Set(talk, "_game", Game);
             Set(talk, "_head", head.transform);
-            npc.AddComponent<Highlightable>();
         }
 
         public static void SpawnPlayer(Vector3 position, float yaw)
