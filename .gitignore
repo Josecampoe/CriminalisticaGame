@@ -35,3 +35,19 @@ Server/.env
 # Claude Code: configuración personal
 .claude/settings.local.json
 CLAUDE.local.md
+
+# Modelos de terceros: solo se suben los FBX para Unity (los formatos duplicados se ignoran)
+Assets/_Project/Art/ThirdParty/**/GLB format*
+Assets/_Project/Art/ThirdParty/**/OBJ format*
+Assets/_Project/Art/ThirdParty/**/Godot - UE*
+Assets/_Project/Art/ThirdParty/**/FBX (Unreal Engine)*
+Assets/_Project/Art/ThirdParty/**/glTF (Godot*
+Assets/_Project/Art/ThirdParty/**/Unreal-Engine-README.txt*
+Assets/_Project/Art/ThirdParty/**/*.glb
+Assets/_Project/Art/ThirdParty/**/*.glb.meta
+Assets/_Project/Art/ThirdParty/**/*.gltf
+Assets/_Project/Art/ThirdParty/**/*.gltf.meta
+Assets/_Project/Art/ThirdParty/**/*.bin
+Assets/_Project/Art/ThirdParty/**/*.bin.meta
+Assets/_Project/Art/ThirdParty/**/*.url
+Assets/_Project/Art/ThirdParty/**/*.url.meta

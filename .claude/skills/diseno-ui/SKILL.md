@@ -30,7 +30,13 @@ Contraste mínimo 4.5:1 para texto. No dependas solo del color: añade icono o e
 
 ## Pantallas del prototipo
 1. **Menú principal** — título con efecto de máquina de escribir, Nueva partida / Continuar / Opciones / Salir
-2. **HUD de exploración** — mínimo: nombre de la escena, indicador de interacción junto al cursor, botones a Expediente y a Alex, contador de evidencias sin analizar
+2. **HUD de exploración (primera persona)** — mínimo:
+   - retícula pequeña en el centro, que crece o cambia de color al apuntar a algo investigable;
+   - prompt bajo la retícula ("E — Inspeccionar", "E — Hablar con Laura");
+   - nombre de la escena al entrar (se desvanece en 3 s);
+   - atajos a Expediente (Tab) y a ALEX (Q);
+   - contador de evidencias sin analizar.
+2b. **Modo inspección** — fondo desenfocado u oscurecido, objeto 3D al centro que se rota con el mouse, nombre del objeto arriba y botones "Guardar en expediente" y "Soltar". Algunos objetos tienen detalles que solo se ven al girarlos (por ejemplo, el vidrio en la manga del overol).
 3. **Expediente / inventario** — fichas de papel en cuadrícula; cada ficha: foto, nombre, estado (nueva, analizada), botón Analizar
 4. **Análisis de evidencia** — vista de la ficha ampliada + resultado que aparece como sello o informe de laboratorio
 5. **Diálogo** — retrato del personaje, nombre, texto con efecto de escritura, campo para escribir la pregunta + 3–4 botones rápidos (Preguntar por el crimen, por otra persona, por una evidencia, Presionar). Indicador de "pensando" mientras responde la IA
@@ -46,6 +52,13 @@ Contraste mínimo 4.5:1 para texto. No dependas solo del color: añade icono o e
 - Abrir y cerrar paneles con un `UIManager` que gestiona una pila (Escape cierra el panel de arriba).
 - Animaciones cortas (150–300 ms) con `CanvasGroup.alpha` y escala; usa curvas *ease-out*. Nada de animaciones que retrasen la respuesta del jugador.
 - Navegación con teclado/mando mediante `EventSystem` y `Selectable.navigation`; foco visible.
+
+## Particularidades del 3D
+- La UI va en Canvas *Screen Space – Overlay*. Usa *World Space* solo para cosas diegéticas, como la pantalla de un computador dentro de la escena o el tablero de corcho de la Comisaría.
+- Resalta el objeto apuntado con un contorno suave (shader de outline o capa de render de URP) en `warning_amber` si la evidencia es nueva y en blanco si ya se revisó.
+- Al abrir cualquier panel: pausa el movimiento, libera el cursor y aplica un desenfoque o viñeta al fondo (volumen de post-procesado). Al cerrarlo, vuelve el cursor bloqueado al centro.
+- En los diálogos, la cámara se acerca al rostro del personaje (Cinemachine o interpolación de la cámara). El retrato en la UI es opcional si el modelo se ve bien.
+- Ambientación noir en la escena: luces cálidas puntuales, sombras marcadas, niebla ligera y una paleta de colores que coincida con la de la UI.
 
 ## Sensación (feedback)
 - Recoger evidencia: sonido de cámara/papel + ficha que vuela al icono del expediente

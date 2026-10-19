@@ -1,0 +1,14 @@
+{
+    "name": "Caso404.Runtime",
+    "rootNamespace": "Caso404",
+    "references": [
+        "Unity.InputSystem",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "autoReferenced": true,
+    "noEngineReferences": false
+}

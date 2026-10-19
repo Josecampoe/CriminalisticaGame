@@ -36,8 +36,8 @@ public class GameState
     public List<string> analyzedEvidenceIds = new();
     public List<string> flags = new();            // ej. "confronted_alex_camera"
     public List<string> decisionsTaken = new();   // "decisionId:optionId"
-    public List<string> detectedContradictions = new();
-    public int alexTrust = 50;                    // 0–100
+    public List<CaseContradictions> alexContradictions = new(); // por caso: {caseId, lieIds}
+    public int alexTrust = 60;                    // 0–100, empieza en 60 (GUION §1)
     public string accusedSuspectId;
 }
 ```
