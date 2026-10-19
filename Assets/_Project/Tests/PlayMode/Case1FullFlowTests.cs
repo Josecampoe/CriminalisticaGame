@@ -230,6 +230,8 @@ namespace Caso404.Tests
             yield return SceneManager.LoadSceneAsync(GameUIController.MainMenuScene);
             yield return null;
             Object.FindAnyObjectByType<MainMenuView>().StartNewGame();
+            Assert.IsNotNull(CaseLetterView.Current, "Antes del caso 1 se muestra la carta de la Comisaria Lozano");
+            CaseLetterView.Current.Begin();
             yield return WaitScene("c1_s1");
             Assert.IsInstanceOf<MessageView>(Ui.Top, "La partida nueva abre con la intro del caso");
             Assert.IsTrue(((MessageView)Ui.Top).Choose("Empezar"));
@@ -339,6 +341,8 @@ namespace Caso404.Tests
             Object.FindAnyObjectByType<EndingView>().Finish();
             yield return null;
             Assert.IsTrue(Choose("Comenzar «Protocolo 404»"), "Tras el caso 1 se ofrece empezar el caso 2");
+            Assert.IsNotNull(CaseLetterView.Current, "Antes del caso 2 se muestra su carta");
+            CaseLetterView.Current.Begin();
             yield return WaitScene("c2_s1");
             var g = Game;
             Assert.AreEqual("c2", g.Case.Id);
