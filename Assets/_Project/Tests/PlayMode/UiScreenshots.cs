@@ -51,6 +51,12 @@ namespace Caso404.Tests
             options.gameObject.SetActive(false);
 
             Object.FindAnyObjectByType<MainMenuView>().StartNewGame();
+            yield return new WaitForSecondsRealtime(2f);
+            yield return Shot("00c_carta_c1_escribiendo");
+            CaseLetterView.Current.Complete();
+            yield return null;
+            yield return Shot("00d_carta_c1");
+            CaseLetterView.Current.Begin();
             yield return WaitScene("c1_s1");
             yield return new WaitForSecondsRealtime(1f);
             yield return Shot("01_intro");
