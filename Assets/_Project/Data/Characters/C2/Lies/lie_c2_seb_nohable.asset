@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ae49f3db5a70314dbf28f152a69aa23, type: 3}
+  m_Name: lie_c2_seb_nohable
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.LieData
+  _id: lie_c2_seb_nohable
+  _caseId: c2
+  _ownerId: sebastian
+  _isAlexLie: 0
+  _statement: "No habl\xE9 con Tom\xE1s esa noche."
+  _refutedByEvidence:
+  - {fileID: 11400000, guid: 1d786724408d38c45aa482e089d9df18, type: 2}
+  _refutedByFactIds: []
+  _exposedResponse: "Est\xE1 bien, habl\xE9 con \xE9l. \xBFY qu\xE9? Eso no me convierte en asesino."
+  _revealsFactIdsOnExposed:
+  - f_c2_seb_discusion
+  _setsFlagsOnExposed: []
+  _grantsEvidenceOnExposed: []
+  _alexTrigger: 0
+  _alexTriggerEvidence: {fileID: 0}
+  _evidenceRequirements: []
+  _triggersDecision: {fileID: 0}

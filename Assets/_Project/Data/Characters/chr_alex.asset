@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 199e8501105ed5749bb72508951d35ff, type: 3}
+  m_Name: chr_alex
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.AlexProfile
+  _id: alex
+  _displayName: ALEX
+  _age: 0
+  _role: "Asistente L\xF3gico de EXpedientes (Nexo Analytics)"
+  _caseId: 
+  _personality: "IA forense. Con confianza alta es c\xE1lido, seguro y usa \"nosotros\". Con confianza media es formal y prudente. Con confianza baja es evasivo, fr\xEDo y responde corto. Nunca niega un resultado que el jugador ya ve: solo lo pone en duda."
+  _portrait: {fileID: 0}
+  _placeholderColor: {r: 0.31, g: 0.82, b: 0.77, a: 1}
+  _knownFacts: []
+  _lies:
+  - {fileID: 11400000, guid: a4dab897b838545499f0d8c93244f1ef, type: 2}
+  - {fileID: 11400000, guid: 18b8c66e7efaa9c46ae34c79138bd9af, type: 2}
+  - {fileID: 11400000, guid: d1baa93ea150d9243bc665ef9354b04d, type: 2}
+  - {fileID: 11400000, guid: 4df082768c41b604dbc0722be0507dc0, type: 2}
+  - {fileID: 11400000, guid: 52ba7df6da030c34683efafb51bc7805, type: 2}
+  _secrets: []
+  _fallback:
+    _crime:
+      _text: 
+      _revealsFactIds: []
+    _otherPerson:
+      _text: 
+      _revealsFactIds: []
+    _evidence:
+      _text: 
+      _revealsFactIds: []
+    _press:
+      _text: 
+      _revealsFactIds: []
+  _attitudeVariants: []
+  _extraTopics: []
+  _refusesUnless:
+    _allEvidenceAnalyzed: []
+    _anyEvidenceAnalyzed: []
+    _allFlags: []
+    _anyFlags: []
+    _noneFlags: []
+    _exposedLies: []
+    _knownFactIds: []
+  _cooperatesAfterSeeing: {fileID: 0}
+  _refusalLine: 
+  _startTrust: 60
+  _highTrustThreshold: 60
+  _lowTrustThreshold: 30
+  _acceptTrustDelta: 5
+  _questionSuccessTrustDelta: -10
+  _questionedSuccessHigh: "Tienes raz\xF3n. Mi an\xE1lisis fue apresurado. Lo registro."
+  _questionedSuccessLow: Registrado.
+  _questionedFail: "Esa evidencia no contradice mi an\xE1lisis, detective."
+  _acceptedLine: "Bien. Seguimos con esa l\xEDnea."

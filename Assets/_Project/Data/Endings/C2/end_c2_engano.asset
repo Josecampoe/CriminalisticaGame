@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93be8a371aaedb5498a4191795509819, type: 3}
+  m_Name: end_c2_engano
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.EndingData
+  _id: end_c2_engano
+  _caseId: c2
+  _priority: 4
+  _title: Caso archivado
+  _requirement:
+    _accusedAnyOf:
+    - {fileID: 11400000, guid: dd96f46f494178a4180fa198f31a1b99, type: 2}
+    _minSolidProofs: 0
+    _maxSolidProofs: -1
+    _minAlexContradictions: 0
+    _maxAlexContradictions: -1
+    _extra:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+  _epilogue: "Sebasti\xE1n es acusado. Valeria le agradece a Rivera \"su profesionalismo\". El art\xEDculo de Elena sobre Nexo desaparece de internet: la p\xE1gina muestra \"404 \u2014 Not Found\"."
+  _variants: []
+  _closingText: 
+  _followUpDecision: {fileID: 0}
+  _revealsFactIds: []

@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40ddba45c3bd07a48b33b068fb975abb, type: 3}
+  m_Name: ev_c1_celular_andres
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.EvidenceData
+  _id: ev_c1_celular_andres
+  _caseId: c1
+  _sceneId: c1_s4
+  _displayName: "Celular de Andr\xE9s"
+  _description: "El celular que Andr\xE9s entreg\xF3 \"para demostrar que no tiene nada que esconder\"."
+  _icon: {fileID: 0}
+  _inspectPrefab: {fileID: 0}
+  _source: 1
+  _spawnCondition:
+    _allEvidenceAnalyzed: []
+    _anyEvidenceAnalyzed: []
+    _allFlags: []
+    _anyFlags: []
+    _noneFlags: []
+    _exposedLies: []
+    _knownFactIds: []
+  _hasHiddenDetail: 0
+  _hiddenDetailText: 
+  _analysisResult: "Mensajes de \"Soporte NX\": \"Apto 404. Estar\xE1 fuera hasta las 11. Solo la USB.\" \u2014 \"Pago confirmado.\""
+  _analyzedByAlex: 0
+  _canBeAnalyzed: 1
+  _revealsFactIds: []
+  _setsFlagsOnAnalyze: []
+  _extraAnalysis:
+    _kind: 1
+    _buttonLabel: "An\xE1lisis profundo"
+    _password: 
+    _resultText: "El n\xFAmero de \"Soporte NX\" corresponde al canal de soporte t\xE9cnico de ALEX."
+    _alexComment: "Ese canal lo usan cientos de clientes de Nexo. Es una coincidencia estad\xEDstica."
+    _setsFlags:
+    - {fileID: 11400000, guid: 3972c095063d34540b14f79a4cf34ee7, type: 2}

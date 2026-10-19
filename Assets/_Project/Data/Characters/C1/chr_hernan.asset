@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8dac0d6a92d79142a22c279081ae8dd, type: 3}
+  m_Name: chr_hernan
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.CharacterProfile
+  _id: hernan
+  _displayName: "Don Hern\xE1n G\xF3mez"
+  _age: 63
+  _role: Portero del Edificio Mirador
+  _caseId: c1
+  _personality: "Amable, charlat\xE1n, orgulloso de \"no perderse nada\". Le averg\xFCenza haber dejado su puesto."
+  _portrait: {fileID: 0}
+  _placeholderColor: {r: 0.45, g: 0.4, b: 0.3, a: 1}
+  _knownFacts:
+  - _id: f_c1_hernan_carlos
+    _text: "Carlos entr\xF3 a las 9:10 y sali\xF3 a las 9:40."
+  - _id: f_c1_hernan_andres
+    _text: "Vio a Andr\xE9s con overol entrar por el s\xF3tano a las 10:05, algo raro de noche."
+  - _id: f_c1_hernan_tienda
+    _text: Estuvo en la tienda de 10:15 a 10:50.
+  _lies:
+  - {fileID: 11400000, guid: 60eb830ecbae3a44285b3ffe571bf138, type: 2}
+  _secrets: []
+  _fallback:
+    _crime:
+      _text: "En treinta a\xF1os en este edificio nunca hab\xEDa pasado algo as\xED, doctor(a)."
+      _revealsFactIds: []
+    _otherPerson:
+      _text: "El se\xF1or Carlos entr\xF3 y sali\xF3, ah\xED est\xE1 firmado. Yo anoto todo."
+      _revealsFactIds:
+      - f_c1_hernan_carlos
+    _evidence:
+      _text: "Ese recibo... bueno, hab\xEDa partido, \xBFs\xED me entiende?"
+      _revealsFactIds: []
+    _press:
+      _text: "Me fui un ratico a la tienda. Y antes de irme vi a Andr\xE9s, el de mantenimiento, en overol. A esa hora no ten\xEDa nada que hacer aqu\xED."
+      _revealsFactIds: []
+  _attitudeVariants: []
+  _extraTopics:
+  - _id: llave_maestra
+    _label: Preguntar por la llave maestra
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags:
+      - {fileID: 11400000, guid: b1ea9debfe2b3d44e84e271fa06fde81, type: 2}
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+    _line:
+      _text: "\xBFLa llave maestra? Esa est\xE1 en el llavero de mantenimiento, en el s\xF3tano. Ah\xED queda anotado qui\xE9n la saca y a qu\xE9 hora."
+      _revealsFactIds: []
+  _refusesUnless:
+    _allEvidenceAnalyzed: []
+    _anyEvidenceAnalyzed: []
+    _allFlags: []
+    _anyFlags: []
+    _noneFlags: []
+    _exposedLies: []
+    _knownFactIds: []
+  _cooperatesAfterSeeing: {fileID: 0}
+  _refusalLine: 

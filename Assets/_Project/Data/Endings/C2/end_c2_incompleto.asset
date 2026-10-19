@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93be8a371aaedb5498a4191795509819, type: 3}
+  m_Name: end_c2_incompleto
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.EndingData
+  _id: end_c2_incompleto
+  _caseId: c2
+  _priority: 3
+  _title: "Falla t\xE9cnica"
+  _requirement:
+    _accusedAnyOf:
+    - {fileID: 11400000, guid: 06ee290dca643274dbdba25d9ce1e450, type: 2}
+    - {fileID: 11400000, guid: 61b4d049ccd90414d9c94f1bb9038981, type: 2}
+    _minSolidProofs: 0
+    _maxSolidProofs: -1
+    _minAlexContradictions: 0
+    _maxAlexContradictions: -1
+    _extra:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+  _epilogue: "La versi\xF3n oficial de \"falla t\xE9cnica\" se mantiene."
+  _variants:
+  - _id: valeria_pocas_pruebas
+    _requirement:
+      _accusedAnyOf:
+      - {fileID: 11400000, guid: 06ee290dca643274dbdba25d9ce1e450, type: 2}
+      _minSolidProofs: 0
+      _maxSolidProofs: 1
+      _minAlexContradictions: 0
+      _maxAlexContradictions: -1
+      _extra:
+        _allEvidenceAnalyzed: []
+        _anyEvidenceAnalyzed: []
+        _allFlags: []
+        _anyFlags: []
+        _noneFlags: []
+        _exposedLies: []
+        _knownFactIds: []
+    _text: "Valeria queda libre en 48 horas; la versi\xF3n oficial de \"falla t\xE9cnica\" se mantiene."
+  - _id: valeria_sin_alex
+    _requirement:
+      _accusedAnyOf:
+      - {fileID: 11400000, guid: 06ee290dca643274dbdba25d9ce1e450, type: 2}
+      _minSolidProofs: 2
+      _maxSolidProofs: -1
+      _minAlexContradictions: 0
+      _maxAlexContradictions: 1
+      _extra:
+        _allEvidenceAnalyzed: []
+        _anyEvidenceAnalyzed: []
+        _allFlags: []
+        _anyFlags: []
+        _noneFlags: []
+        _exposedLies: []
+        _knownFactIds: []
+    _text: 'Valeria va a juicio y ALEX sigue en servicio. Escena final: "Buen trabajo, detective. Seguimos."'
+  - _id: ines
+    _requirement:
+      _accusedAnyOf:
+      - {fileID: 11400000, guid: 61b4d049ccd90414d9c94f1bb9038981, type: 2}
+      _minSolidProofs: 0
+      _maxSolidProofs: -1
+      _minAlexContradictions: 0
+      _maxAlexContradictions: -1
+      _extra:
+        _allEvidenceAnalyzed: []
+        _anyEvidenceAnalyzed: []
+        _allFlags: []
+        _anyFlags: []
+        _noneFlags: []
+        _exposedLies: []
+        _knownFactIds: []
+    _text: "In\xE9s pierde su trabajo y nadie m\xE1s es investigado."
+  _closingText: 
+  _followUpDecision: {fileID: 0}
+  _revealsFactIds: []

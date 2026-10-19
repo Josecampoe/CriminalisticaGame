@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00c5986fe47059d41bd4988a04d126c6, type: 3}
+  m_Name: hyp_c1_s2
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.HypothesisData
+  _id: hyp_c1_s2
+  _sceneId: c1_s2
+  _questions:
+  - _id: hyp_c1_s2_q1
+    _text: "\xBFCarlos pudo estar en el 404 a las 10:32?"
+    _multiSelect: 0
+    _options:
+    - _id: si
+      _text: "S\xED"
+      _unlockCondition:
+        _allEvidenceAnalyzed: []
+        _anyEvidenceAnalyzed: []
+        _allFlags: []
+        _anyFlags: []
+        _noneFlags: []
+        _exposedLies: []
+        _knownFactIds: []
+      _isCorrect: 0
+    - _id: no
+      _text: "No, estaba en el caf\xE9"
+      _unlockCondition:
+        _allEvidenceAnalyzed:
+        - {fileID: 11400000, guid: e11dad27ba09fc949879eb5f85bb7e2d, type: 2}
+        _anyEvidenceAnalyzed: []
+        _allFlags: []
+        _anyFlags: []
+        _noneFlags: []
+        _exposedLies: []
+        _knownFactIds: []
+      _isCorrect: 1
+    _onCorrectSetFlags: []

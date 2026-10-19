@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec4b29b1d066997429b8fa8401ac128b, type: 3}
+  m_Name: c2_s2
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.SceneData
+  _id: c2_s2
+  _caseId: c2
+  _unitySceneName: PisoEjecutivo
+  _displayName: "Piso ejecutivo \u2014 Torre Nexo"
+  _ambience: Oficinas de vidrio, ciudad de noche al fondo, pizarras con diagramas.
+  _introText: 
+  _evidence:
+  - {fileID: 11400000, guid: 66e4984ec9c0bfd45a769c7fbd8655bd, type: 2}
+  - {fileID: 11400000, guid: 6f63cced8a6e3aa4fb8bb0abbadd07f6, type: 2}
+  - {fileID: 11400000, guid: 3150aeb3335722344b895aad3302c2dd, type: 2}
+  - {fileID: 11400000, guid: b6ac5f27d057d9246a0fa030b20ddc6a, type: 2}
+  - {fileID: 11400000, guid: e7202947d71a367419b865efb424cf15, type: 2}
+  - {fileID: 11400000, guid: dd6ad4a2794e8c64ea8facb0346d198d, type: 2}
+  _characters:
+  - _character: {fileID: 11400000, guid: 06ee290dca643274dbdba25d9ce1e450, type: 2}
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+  - _character: {fileID: 11400000, guid: dd96f46f494178a4180fa198f31a1b99, type: 2}
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags:
+      - {fileID: 11400000, guid: bc7181ed3f5cca849a21ccf3a1dee5fc, type: 2}
+      _exposedLies: []
+      _knownFactIds: []
+  _hypothesis: {fileID: 11400000, guid: 0b925de078f81bc4b8bda87b5317455f, type: 2}
+  _closingDecision: {fileID: 0}
+  _requiredCompletedSceneIds: []
+  _hasAccusation: 0

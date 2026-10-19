@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ae49f3db5a70314dbf28f152a69aa23, type: 3}
+  m_Name: lie_c2_alex_tarjeta
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.LieData
+  _id: lie_c2_alex_tarjeta
+  _caseId: c2
+  _ownerId: alex
+  _isAlexLie: 1
+  _statement: "La tarjeta de Valeria pudo ser clonada. Sebasti\xE1n tiene los conocimientos."
+  _refutedByEvidence:
+  - {fileID: 11400000, guid: 1d786724408d38c45aa482e089d9df18, type: 2}
+  _refutedByFactIds:
+  - f_c2_ines_vio
+  _exposedResponse: 
+  _revealsFactIdsOnExposed: []
+  _setsFlagsOnExposed: []
+  _grantsEvidenceOnExposed: []
+  _alexTrigger: 2
+  _alexTriggerEvidence: {fileID: 11400000, guid: b6ac5f27d057d9246a0fa030b20ddc6a, type: 2}
+  _evidenceRequirements:
+  - _evidence: {fileID: 11400000, guid: 1d786724408d38c45aa482e089d9df18, type: 2}
+    _requiredFlag: {fileID: 11400000, guid: 0e734bf0d23284446815a336e9a0f5a4, type: 2}
+  _triggersDecision: {fileID: 0}

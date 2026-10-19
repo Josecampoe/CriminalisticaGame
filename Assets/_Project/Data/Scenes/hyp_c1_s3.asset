@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00c5986fe47059d41bd4988a04d126c6, type: 3}
+  m_Name: hyp_c1_s3
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.HypothesisData
+  _id: hyp_c1_s3
+  _sceneId: c1_s3
+  _questions:
+  - _id: hyp_c1_s3_q1
+    _text: "\xBFQui\xE9n us\xF3 la llave maestra?"
+    _multiSelect: 0
+    _options:
+    - _id: hernan
+      _text: "Don Hern\xE1n"
+      _unlockCondition:
+        _allEvidenceAnalyzed: []
+        _anyEvidenceAnalyzed: []
+        _allFlags: []
+        _anyFlags: []
+        _noneFlags: []
+        _exposedLies: []
+        _knownFactIds: []
+      _isCorrect: 0
+    - _id: andres
+      _text: "Andr\xE9s"
+      _unlockCondition:
+        _allEvidenceAnalyzed:
+        - {fileID: 11400000, guid: 6570dafa5dac02349b13154bd9e499dd, type: 2}
+        _anyEvidenceAnalyzed: []
+        _allFlags: []
+        _anyFlags: []
+        _noneFlags: []
+        _exposedLies: []
+        _knownFactIds: []
+      _isCorrect: 1
+    _onCorrectSetFlags: []
+  - _id: hyp_c1_s3_q2
+    _text: "\xBFPor qu\xE9 se rompi\xF3 la ventana?"
+    _multiSelect: 0
+    _options:
+    - _id: entrar
+      _text: Para entrar
+      _unlockCondition:
+        _allEvidenceAnalyzed: []
+        _anyEvidenceAnalyzed: []
+        _allFlags: []
+        _anyFlags: []
+        _noneFlags: []
+        _exposedLies: []
+        _knownFactIds: []
+      _isCorrect: 0
+    - _id: simular
+      _text: Para simular un robo
+      _unlockCondition:
+        _allEvidenceAnalyzed:
+        - {fileID: 11400000, guid: 7f5125a108b64f14c823d0deda87b1c1, type: 2}
+        _anyEvidenceAnalyzed:
+        - {fileID: 11400000, guid: 7b2b87636e092414bbdf620fc4019f8a, type: 2}
+        - {fileID: 11400000, guid: 8142425eb550f174bbadcbc94a17b3bb, type: 2}
+        _allFlags: []
+        _anyFlags: []
+        _noneFlags: []
+        _exposedLies: []
+        _knownFactIds: []
+      _isCorrect: 1
+    _onCorrectSetFlags: []

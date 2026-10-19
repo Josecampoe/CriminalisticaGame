@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dec343f0efddaf742832f9dde88f5d1e, type: 3}
+  m_Name: dec_c2_s1
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.DecisionData
+  _id: dec_c2_s1
+  _prompt: "\xBFQu\xE9 hacemos ahora?"
+  _irreversible: 1
+  _alexRecommendedOptionId: A
+  _alexRecommendationText: "Esta nota prueba que Sebasti\xE1n ten\xEDa un conflicto con Tom\xE1s esa misma noche."
+  _options:
+  - _id: A
+    _text: "Detener a Sebasti\xE1n y registrar su casa esta noche"
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+    _setsFlags:
+    - {fileID: 11400000, guid: bc7181ed3f5cca849a21ccf3a1dee5fc, type: 2}
+    _alexTrustDelta: 10
+    _nextSceneId: 
+    _letPlayerChooseNextScene: 1
+    _resultText: "Sebasti\xE1n queda detenido y se registra su casa esta noche."
+    _resultSpokenByAlex: 0
+    _grantsEvidence: []
+  - _id: B
+    _text: "Ir a la oficina de Tom\xE1s"
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+    _setsFlags: []
+    _alexTrustDelta: 0
+    _nextSceneId: c2_s2
+    _letPlayerChooseNextScene: 0
+    _resultText: 
+    _resultSpokenByAlex: 0
+    _grantsEvidence: []
+  - _id: C
+    _text: Ir a la caseta de seguridad
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+    _setsFlags: []
+    _alexTrustDelta: 0
+    _nextSceneId: c2_s3
+    _letPlayerChooseNextScene: 0
+    _resultText: 
+    _resultSpokenByAlex: 0
+    _grantsEvidence: []

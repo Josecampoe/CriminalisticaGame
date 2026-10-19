@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec4b29b1d066997429b8fa8401ac128b, type: 3}
+  m_Name: c1_s1
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.SceneData
+  _id: c1_s1
+  _caseId: c1
+  _unitySceneName: Apartamento404
+  _displayName: "Apartamento 404 \u2014 Edificio Mirador"
+  _ambience: "Sala desordenada, ventana del balc\xF3n rota, escritorio vac\xEDo, luz de ma\xF1ana gris."
+  _introText: "Viernes, 8:00 AM. Edificio Mirador, apartamento 404. Elena Vargas, periodista, fue encontrada inconsciente anoche. Le robaron su port\xE1til."
+  _evidence:
+  - {fileID: 11400000, guid: 7f5125a108b64f14c823d0deda87b1c1, type: 2}
+  - {fileID: 11400000, guid: 804ecff1b46873647bd4803bd26fef3e, type: 2}
+  - {fileID: 11400000, guid: b304430acb25b41439500cde97db3e2c, type: 2}
+  - {fileID: 11400000, guid: aa4ce633b72e7c448a12b64229401f93, type: 2}
+  - {fileID: 11400000, guid: 307b697f0f0b92c48b0c272d898edcad, type: 2}
+  - {fileID: 11400000, guid: 91a1ded177c287349838f06c08ecf2f1, type: 2}
+  - {fileID: 11400000, guid: b8361eac0fa5c6541b3ee883eb060c26, type: 2}
+  _characters:
+  - _character: {fileID: 11400000, guid: 8c9eebfea2839094ba4293edc50d4817, type: 2}
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+  _hypothesis: {fileID: 11400000, guid: f19e1c1d298eadb498553a5c73c85f5b, type: 2}
+  _closingDecision: {fileID: 11400000, guid: 48e7f0e318c21f04ab8e255ab95a438f, type: 2}
+  _requiredCompletedSceneIds: []
+  _hasAccusation: 0

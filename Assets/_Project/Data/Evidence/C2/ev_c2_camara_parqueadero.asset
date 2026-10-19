@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40ddba45c3bd07a48b33b068fb975abb, type: 3}
+  m_Name: ev_c2_camara_parqueadero
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.EvidenceData
+  _id: ev_c2_camara_parqueadero
+  _caseId: c2
+  _sceneId: c2_s3
+  _displayName: "C\xE1mara del parqueadero"
+  _description: "La grabaci\xF3n de la c\xE1mara del parqueadero subterr\xE1neo."
+  _icon: {fileID: 0}
+  _inspectPrefab: {fileID: 0}
+  _source: 0
+  _spawnCondition:
+    _allEvidenceAnalyzed: []
+    _anyEvidenceAnalyzed: []
+    _allFlags: []
+    _anyFlags: []
+    _noneFlags: []
+    _exposedLies: []
+    _knownFactIds: []
+  _hasHiddenDetail: 0
+  _hiddenDetailText: 
+  _analysisResult: "9:00 Tom\xE1s y Sebasti\xE1n discuten. 9:20 Sebasti\xE1n se va. 12:05 AM sale un carro. ALEX: \"Las placas no se leen.\""
+  _analyzedByAlex: 0
+  _canBeAnalyzed: 1
+  _revealsFactIds: []
+  _setsFlagsOnAnalyze: []
+  _extraAnalysis:
+    _kind: 2
+    _buttonLabel: "An\xE1lisis de laboratorio externo"
+    _password: 
+    _resultText: 'Las placas son legibles: es el carro de Valeria Duarte.'
+    _alexComment: 
+    _alexGlitch: 0
+    _setsFlags:
+    - {fileID: 11400000, guid: 0e734bf0d23284446815a336e9a0f5a4, type: 2}

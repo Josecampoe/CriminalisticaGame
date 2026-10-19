@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40ddba45c3bd07a48b33b068fb975abb, type: 3}
+  m_Name: ev_c1_llavero
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.EvidenceData
+  _id: ev_c1_llavero
+  _caseId: c1
+  _sceneId: c1_s3
+  _displayName: Registro del llavero maestro
+  _description: La hoja de control del llavero de mantenimiento.
+  _icon: {fileID: 0}
+  _inspectPrefab: {fileID: 0}
+  _source: 0
+  _spawnCondition:
+    _allEvidenceAnalyzed: []
+    _anyEvidenceAnalyzed: []
+    _allFlags: []
+    _anyFlags: []
+    _noneFlags: []
+    _exposedLies: []
+    _knownFactIds: []
+  _hasHiddenDetail: 0
+  _hiddenDetailText: 
+  _analysisResult: Llave maestra retirada por A. Pardo a las 10:10 y devuelta a las 10:58.
+  _analyzedByAlex: 0
+  _canBeAnalyzed: 1
+  _revealsFactIds: []
+  _setsFlagsOnAnalyze: []
+  _extraAnalysis:
+    _kind: 0
+    _buttonLabel: 
+    _password: 
+    _resultText: 
+    _alexComment: 
+    _setsFlags: []

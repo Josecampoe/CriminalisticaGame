@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ae49f3db5a70314dbf28f152a69aa23, type: 3}
+  m_Name: lie_c1_andres_casa
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.LieData
+  _id: lie_c1_andres_casa
+  _caseId: c1
+  _ownerId: andres
+  _isAlexLie: 0
+  _statement: "Termin\xE9 turno a las 6 y me fui para la casa."
+  _refutedByEvidence:
+  - {fileID: 11400000, guid: 6570dafa5dac02349b13154bd9e499dd, type: 2}
+  - {fileID: 11400000, guid: 7b2b87636e092414bbdf620fc4019f8a, type: 2}
+  - {fileID: 11400000, guid: 8142425eb550f174bbadcbc94a17b3bb, type: 2}
+  _refutedByFactIds:
+  - f_c1_hernan_andres
+  _exposedResponse: "Yo no tengo nada que esconder, oiga. Tome mi celular y rev\xEDselo, para que vea."
+  _revealsFactIdsOnExposed: []
+  _setsFlagsOnExposed: []
+  _grantsEvidenceOnExposed:
+  - {fileID: 11400000, guid: 005d711974179c14eb02e3ca46c816fe, type: 2}
+  _alexTrigger: 0
+  _alexTriggerEvidence: {fileID: 0}
+  _evidenceRequirements: []
+  _triggersDecision: {fileID: 0}

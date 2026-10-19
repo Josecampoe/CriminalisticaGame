@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ae49f3db5a70314dbf28f152a69aa23, type: 3}
+  m_Name: lie_c2_alex_nota
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.LieData
+  _id: lie_c2_alex_nota
+  _caseId: c2
+  _ownerId: alex
+  _isAlexLie: 1
+  _statement: "Esta nota prueba que Sebasti\xE1n ten\xEDa un conflicto con Tom\xE1s esa misma noche."
+  _refutedByEvidence:
+  - {fileID: 11400000, guid: 89eee9d5682d5d0429b539d77476134d, type: 2}
+  _refutedByFactIds: []
+  _exposedResponse: 
+  _revealsFactIdsOnExposed: []
+  _setsFlagsOnExposed: []
+  _grantsEvidenceOnExposed: []
+  _alexTrigger: 1
+  _alexTriggerEvidence: {fileID: 11400000, guid: 89eee9d5682d5d0429b539d77476134d, type: 2}
+  _evidenceRequirements: []
+  _triggersDecision: {fileID: 0}

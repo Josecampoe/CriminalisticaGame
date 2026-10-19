@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8dac0d6a92d79142a22c279081ae8dd, type: 3}
+  m_Name: chr_laura
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.CharacterProfile
+  _id: laura
+  _displayName: "Laura R\xEDos"
+  _age: 29
+  _role: Enfermera, vecina del 403 y amiga de Elena
+  _caseId: c1
+  _personality: "C\xE1lida, protectora y nerviosa. Habla r\xE1pido cuando miente."
+  _portrait: {fileID: 0}
+  _placeholderColor: {r: 0.3, g: 0.45, b: 0.6, a: 1}
+  _knownFacts:
+  - _id: f_c1_laura_gritos
+    _text: "Oy\xF3 gritos hacia las 9:30."
+  - _id: f_c1_laura_golpe
+    _text: "Oy\xF3 un golpe hacia las 10:35."
+  - _id: f_c1_laura_encontro
+    _text: "Encontr\xF3 a Elena a las 10:48 con la puerta abierta."
+  - _id: f_c1_laura_fumar
+    _text: "Sabe que Carlos siempre fumaba en el balc\xF3n."
+  - _id: f_c1_laura_cuaderno
+    _text: "Elena le pidi\xF3 guardar su cuaderno si algo le pasaba. Laura lo tiene."
+  _lies:
+  - {fileID: 11400000, guid: 2600038c76ba83f478e7d6cb9c0f7cc3, type: 2}
+  - {fileID: 11400000, guid: a492ebf992e0ad5479228d524cecc025, type: 2}
+  _secrets:
+  - _factId: f_c1_laura_cuaderno
+    _revealText: "Elena me dijo: \"Si algo me pasa, guarda mi cuaderno y no conf\xEDes en nadie de la polic\xEDa.\" Aqu\xED est\xE1. Su cuaderno rojo."
+    _unlockCondition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies:
+      - {fileID: 11400000, guid: 2600038c76ba83f478e7d6cb9c0f7cc3, type: 2}
+      _knownFactIds: []
+    _requiresCalmApproach: 1
+    _onlyInEnding: 0
+    _setsFlags: []
+    _revealedByEvidence: {fileID: 0}
+    _alsoRevealsFactIds: []
+    _triggersDecision: {fileID: 11400000, guid: d414a5a6b81cb534ab8c1e7b59322714, type: 2}
+  _fallback:
+    _crime:
+      _text: "Elena no ten\xEDa enemigos... bueno, solo los que le tra\xEDa su trabajo."
+      _revealsFactIds: []
+    _otherPerson:
+      _text: "Carlos vino esa noche, los o\xED gritar. \xC9l fumaba en el balc\xF3n, siempre."
+      _revealsFactIds:
+      - f_c1_laura_gritos
+      - f_c1_laura_fumar
+    _evidence:
+      _text: "\xBFMi tel\xE9fono? Ah... se me debi\xF3 caer."
+      _revealsFactIds: []
+    _press:
+      _text: "Est\xE1 bien, llegu\xE9 antes. O\xED un golpe, esper\xE9... ten\xEDa miedo. Cuando entr\xE9 ya estaba en el piso."
+      _revealsFactIds: []
+  _attitudeVariants: []
+  _extraTopics: []
+  _refusesUnless:
+    _allEvidenceAnalyzed: []
+    _anyEvidenceAnalyzed: []
+    _allFlags: []
+    _anyFlags: []
+    _noneFlags: []
+    _exposedLies: []
+    _knownFactIds: []
+  _cooperatesAfterSeeing: {fileID: 0}
+  _refusalLine: 

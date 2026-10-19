@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ae49f3db5a70314dbf28f152a69aa23, type: 3}
+  m_Name: lie_c2_alex_falla
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.LieData
+  _id: lie_c2_alex_falla
+  _caseId: c2
+  _ownerId: alex
+  _isAlexLie: 1
+  _statement: "El registro es claro: falla de energ\xEDa a las 11:47. Fue un accidente."
+  _refutedByEvidence:
+  - {fileID: 11400000, guid: 93d1aa00d4de8354bb55a14f1a185d77, type: 2}
+  - {fileID: 11400000, guid: f2c12abedec176a4696a8775fe778813, type: 2}
+  - {fileID: 11400000, guid: 3c0806b0b318d424d86978907fc19d53, type: 2}
+  _refutedByFactIds: []
+  _exposedResponse: 
+  _revealsFactIdsOnExposed: []
+  _setsFlagsOnExposed: []
+  _grantsEvidenceOnExposed: []
+  _alexTrigger: 2
+  _alexTriggerEvidence: {fileID: 11400000, guid: a2c381f6ada399746bb34d4adc164dc4, type: 2}
+  _evidenceRequirements: []
+  _triggersDecision: {fileID: 0}

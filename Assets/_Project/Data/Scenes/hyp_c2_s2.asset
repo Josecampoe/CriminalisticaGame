@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00c5986fe47059d41bd4988a04d126c6, type: 3}
+  m_Name: hyp_c2_s2
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.HypothesisData
+  _id: hyp_c2_s2
+  _sceneId: c2_s2
+  _questions:
+  - _id: hyp_c2_s2_q1
+    _text: "\xBFQui\xE9n estaba en el piso 12 cuando muri\xF3 Tom\xE1s?"
+    _multiSelect: 0
+    _options:
+    - _id: sebastian
+      _text: "Sebasti\xE1n"
+      _unlockCondition:
+        _allEvidenceAnalyzed: []
+        _anyEvidenceAnalyzed: []
+        _allFlags: []
+        _anyFlags: []
+        _noneFlags: []
+        _exposedLies: []
+        _knownFactIds: []
+      _isCorrect: 0
+    - _id: valeria
+      _text: Valeria
+      _unlockCondition:
+        _allEvidenceAnalyzed:
+        - {fileID: 11400000, guid: b6ac5f27d057d9246a0fa030b20ddc6a, type: 2}
+        _anyEvidenceAnalyzed: []
+        _allFlags: []
+        _anyFlags: []
+        _noneFlags: []
+        _exposedLies: []
+        _knownFactIds: []
+      _isCorrect: 1
+    - _id: nadie
+      _text: Nadie
+      _unlockCondition:
+        _allEvidenceAnalyzed: []
+        _anyEvidenceAnalyzed: []
+        _allFlags: []
+        _anyFlags: []
+        _noneFlags: []
+        _exposedLies: []
+        _knownFactIds: []
+      _isCorrect: 0
+    _onCorrectSetFlags: []

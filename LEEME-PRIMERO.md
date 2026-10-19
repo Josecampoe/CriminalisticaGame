@@ -58,7 +58,7 @@ Dentro de Claude Code, en la carpeta del proyecto:
 |---|---|
 | 1. Guion del caso | "Escribe el documento del caso con hechos, mentiras y qué evidencia refuta cada una" |
 | 2. Base | "Crea la escena Bootstrap, GameState, SaveService y SceneLoader" |
-| 3. Exploración | "Movimiento del investigador en 2D y sistema IInteractable con indicador en el cursor" |
+| 3. Exploración | "Jugador en primera persona, interacción con raycast desde la cámara, resaltado de objetos y modo inspección" |
 | 4. Evidencias | "EvidenceData, EvidenceService, expediente y pantalla de análisis" |
 | 5. Diálogo sin IA | "DialogueService con OfflineAiClient y la UI de diálogo" (el juego ya se puede jugar) |
 | 6. IA real | "Servidor proxy + HttpAiClient siguiendo la skill dialogo-ia" |

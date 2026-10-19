@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec4b29b1d066997429b8fa8401ac128b, type: 3}
+  m_Name: c2_s1
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.SceneData
+  _id: c2_s1
+  _caseId: c2
+  _unitySceneName: ServidoresB
+  _displayName: "Sala de servidores B \u2014 Piso 12, Torre Nexo"
+  _ambience: "Pasillos de racks con luces azules, puerta de seguridad, panel rojo del sistema de gas, fr\xEDo."
+  _introText: "Tres meses despu\xE9s. Torre Nexo Analytics, piso 12. El creador de ALEX est\xE1 muerto."
+  _evidence:
+  - {fileID: 11400000, guid: a2c381f6ada399746bb34d4adc164dc4, type: 2}
+  - {fileID: 11400000, guid: 93d1aa00d4de8354bb55a14f1a185d77, type: 2}
+  - {fileID: 11400000, guid: f2c12abedec176a4696a8775fe778813, type: 2}
+  - {fileID: 11400000, guid: 0c694d47e77926c4f85af03ca6868c38, type: 2}
+  - {fileID: 11400000, guid: 89eee9d5682d5d0429b539d77476134d, type: 2}
+  _characters: []
+  _hypothesis: {fileID: 11400000, guid: 18cfc1e0b98d99841aadfd143595c511, type: 2}
+  _closingDecision: {fileID: 11400000, guid: 08bf2207038c5cc498abbbea53a2b4dc, type: 2}
+  _requiredCompletedSceneIds: []
+  _hasAccusation: 0

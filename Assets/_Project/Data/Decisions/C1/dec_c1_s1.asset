@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dec343f0efddaf742832f9dde88f5d1e, type: 3}
+  m_Name: dec_c1_s1
+  m_EditorClassIdentifier: Caso404.Runtime::Caso404.Data.DecisionData
+  _id: dec_c1_s1
+  _prompt: "\xBFQu\xE9 hacemos ahora?"
+  _irreversible: 1
+  _alexRecommendedOptionId: A
+  _alexRecommendationText: "Carlos tiene motivo, estuvo aqu\xED y minti\xF3. Si esperamos, puede irse de la ciudad. Deteng\xE1moslo ya."
+  _options:
+  - _id: A
+    _text: Detener a Carlos de inmediato
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+    _setsFlags:
+    - {fileID: 11400000, guid: 6a95f91835e1a9f4296aaafee78cc523, type: 2}
+    _alexTrustDelta: 10
+    _nextSceneId: 
+    _letPlayerChooseNextScene: 1
+    _resultText: "Carlos queda detenido. Lo interrogar\xE1s en la Comisar\xEDa."
+    _resultSpokenByAlex: 0
+    _grantsEvidence: []
+  - _id: B
+    _text: Hablar con Carlos antes de actuar
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+    _setsFlags: []
+    _alexTrustDelta: 0
+    _nextSceneId: c1_s2
+    _letPlayerChooseNextScene: 0
+    _resultText: 
+    _resultSpokenByAlex: 0
+    _grantsEvidence: []
+  - _id: C
+    _text: "Revisar primero la porter\xEDa y el s\xF3tano"
+    _condition:
+      _allEvidenceAnalyzed: []
+      _anyEvidenceAnalyzed: []
+      _allFlags: []
+      _anyFlags: []
+      _noneFlags: []
+      _exposedLies: []
+      _knownFactIds: []
+    _setsFlags: []
+    _alexTrustDelta: 0
+    _nextSceneId: c1_s3
+    _letPlayerChooseNextScene: 0
+    _resultText: 
+    _resultSpokenByAlex: 0
+    _grantsEvidence: []
