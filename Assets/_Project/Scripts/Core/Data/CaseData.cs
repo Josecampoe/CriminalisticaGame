@@ -11,6 +11,7 @@ namespace Caso404.Data
         [SerializeField] private string _id;
         [SerializeField] private string _title;
         [SerializeField, TextArea(3, 6)] private string _introText;
+        [SerializeField, TextArea(8, 30)] private string _introLetter;
         [SerializeField, TextArea] private string _alexIntroLine;
         [SerializeField] private FallbackLines _alexLines = new();
         [SerializeField] private List<SceneData> _scenes = new();
@@ -33,6 +34,8 @@ namespace Caso404.Data
         public string Id { get => _id; internal set => _id = value; }
         public string Title { get => _title; internal set => _title = value; }
         public string IntroText { get => _introText; internal set => _introText = value; }
+        /// <summary>Carta de contexto de la Comisaria Lozano que se muestra antes de la primera escena del caso (vacía = sin carta).</summary>
+        public string IntroLetter { get => _introLetter; internal set => _introLetter = value; }
         public string AlexIntroLine { get => _alexIntroLine; internal set => _alexIntroLine = value; }
         /// <summary>Frases de respaldo de ALEX en este caso (diálogo libre sin conexión).</summary>
         public FallbackLines AlexLines { get => _alexLines; internal set => _alexLines = value; }
