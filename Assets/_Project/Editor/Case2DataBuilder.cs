@@ -332,6 +332,7 @@ namespace Caso404.EditorTools
             var c2 = Asset<CaseData>(Case2Path);
             c2.Id = "c2";
             c2.Title = "Protocolo 404";
+            c2.IntroLetter = "Unidad de Criminalística de Valdora — Oficio N.º 404-B\nPara: Investigador(a) Rivera\nAsunto: Muerte de Tomás Quintero, Torre Nexo Analytics, piso 12\n\nRivera:\nHan pasado tres meses desde el caso del Edificio Mirador. Hoy, a las 6:10 de la mañana, la guardia de seguridad de la Torre Nexo encontró muerto a Tomás Quintero, 45 años, ingeniero jefe de Nexo Analytics y creador de ALEX. Estaba dentro de la sala de servidores B. Se activó el sistema de extinción por gas con la puerta bloqueada.\nLa empresa ya emitió un comunicado: falla de energía y activación accidental. ALEX confirma esa versión en su informe preliminar.\nNexo financia la mitad de los equipos de esta unidad, así que habrá presión para cerrar esto rápido. No lo cierre rápido. Ciérrelo bien.\nUna cosa más: Elena Vargas ya se recuperó, y me llamó esta mañana. Dice que Tomás le escribió la noche en que murió.\n— Comisaria Patricia Lozano"; // texto exacto de la carta (sesión 4, GUION §6)
             c2.IntroText = "Tres meses después. Torre Nexo Analytics, piso 12. El creador de ALEX está muerto.";
             c2.AlexIntroLine = "Detective, el informe preliminar indica una falla técnica. No creo que nos tome mucho tiempo.";
             c2.AlexLowTrustIntroLine = "Noto que has dejado de confiar en mí, detective. Es una lástima. Sigo aquí para ayudarte.";
