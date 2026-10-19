@@ -105,6 +105,14 @@ namespace Caso404.UI
         public void StartNewGame()
         {
             var c = _database.FindCase(_firstCaseId);
+            // Antes del caso 1 se lee la carta de la Comisaria Lozano.
+            if (!string.IsNullOrEmpty(c.IntroLetter)) CaseLetterView.Show(transform.parent, _theme, c.IntroLetter, BeginNewGame);
+            else BeginNewGame();
+        }
+
+        void BeginNewGame()
+        {
+            var c = _database.FindCase(_firstCaseId);
             var first = c.Scenes[0];
             var state = new GameState
             {
