@@ -285,6 +285,17 @@ namespace Caso404.UI
         /// <summary>Empieza el siguiente caso conservando flags, finales y alexTrust (GUION §2).</summary>
         public void StartCase(CaseData nextCase, SceneData first)
         {
+            // Antes de la primera escena del caso se lee la carta de contexto.
+            if (!string.IsNullOrEmpty(nextCase.IntroLetter))
+            {
+                CaseLetterView.Show(_hud.transform.parent, _theme, nextCase.IntroLetter, () => LoadCase(nextCase, first));
+                return;
+            }
+            LoadCase(nextCase, first);
+        }
+
+        void LoadCase(CaseData nextCase, SceneData first)
+        {
             _game.State.SetCurrentScene(nextCase.Id, first.Id);
             _game.SaveGame();
             LoadingSceneId = first.Id;
