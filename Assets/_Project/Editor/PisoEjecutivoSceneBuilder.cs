@@ -77,7 +77,12 @@ namespace Caso404.EditorTools
             Npc("sebastian", new Vector3(5.3f, 0f, 9.1f), 180f, seated: true);
             Trigger<SceneCloseTrigger>("Ascensor (repasar el caso)", new Vector3(-1f, 1.1f, 0.12f), new Vector3(1.4f, 2.2f, 0.06f), "metal", "Repasar el caso (hipótesis)");
 
-            CityKit.Surround(-36f, true, 1212); // piso 12 de la Torre Nexo, de noche
+            CityKit.Surround(new CityKit.Options
+            {
+                StreetY = -36f, Night = true, Seed = 1212, Downtown = true, // piso 12 de la Torre Nexo, de noche
+                HostMin = new Vector2(-8.3f, -3f), HostMax = new Vector2(8.3f, 10.15f), GridCenter = new Vector2(0f, -3f),
+                HostHeight = 66f, PlayFloorY = 0f, PlayCeilingY = WallHeight, HostMaterial = "fachada_torre"
+            });
             Finish(scene, ScenePath);
         }
     }
