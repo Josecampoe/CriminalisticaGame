@@ -35,6 +35,7 @@ namespace Caso404.EditorTools
             Npc("laura", new Vector3(0.6f, 0f, -1.1f), 60f); // mirando hacia la puerta del 404
             Trigger<SceneCloseTrigger>("Ascensor (repasar el caso)", new Vector3(-3.85f, 1.1f, -1f), new Vector3(0.1f, 2.2f, 1.2f), "metal", "Repasar el caso y decidir");
 
+            CityKit.Surround(-12f, false, 404); // 4.º piso, mañana gris
             Finish(scene, ScenePath);
         }
 
@@ -78,6 +79,16 @@ namespace Caso404.EditorTools
             Box("Baranda O", b, new Vector3(-2.5f, 0.5f, 7), new Vector3(0.08f, 1f, 2), "metal");
             Box("Baranda E", b, new Vector3(2.5f, 0.5f, 7), new Vector3(0.08f, 1f, 2), "metal");
             Box("Matera", b, new Vector3(2.1f, 0.2f, 7.6f), new Vector3(0.4f, 0.4f, 0.4f), "dark");
+            // Colliders invisibles sobre la baranda: el jugador no puede caerse del balcón.
+            foreach (var (pos, size) in new[] { (new Vector3(0, 1.5f, 8.05f), new Vector3(5.2f, 3f, 0.1f)),
+                                                (new Vector3(-2.55f, 1.5f, 7f), new Vector3(0.1f, 3f, 2.2f)),
+                                                (new Vector3(2.55f, 1.5f, 7f), new Vector3(0.1f, 3f, 2.2f)) })
+            {
+                var wall = new GameObject("Límite invisible del balcón");
+                wall.transform.SetParent(b, false);
+                wall.transform.position = pos;
+                wall.AddComponent<BoxCollider>().size = size;
+            }
         }
 
         static void BuildEvidence(Transform root)
