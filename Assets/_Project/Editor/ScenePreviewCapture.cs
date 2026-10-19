@@ -16,19 +16,29 @@ namespace Caso404.EditorTools
         {
             Capture();
             EditorSceneManager.OpenScene(CafeSceneBuilder.ScenePath);
-            Shot("c1s2_entrada", new Vector3(0f, 1.65f, 0.9f), new Vector3(12, 10, 0));
-            Shot("c1s2_barra", new Vector3(1.5f, 1.65f, 3.5f), new Vector3(20, -40, 0));
+            Shot("c1s2_entrada", new Vector3(0f, 1.65f, 1f), new Vector3(10, 15, 0));
+            Shot("c1s2_barra", new Vector3(-5f, 1.65f, 3.5f), new Vector3(12, 50, 0));
+            Shot("c1s2_trastienda", new Vector3(3.2f, 1.65f, 9.8f), new Vector3(15, 70, 0));
+            Shot("c1s2_calle", new Vector3(-3.6f, 1.65f, 1.2f), new Vector3(3, 180, 0));
             EditorSceneManager.OpenScene(PorteriaSceneBuilder.ScenePath);
             Shot("c1s3_porteria", new Vector3(-3.8f, 1.65f, 1f), new Vector3(10, 10, 0));
+            Shot("c1s3_calle", new Vector3(-3f, 1.65f, 3f), new Vector3(3, 180, 0));
             Shot("c1s3_sotano", new Vector3(1f, 1.65f, 3f), new Vector3(8, 90, 0));
             Shot("c1s3_mantenimiento", new Vector3(6.5f, 1.65f, 4.6f), new Vector3(10, 0, 0));
             Shot("c1s3_parqueadero", new Vector3(13f, 1.65f, 3f), new Vector3(10, 60, 0));
             EditorSceneManager.OpenScene(ComisariaSceneBuilder.ScenePath);
             Shot("c1s4_oficina", new Vector3(-1.5f, 1.65f, 0.9f), new Vector3(10, -20, 0));
+            Shot("c1s4_ventana", new Vector3(-1.5f, 1.65f, 2.2f), new Vector3(3, 180, 0));
             Shot("c1s4_interrogatorio", new Vector3(5f, 1.65f, 2f), new Vector3(15, 60, 0));
             EditorSceneManager.OpenScene(ServidoresSceneBuilder.ScenePath);
-            Shot("c2s1_entrada", new Vector3(0f, 1.65f, -1.5f), new Vector3(10, 0, 0));
-            Shot("c2s1_sala", new Vector3(-1.5f, 1.65f, 0.8f), new Vector3(25, 50, 0));
+            Shot("c2s1_pasillo", new Vector3(-4.5f, 1.65f, -1.2f), new Vector3(3, 150, 0));
+            Shot("c2s1_sala", new Vector3(-3f, 1.65f, 0.8f), new Vector3(12, 40, 0));
+            EditorSceneManager.OpenScene(PisoEjecutivoSceneBuilder.ScenePath);
+            Shot("c2s2_oficinas", new Vector3(3f, 1.65f, 1.2f), new Vector3(8, -20, 0));
+            Shot("c2s2_ventanal", new Vector3(0f, 1.65f, 4.5f), new Vector3(2, 0, 0));
+            EditorSceneManager.OpenScene(CasetaSceneBuilder.ScenePath);
+            Shot("c2s3_caseta", new Vector3(2.5f, 1.65f, 1f), new Vector3(10, -90, 0));
+            Shot("c2s3_parqueadero", new Vector3(1f, 1.65f, 6f), new Vector3(10, 120, 0));
             Debug.Log("[Caso404] Capturas guardadas en Logs/preview_*.png");
         }
 
@@ -36,12 +46,13 @@ namespace Caso404.EditorTools
         public static void Capture()
         {
             EditorSceneManager.OpenScene(Apartment404SceneBuilder.ScenePath);
-            Shot("01_entrada", new Vector3(2.5f, 1.65f, 1.2f), new Vector3(10, -30, 0));
-            Shot("04_balcon", new Vector3(0.3f, 1.65f, 7.3f), new Vector3(35, 200, 0));
-            Shot("05_pasillo", new Vector3(3.5f, 1.65f, -1f), new Vector3(5, -100, 0));
-            Shot("06_ciudad_desde_balcon", new Vector3(0.5f, 1.65f, 7.4f), new Vector3(8, 20, 0));
-            EditorSceneManager.OpenScene(PisoEjecutivoSceneBuilder.ScenePath);
-            Shot("c2s2_ventanal", new Vector3(0f, 1.65f, 4.5f), new Vector3(2, 0, 0));
+            Shot("c1s1_01_pasillo", new Vector3(-12f, 1.65f, -1.5f), new Vector3(5, 90, 0));
+            Shot("c1s1_02_sala", new Vector3(0.6f, 1.65f, 0.8f), new Vector3(10, -45, 0));
+            Shot("c1s1_03_comedor_cocina", new Vector3(-5f, 1.65f, 6.5f), new Vector3(12, 120, 0));
+            Shot("c1s1_04_estudio", new Vector3(2.6f, 1.65f, 4.4f), new Vector3(12, 50, 0));
+            Shot("c1s1_05_habitacion", new Vector3(6.7f, 1.65f, 1f), new Vector3(10, 40, 0));
+            Shot("c1s1_06_balcon", new Vector3(1.4f, 1.65f, 9f), new Vector3(20, -95, 0));
+            Shot("c1s1_07_ciudad", new Vector3(-1f, 1.65f, 10.1f), new Vector3(12, 0, 0));
         }
 
         /// <summary>Fila con los 8 personajes (de pie, sentados y hablando) para revisar modelos, ropa y poses.</summary>
