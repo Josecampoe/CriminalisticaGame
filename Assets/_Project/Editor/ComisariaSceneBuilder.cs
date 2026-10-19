@@ -20,7 +20,7 @@ namespace Caso404.EditorTools
             var scene = Begin("c1", "c1_s4");
 
             Ambient(new Color(0.26f, 0.27f, 0.3f), new Color(0.2f, 0.21f, 0.23f), 12f, 40f);
-            Sun("Luz de ventana", new Color(0.75f, 0.8f, 0.9f), 0.4f, new Vector3(35f, 210f, 0f));
+            var sun = Sun("Luz de ventana", new Color(0.75f, 0.8f, 0.9f), 0.4f, new Vector3(35f, 210f, 0f));
             PointLight("Lámpara de la oficina", new Vector3(-1f, 2.5f, 4f), new Color(1f, 0.88f, 0.7f), 1.4f, 8f);
             PointLight("Luz del tablero", new Vector3(-4.5f, 2.3f, 4f), new Color(1f, 0.8f, 0.55f), 1.0f, 4f);
             PointLight("Lámpara de interrogatorio", new Vector3(8f, 2.4f, 4f), new Color(1f, 0.92f, 0.8f), 1.8f, 6f);
@@ -29,7 +29,9 @@ namespace Caso404.EditorTools
             var env = Group("Environment");
             // Oficina: x ∈ [-6, 4], z ∈ [0, 8]
             FloorAndCeiling(env, "Oficina", new Vector2(-6, 0), new Vector2(4, 8), "floor_hall");
-            Wall(env, "Oficina Sur", new Vector3(-6, 0, 0), new Vector3(4, 0, 0), "wall_office", new Opening(4f, 2.4f, 1.2f, 0.9f));
+            Wall(env, "Oficina Sur", new Vector3(-6, 0, 0), new Vector3(4, 0, 0), "wall_office", new Opening(4f, 2.4f, 1.2f, 0.9f), new Opening(8f, 1.6f, 1.2f, 0.9f));
+            Box("Ventana de la oficina", env, new Vector3(-2f, 1.5f, 0f), new Vector3(2.4f, 1.2f, 0.03f), "glass");
+            Box("Ventana de la oficina 2", env, new Vector3(2f, 1.5f, 0f), new Vector3(1.6f, 1.2f, 0.03f), "glass");
             Wall(env, "Oficina Norte", new Vector3(-6, 0, 8), new Vector3(4, 0, 8), "wall_office");
             Wall(env, "Oficina Oeste", new Vector3(-6, 0, 0), new Vector3(-6, 0, 8), "wall_office");
             Wall(env, "Oficina/Interrogatorio", new Vector3(4, 0, 0), new Vector3(4, 0, 8), "wall_office", new Opening(2f, 1f), new Opening(5.5f, 2f, 1f, 1f));
@@ -80,7 +82,23 @@ namespace Caso404.EditorTools
                 so.ApplyModifiedPropertiesWithoutUndo();
             }
 
-            CityKit.Surround(-4f, false, 7); // segundo piso
+            // Comisaría en el segundo piso. Es la misma escena en los dos casos: de día en el caso 1 y de noche en el caso 2.
+            CityKit.Surround(new CityKit.Options
+            {
+                StreetY = -4f, Night = false, Seed = 7, Switchable = true,
+                HostMin = new Vector2(-6.3f, -0.3f), HostMax = new Vector2(12.3f, 8.3f), GridCenter = new Vector2(3f, 14f),
+                HostHeight = 16f, PlayFloorY = 0f, PlayCeilingY = WallHeight, HostMaterial = "fachada_comisaria"
+            });
+            var atmosphere = new GameObject("Ambiente según el caso").AddComponent<Caso404.Environment.CaseAtmosphere>();
+            Set(atmosphere, "_game", Game);
+            Set(atmosphere, "_sun", sun);
+            Set(atmosphere, "_nightSkybox", CityKit.SkyMaterial(true));
+            Set(atmosphere, "_lampMaterial", Mat("farol_comisaria"));
+            var atmoSo = new SerializedObject(atmosphere);
+            var lights = atmoSo.FindProperty("_cityLights");
+            lights.arraySize = CityKit.LastEmissive.Count;
+            for (int i = 0; i < CityKit.LastEmissive.Count; i++) lights.GetArrayElementAtIndex(i).objectReferenceValue = CityKit.LastEmissive[i];
+            atmoSo.ApplyModifiedPropertiesWithoutUndo();
             Finish(scene, ScenePath);
         }
 

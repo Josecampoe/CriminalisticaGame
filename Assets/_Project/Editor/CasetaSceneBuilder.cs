@@ -66,7 +66,12 @@ namespace Caso404.EditorTools
             Npc("ines", new Vector3(-2f, 0f, 2.6f), 90f, seated: true);
             Trigger<SceneCloseTrigger>("Ascensor del parqueadero (repasar el caso)", new Vector3(13.9f, 1.1f, 2f), new Vector3(0.1f, 2.2f, 1.4f), "metal", "Repasar el caso (hipótesis)");
 
-            CityKit.Surround(0f, true, 99, 24f); // de noche
+            CityKit.Surround(new CityKit.Options
+            {
+                StreetY = -0.15f, Night = true, Seed = 99, Downtown = true, // base de la Torre Nexo, de noche
+                HostMin = new Vector2(-4.3f, -4.3f), HostMax = new Vector2(14.3f, 8.3f),
+                HostHeight = 66f, PlayFloorY = 0f, PlayCeilingY = WallHeight, HostMaterial = "fachada_torre"
+            });
             Finish(scene, ScenePath);
         }
     }

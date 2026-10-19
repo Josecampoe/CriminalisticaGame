@@ -34,10 +34,12 @@ namespace Caso404.EditorTools
             // Portería (lobby): x ∈ [-6, 0], z ∈ [0, 6]
             FloorAndCeiling(env, "Portería", new Vector2(-6, 0), new Vector2(0, 6), "floor_tile");
             Wall(env, "Portería Oeste", new Vector3(-6, 0, 0), new Vector3(-6, 0, 6), "wall");
-            Wall(env, "Portería Sur", new Vector3(-6, 0, 0), new Vector3(0, 0, 0), "wall");
+            Wall(env, "Portería Sur", new Vector3(-6, 0, 0), new Vector3(0, 0, 0), "wall", new Opening(3f, 1.4f, 2.2f), new Opening(1.1f, 1.2f, 1.2f, 1f), new Opening(4.9f, 1.2f, 1.2f, 1f));
+            Box("Ventana de la portería 1", env, new Vector3(-4.9f, 1.6f, 0f), new Vector3(1.2f, 1.2f, 0.03f), "glass");
+            Box("Ventana de la portería 2", env, new Vector3(-1.1f, 1.6f, 0f), new Vector3(1.2f, 1.2f, 0.03f), "glass");
             Wall(env, "Portería Norte", new Vector3(-6, 0, 6), new Vector3(0, 0, 6), "wall");
             Wall(env, "Portería Este", new Vector3(0, 0, 0), new Vector3(0, 0, 6), "wall", new Opening(3f, 1.4f));
-            Box("Puerta de la calle", env, new Vector3(-3f, 1.1f, 0.05f), new Vector3(1.4f, 2.2f, 0.06f), "glass", keepCollider: false);
+            Box("Puerta de la calle", env, new Vector3(-3f, 1.1f, 0.0f), new Vector3(1.4f, 2.2f, 0.04f), "glass");
             // Caseta
             Box("Caseta mostrador", env, new Vector3(-4.6f, 0.55f, 4.2f), new Vector3(1.6f, 1.1f, 0.5f), "wood");
             Box("Caseta lateral", env, new Vector3(-3.85f, 0.55f, 5.1f), new Vector3(0.1f, 1.1f, 1.3f), "wood");
@@ -119,7 +121,12 @@ namespace Caso404.EditorTools
             Npc("andres", new Vector3(7.2f, 0f, 6.6f), 180f);
             Trigger<SceneCloseTrigger>("Puerta de la calle (repasar el caso)", new Vector3(-3f, 1.1f, 0.12f), new Vector3(1.4f, 2.2f, 0.06f), "glass", "Repasar el caso (hipótesis)");
 
-            CityKit.Surround(0f, false, 33, 30f); // planta baja, día nublado
+            CityKit.Surround(new CityKit.Options
+            {
+                StreetY = -0.15f, Night = false, Seed = 33, // planta baja del Edificio Mirador, día nublado
+                HostMin = new Vector2(-6.3f, -3.3f), HostMax = new Vector2(22.3f, 9.3f), GridCenter = new Vector2(4f, 14f),
+                HostHeight = 24f, PlayFloorY = 0f, PlayCeilingY = WallHeight
+            });
             Finish(scene, ScenePath);
         }
 
