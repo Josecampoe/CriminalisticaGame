@@ -2,7 +2,7 @@
 
 ## Sesión 4 (19 de octubre de 2026, hasta las 9:30 AM)
 
-**En resumen:** quedaron hechos la **tarea 1 (personajes)** y la **tarea 4 (cartas de contexto)**. También se generó el **build de Windows** y se **subió todo a GitHub** en ramas por integrante. **No alcanzó el tiempo** para la **tarea 2 (espacios más grandes)** ni para la **tarea 3 (la ciudad alrededor)**.
+**En resumen:** quedaron hechos la **tarea 1 (personajes)** y la **tarea 4 (cartas de contexto)**. Hay una **versión básica de la tarea 3 (ciudad)**, y se generaron el **build de Windows** y la **subida a GitHub** en ramas por integrante. **No alcanzó el tiempo** para la **tarea 2 (espacios más grandes)**.
 
 ### Qué se hizo
 | Tarea | Estado | Detalle |
@@ -10,26 +10,27 @@
 | Subida a GitHub | Hecha | `tools/split_by_owner.py` reparte el trabajo en una rama por integrante, con commits pequeños firmados por cada uno y la fecha original. Verifica que fusionar las 3 ramas da exactamente el mismo proyecto. Ramas: `jose/base-juego`, `majo/docs-ui-datos`, `daniel/core-pruebas`; las de esta sesión son `jose/sesion4`, `majo/sesion4` y `daniel/sesion4`. |
 | 1. Personajes | Hecha | Los 8 personajes usan modelos humanoides de Quaternius en vez de cápsulas, con ropa según el guion, peinado, barba, gorra o placa, y escala según edad. Tienen animaciones de reposo, hablar, sentado y sentado hablando, creadas por código porque el paquete no trae ninguna. Al hablar, el personaje mira al jugador. Se conservan los colliders, `CharacterNpc` y el resaltado. Los sentados tienen su propia silla. |
 | 4. Cartas de contexto | Hecha | Antes de c1_s1 (**Nueva partida**) y antes de c2_s1 (**Comenzar «Protocolo 404»**): fondo oscuro, hoja de expediente, sello CONFIDENCIAL, máquina de escribir (un clic muestra todo) y el botón "Comenzar investigación". Usan los textos exactos que me diste. La Comisaria Lozano quedó agregada al guion (§1 y §6). |
-| Build de Windows | Hecho | `Builds/ElCaso404/ElCaso404.exe` (115 MB). Se regenera con **Caso404 → Build de Windows**. |
-| Capturas | Parcial | En `Docs/capturas/`: la carta del caso 1 (escribiéndose y completa) y los personajes de pie, sentados y hablando. Faltan las capturas de la carta del caso 2 y de cada escena. |
+| Build de Windows | Hecho | `Builds/ElCaso404/ElCaso404.exe` (118 MB). Se regenera con **Caso404 → Build de Windows**. |
+| Capturas | Parcial | En `Docs/capturas/`: la carta del caso 1 (escribiéndose y completa), los personajes de pie, sentados y hablando, la ciudad desde el balcón, el ventanal nocturno, Carlos en el café y el interrogatorio. Faltan la carta del caso 2 y una captura de cada escena. |
 | 2. Espacios más grandes | **No se hizo** | El apartamento sigue del tamaño anterior. |
-| 3. Ciudad alrededor | **No se hizo** | Por las ventanas se sigue viendo el piso infinito y el cielo por defecto. Ya revisé el kit de Kenney: **solo trae edificios**, así que calles, andenes, faroles, carros y montañas habrá que hacerlos con primitivas. |
+| 3. Ciudad alrededor | **Básica** | `CityKit` pone alrededor de 6 escenas un suelo de calle (ya no hay piso infinito), un anillo de edificios de Kenney (detallados cerca y mallas simples lejos), montañas lejanas, cielo nublado o nocturno con ventanas que brillan y niebla en el borde. La calle está a la altura de cada piso: 12 m abajo en el apartamento y 36 m en el piso ejecutivo. Hay colliders invisibles en el balcón y en el ventanal del piso ejecutivo, que ahora es de vidrio transparente. **Falta:** andenes, faroles y carros (el kit de Kenney **solo trae edificios**), iluminación horneada, una vista nocturna más clara en el piso ejecutivo y la Comisaría de noche en el caso 2. |
 
 Pruebas: **40 EditMode y 6 PlayMode en verde** antes y después de los cambios. Las PlayMode ahora también pasan por las dos cartas.
 
 ### Qué debes revisar tú
 1. **Cómo se ven los personajes.** Los cuerpos base del paquete gratuito son muy musculosos y la ropa queda ajustada, como un enterizo, porque está pintada sobre la piel. Si no te convence, la alternativa es un paquete con ropa modelada.
 2. **Las poses en el juego.** En Play los personajes deben estar en reposo; los sentados, en su silla; y al hablarles, gesticular y mirarte. Revisa sobre todo la Comisaría y el café.
-3. **Las dos cartas**: que el texto se lea bien en tu pantalla y que el clic complete el texto.
-4. **El vestuario que elegí** sin que lo pidieras: Laura con uniforme de enfermera, Sebastián con buzo con capota y Elena con chaqueta y jeans (`DECISIONES.md`, N2).
-5. **Los PR en GitHub** (enlaces abajo). Te recomiendo fusionar primero las ramas de la subida inicial y después las de la sesión 4: las de la sesión 4 continúan a las anteriores y no tienen conflictos.
+3. **La ciudad**: asómate al balcón del apartamento y al ventanal del piso ejecutivo; revisa que no haya bordes visibles ni caídas.
+4. **Las dos cartas**: que el texto se lea bien en tu pantalla y que el clic complete el texto.
+5. **El vestuario que elegí** sin que lo pidieras: Laura con uniforme de enfermera, Sebastián con buzo con capota y Elena con chaqueta y jeans (`DECISIONES.md`, N2).
+6. **Los PR en GitHub** (enlaces abajo). Te recomiendo fusionar primero las ramas de la subida inicial y después las de la sesión 4: las de la sesión 4 continúan a las anteriores y no tienen conflictos.
 
 ### Cómo probar
 - **En el Editor:** **Caso404 → Jugar desde el menú** (Ctrl+Shift+P) → **Nueva partida**. Debe aparecer la carta.
 - **En el ejecutable:** abre `Builds/ElCaso404/ElCaso404.exe`.
 
 ### Para la próxima sesión
-- **"Hagamos las tareas 2 y 3"**: apartamento ampliado con pasillo 401–405 y ascensor, y la ciudad alrededor de cada escena con niebla, cielo según la hora y colliders invisibles en el balcón.
+- **"Hagamos la tarea 2 y terminemos la 3"**: apartamento ampliado con pasillo 401–405 y ascensor, repartir las evidencias en el espacio, y completar la ciudad con andenes, faroles, carros, luz horneada y la Comisaría de noche en el caso 2.
 - Capturas de cada escena y de la carta del caso 2 (necesita jugar el caso 1 hasta el final o una prueba que llegue ahí).
 
 ---
