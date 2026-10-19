@@ -108,7 +108,6 @@ namespace Caso404.EditorTools
                 var tex = PaintOutfit(look, regionMaps[look.Female], skins[look.Female]);
                 BuildPrefab(look, tex, controller, regionMaps[look.Female]);
             }
-            BuildSurfaceMasks(); // piel, ropa y zapatos con brillo distinto
             AssetDatabase.SaveAssets();
             Debug.Log($"[Caso404] {Looks.Length} personajes construidos en {PrefabFolder}.");
         }
@@ -196,9 +195,8 @@ namespace Caso404.EditorTools
             Wave(clip, "RootT.y", seated ? 0.56f : 1.0f, 0.004f, L, 1);
             Const(clip, "RootQ.x", 0f); Const(clip, "RootQ.y", 0f); Const(clip, "RootQ.z", 0f); Const(clip, "RootQ.w", 1f);
 
-            // Respiración, postura y un leve cambio de peso de un pie al otro (de pie).
+            // Respiración y postura
             Wave(clip, "Spine Front-Back", seated ? 0.08f : 0.02f, 0.02f, L, 1);
-            if (!seated) Wave(clip, "Spine Left-Right", 0f, 0.025f, L, 1, 0.1f);
             Wave(clip, "Chest Front-Back", 0.02f, 0.025f, L, 1, 0.2f);
             Wave(clip, "Head Turn Left-Right", 0f, talking ? 0.06f : 0.04f, L, 1, 0.5f);
             if (talking) Wave(clip, "Head Nod Down-Up", -0.05f, 0.12f, L, 3);
@@ -218,10 +216,8 @@ namespace Caso404.EditorTools
             {
                 bool right = side == "Right";
                 Const(clip, $"{side} Shoulder Down-Up", -0.2f);
-                // De pie y en reposo, la palma mira al muslo (antes miraba al frente y la mano parecía una garra).
-                bool restingStanding = !seated && !talking;
-                Const(clip, $"{side} Arm Twist In-Out", restingStanding ? 0f : 0.1f);
-                Const(clip, $"{side} Forearm Twist In-Out", restingStanding ? -0.05f : 0.3f);
+                Const(clip, $"{side} Arm Twist In-Out", 0.1f);
+                Const(clip, $"{side} Forearm Twist In-Out", 0.3f);
                 if (seated && !talking)
                 {
                     // Manos sobre los muslos
@@ -241,21 +237,15 @@ namespace Caso404.EditorTools
                 }
                 else
                 {
-                    // Brazos caídos junto al cuerpo (antes quedaban abiertos en "A", como un maniquí) y codo apenas flexionado.
-                    Wave(clip, $"{side} Arm Down-Up", -0.8f, 0.015f, L, 1, right ? 0f : 0.5f);
-                    Const(clip, $"{side} Arm Front-Back", 0.18f);
-                    Const(clip, $"{side} Forearm Stretch", 0.78f);
-                    Const(clip, $"{side} Hand Down-Up", 0.05f);
-                    Const(clip, $"{side} Hand In-Out", right ? -0.1f : -0.05f);
+                    Wave(clip, $"{side} Arm Down-Up", -0.55f, 0.01f, L, 1, right ? 0f : 0.5f);
+                    Const(clip, $"{side} Arm Front-Back", 0.3f);
+                    Const(clip, $"{side} Forearm Stretch", 0.82f);
+                    Const(clip, $"{side} Hand Down-Up", 0f);
                 }
                 // Dedos semicerrados y naturales
-                // Dedos relajados: un poco más cerrados hacia el meñique, como una mano en reposo real.
-                string[] fingers = { "Index", "Middle", "Ring", "Little" };
-                for (int f = 0; f < fingers.Length; f++)
-                    for (int j = 1; j <= 3; j++)
-                        Const(clip, $"{side}Hand.{fingers[f]}.{j} Stretched", talking && right ? 0.4f : 0.6f - 0.08f * f - (j == 1 ? 0f : 0.05f));
-                Const(clip, $"{side}Hand.Thumb.1 Stretched", 0.35f);
-                Const(clip, $"{side}Hand.Thumb.Spread", 0.1f);
+                foreach (var f in new[] { "Index", "Middle", "Ring", "Little" })
+                    for (int j = 1; j <= 3; j++) Const(clip, $"{side}Hand.{f}.{j} Stretched", talking && right ? 0.1f : -0.1f);
+                Const(clip, $"{side}Hand.Thumb.1 Stretched", 0.2f);
             }
 
             var settings = AnimationUtility.GetAnimationClipSettings(clip);
@@ -309,11 +299,6 @@ namespace Caso404.EditorTools
             public float Height;
             public Vector3 ChestFront;   // punto del pecho (lado izquierdo) para la placa
             public Vector3 HeadTop;      // coronilla, para gorras
-            public float WristX;         // |x| donde empieza la mano (pose T: los brazos van a lo largo de X)
-            public float ShoulderX;      // |x| donde empieza el brazo
-            public float NeckBaseY;      // altura de la base del cuello (borde del cuello de la ropa)
-            public float AnkleY;         // altura donde termina la pierna y empieza el pie (dobladillo del pantalón)
-            public Bounds FootLeft, FootRight; // caja de cada pie en la pose T (para ponerle un zapato con volumen)
         }
 
         static Region RegionOfBone(string bone)
@@ -378,22 +363,6 @@ namespace Caso404.EditorTools
                 });
             }
             Dilate(map, filled, 4);
-
-            // Articulaciones para cortar mangas y cuello en líneas limpias (antes seguían los triángulos y quedaban dentadas).
-            float MinAbsX(Region r) => verts.Where((v, i) => vRegion[i] == r).Select(v => Mathf.Abs(v.x)).DefaultIfEmpty(0.6f).Min();
-            map.WristX = MinAbsX(Region.Hands);
-            map.ShoulderX = MinAbsX(Region.UpperArm);
-            map.NeckBaseY = verts.Where((v, i) => vRegion[i] == Region.Neck).Select(v => v.y).DefaultIfEmpty(map.Height * 0.84f).Min();
-            map.AnkleY = verts.Where((v, i) => vRegion[i] == Region.Feet).Select(v => v.y).DefaultIfEmpty(0.1f).Max();
-            Bounds FootBox(int sign)
-            {
-                var pts = verts.Where((v, i) => vRegion[i] == Region.Feet && Mathf.Sign(v.x) == sign).ToList();
-                var b = new Bounds(pts.Count > 0 ? pts[0] : Vector3.zero, Vector3.zero);
-                foreach (var v in pts) b.Encapsulate(v);
-                return b;
-            }
-            map.FootLeft = FootBox(1);
-            map.FootRight = FootBox(-1);
 
             // Punto del pecho izquierdo (para la placa): el más adelantado a la altura del pecho
             float chestY = map.Height * 0.74f;
@@ -461,74 +430,6 @@ namespace Caso404.EditorTools
 
         static float Lum(Color c) => c.r * 0.3f + c.g * 0.59f + c.b * 0.11f;
 
-        /// <summary>
-        /// Color de la ropa en un punto del cuerpo, o null si ahí se ve la piel. Mangas y cuello se cortan por posición
-        /// (distancia a la muñeca o al hombro y altura del cuello) para que el borde sea una línea limpia.
-        /// </summary>
-        static Color? ClothAt(Look look, Region region, Vector3 p, float waist, BodyMap map)
-        {
-            float ax = Mathf.Abs(p.x);
-            if (region is Region.UpperArm or Region.LowerArm or Region.Hands || (region == Region.Torso && ax > map.ShoulderX))
-            {
-                float cuff = look.ShortSleeves ? map.ShoulderX + (map.WristX - map.ShoulderX) * 0.42f : map.WristX - 0.012f;
-                return ax < cuff ? look.Top : null;
-            }
-            if (region == Region.Neck || (region == Region.Torso && p.y > map.NeckBaseY && ax < map.ShoulderX * 0.45f))
-                return p.y < map.NeckBaseY + 0.012f ? look.Top : null; // el cuello de la prenda sube un poco
-            return region switch
-            {
-                Region.Torso => p.y < waist ? look.Pants : look.Top,
-                Region.Hips => p.y > waist + 0.02f && look.Pattern != Pattern.Overall ? look.Top : look.Pants,
-                Region.Legs => look.Pants,
-                Region.Feet => look.Shoes,
-                _ => null,
-            };
-        }
-
-        /// <summary>
-        /// Piel, ropa y zapatos con brillo distinto: genera un mapa de metal/brillo por personaje (alfa = brillo) con las
-        /// mismas zonas de la ropa pintada y lo asigna a su material. No reconstruye los prefabs.
-        /// </summary>
-        [MenuItem("Caso404/Arte/Brillo de piel, ropa y zapatos")]
-        public static void BuildSurfaceMasks()
-        {
-            var regionMaps = new Dictionary<bool, BodyMap> { [false] = BuildBodyMap(MaleFbx), [true] = BuildBodyMap(FemaleFbx) };
-            foreach (var look in Looks)
-            {
-                var map = regionMaps[look.Female];
-                float waist = map.Height * 0.585f;
-                var px = new Color[TexSize * TexSize];
-                for (int i = 0; i < px.Length; i++)
-                {
-                    var region = map.Regions[i];
-                    var cloth = ClothAt(look, region, map.Positions[i], waist, map);
-                    float smooth = cloth == null ? 0.42f : region == Region.Feet ? 0.55f : 0.1f;
-                    if (cloth != null && region != Region.Feet) smooth += 0.06f * Mathf.PerlinNoise(i % TexSize * 0.3f, i / TexSize * 0.3f); // tela
-                    px[i] = new Color(0f, 0f, 0f, smooth);
-                }
-                var tex = new Texture2D(TexSize, TexSize, TextureFormat.RGBA32, false, true);
-                tex.SetPixels(px);
-                tex.Apply();
-                var path = $"{TexFolder}/T_chr_{look.Id}_M.png";
-                File.WriteAllBytes(path, tex.EncodeToPNG());
-                Object.DestroyImmediate(tex);
-                AssetDatabase.ImportAsset(path);
-                var imp = (TextureImporter)AssetImporter.GetAtPath(path);
-                imp.sRGBTexture = false;
-                imp.maxTextureSize = TexSize;
-                imp.SaveAndReimport();
-                var mat = AssetDatabase.LoadAssetAtPath<Material>($"{MatFolder}/M_chr_{look.Id}.mat");
-                if (mat == null) continue;
-                mat.SetTexture("_MetallicGlossMap", AssetDatabase.LoadAssetAtPath<Texture2D>(path));
-                mat.EnableKeyword("_METALLICSPECGLOSSMAP");
-                mat.SetFloat("_Smoothness", 1f);
-                EditorUtility.SetDirty(mat);
-                var hair = AssetDatabase.LoadAssetAtPath<Material>($"{MatFolder}/M_hair_{look.Id}.mat");
-                if (hair != null) { hair.SetFloat("_Smoothness", 0.55f); EditorUtility.SetDirty(hair); } // pelo con algo de brillo
-            }
-            AssetDatabase.SaveAssets();
-        }
-
         static Texture2D PaintOutfit(Look look, BodyMap map, (Color[] light, Color[] dark) skin)
         {
             var px = new Color[TexSize * TexSize];
@@ -541,25 +442,30 @@ namespace Caso404.EditorTools
                 var baseSkin = Color.Lerp(skin.light[i], skin.dark[i], look.SkinTone);
                 float shade = Mathf.Clamp(Lum(skin.light[i]) / 0.62f, 0.55f, 1.25f);
                 shade = Mathf.Lerp(1f, shade, 0.45f); // conserva un poco del volumen pintado, sin músculos marcados
-                Color? cloth = ClothAt(look, region, p, waist, map);
+                Color? cloth = null;
+                switch (region)
+                {
+                    case Region.Torso:
+                        cloth = p.y < waist ? look.Pants : look.Top;
+                        break;
+                    case Region.UpperArm:
+                        cloth = look.Top;
+                        break;
+                    case Region.LowerArm:
+                        if (!look.ShortSleeves) cloth = look.Top;
+                        break;
+                    case Region.Hips:
+                        cloth = p.y > waist + 0.02f && look.Pattern != Pattern.Overall ? look.Top : look.Pants;
+                        break;
+                    case Region.Legs:
+                        cloth = look.Pants;
+                        break;
+                    case Region.Feet:
+                        cloth = look.Shoes;
+                        break;
+                }
                 if (cloth != null) cloth = Details(look, region, p, h, waist, cloth.Value, i);
-                if (cloth != null && region == Region.Feet)
-                {
-                    // Zapatos: color liso (sin los dedos del cuerpo base), suela y un brillo leve en la punta.
-                    float sole = p.y < 0.022f ? 1f : 0f;
-                    var shoe = Color.Lerp(cloth.Value, Lum(cloth.Value) > 0.5f ? C(0.97f, 0.97f, 0.95f) : C(0.03f, 0.03f, 0.03f), sole * 0.8f);
-                    float toe = Mathf.Clamp01((-p.z - 0.05f) * 6f) * 0.08f;
-                    px[i] = shoe * (0.95f + toe);
-                }
-                else if (cloth != null)
-                {
-                    // La ropa no conserva el relieve de los músculos del cuerpo base (parecía piel pintada): lleva una
-                    // trama de tela suave, costuras y sombras de pliegue para que se lea como prenda.
-                    float clothShade = Mathf.Lerp(1f, shade, Lum(cloth.Value) > 0.5f ? 0f : 0.05f);
-                    float weave = 0.975f + 0.025f * Mathf.PerlinNoise(i % TexSize * 0.08f, i / TexSize * 0.08f);
-                    px[i] = cloth.Value * clothShade * weave * Tailoring(look, region, p, waist, map);
-                }
-                else px[i] = baseSkin;
+                px[i] = cloth != null ? cloth.Value * shade : baseSkin;
                 px[i].a = 1f;
             }
             var tex = new Texture2D(TexSize, TexSize, TextureFormat.RGB24, false);
@@ -576,33 +482,6 @@ namespace Caso404.EditorTools
             return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
         }
 
-        /// <summary>
-        /// Oscurecimiento de costuras y pliegues (1 = sin cambio): costura del hombro, puño o ruedo de la manga, cuello,
-        /// cinturilla, dobladillo del pantalón y sombra en los costados del torso y bajo los brazos.
-        /// </summary>
-        static float Tailoring(Look look, Region region, Vector3 p, float waist, BodyMap map)
-        {
-            float ax = Mathf.Abs(p.x);
-            float k = 1f;
-            bool arm = region is Region.UpperArm or Region.LowerArm || (region == Region.Torso && ax > map.ShoulderX);
-            if (arm)
-            {
-                float cuff = look.ShortSleeves ? map.ShoulderX + (map.WristX - map.ShoulderX) * 0.42f : map.WristX - 0.012f;
-                if (cuff - ax < 0.022f) k *= 0.8f;                         // puño o ruedo de la manga
-                if (Mathf.Abs(ax - map.ShoulderX - 0.01f) < 0.004f) k *= 0.82f; // costura del hombro
-                if (p.y < map.NeckBaseY - 0.12f) k *= 0.9f;                // parte baja del brazo, más en sombra
-            }
-            if (region is Region.Torso or Region.Neck && p.y > map.NeckBaseY - 0.008f) k *= 0.82f; // cuello de la prenda
-            if (region is Region.Torso or Region.Hips && Mathf.Abs(p.y - waist) < 0.014f) k *= 0.72f; // cinturilla
-            if (region == Region.Legs && p.y - map.AnkleY < 0.03f) k *= 0.82f;                     // dobladillo
-            if (region == Region.Torso && !arm)
-            {
-                float side = Mathf.Clamp01((ax / Mathf.Max(0.05f, map.ShoulderX) - 0.62f) * 3f);
-                k *= 1f - 0.16f * side * side;                                                  // costados en sombra
-            }
-            return k;
-        }
-
         /// <summary>Detalles por tipo de ropa: cuello en V del traje, cinturón, cuadros del pantalón de chef, bolsillos del overol...</summary>
         static Color Details(Look look, Region region, Vector3 p, float h, float waist, Color cloth, int pixel)
         {
@@ -612,16 +491,8 @@ namespace Caso404.EditorTools
             switch (look.Pattern)
             {
                 case Pattern.Suit:
-                    if (region == Region.Torso && front && p.y > waist)
-                    {
-                        float v = (p.y - h * 0.72f) * 0.3f + 0.006f;                  // apertura en V de la chaqueta
-                        if (p.y > h * 0.72f && ax < v) return C(0.7f, 0.72f, 0.76f);  // blusa gris perla
-                        if (p.y > h * 0.62f && ax < v + 0.03f && ax >= v) return cloth * 1.45f; // solapas satinadas
-                        if (p.y > h * 0.62f && ax < v + 0.034f && ax >= v + 0.03f) return cloth * 0.6f; // borde de la solapa
-                        if (ax < 0.006f && p.y < h * 0.69f) return cloth * 0.65f;     // cierre de la chaqueta
-                        float by = Mathf.Repeat(p.y - waist, 0.075f);
-                        if (Mathf.Abs(ax - 0.014f) < 0.007f && by < 0.012f && p.y < h * 0.66f) return C(0.35f, 0.33f, 0.3f); // botones
-                    }
+                    // Camisa blanca en V bajo la chaqueta
+                    if (region == Region.Torso && front && p.y > h * 0.71f && ax < (p.y - h * 0.71f) * 0.55f + 0.012f) return C(0.92f, 0.92f, 0.94f);
                     break;
                 case Pattern.Chef:
                     if (pantsPart)
@@ -650,22 +521,12 @@ namespace Caso404.EditorTools
                     if (region == Region.Torso && front && p.y > h * 0.72f && ax < (p.y - h * 0.72f) * 0.6f + 0.01f) return cloth * 0.7f; // cuello en V
                     break;
                 case Pattern.Hoodie:
-                    if (region == Region.Torso && front && p.y > h * 0.71f && p.y < h * 0.79f && Mathf.Abs(ax - 0.035f) < 0.004f) return C(0.85f, 0.85f, 0.82f); // cordones
                     if (region == Region.Torso && front && p.y > waist + 0.06f && p.y < waist + 0.16f && ax < 0.1f) return cloth * 0.8f; // bolsillo canguro
                     if (pantsPart && Mathf.Abs(p.y - waist) < 0.012f) return C(0.25f, 0.18f, 0.1f);
                     break;
                 case Pattern.Casual:
-                    // Chaqueta abierta sobre una camiseta clara de cuello redondo, con el borde de la chaqueta marcado.
-                    if (region == Region.Torso && front && p.y > waist)
-                    {
-                        float open = 0.028f + (p.y - waist) * 0.07f;
-                        if (ax < open)
-                        {
-                            bool neckline = p.y > h * 0.8f && ax < 0.05f;
-                            return neckline ? C(0.16f, 0.16f, 0.18f) : C(0.24f, 0.24f, 0.26f);
-                        }
-                        if (ax < open + 0.008f) return cloth * 0.62f;
-                    }
+                    // Chaqueta abierta sobre camiseta clara
+                    if (region == Region.Torso && front && p.y > waist && ax < 0.045f) return C(0.85f, 0.83f, 0.78f);
                     if (pantsPart && Mathf.Abs(p.y - waist) < 0.012f) return C(0.25f, 0.18f, 0.1f);
                     break;
             }
@@ -712,77 +573,12 @@ namespace Caso404.EditorTools
                 Prim(PrimitiveType.Cube, "Placa", chest, badgePos, new Vector3(0.045f, 0.055f, 0.01f), C(0.85f, 0.7f, 0.25f), 0.7f);
             }
 
-            // El cuerpo base es de superhéroe: se adelgazan un poco brazos y piernas (solo el grosor, no el largo).
-            Thin(animator, HumanBodyBones.LeftUpperArm, HumanBodyBones.LeftLowerArm, HumanBodyBones.LeftHand, 0.84f);
-            Thin(animator, HumanBodyBones.RightUpperArm, HumanBodyBones.RightLowerArm, HumanBodyBones.RightHand, 0.84f);
-            Thin(animator, HumanBodyBones.LeftUpperLeg, HumanBodyBones.LeftLowerLeg, HumanBodyBones.LeftFoot, 0.92f);
-            Thin(animator, HumanBodyBones.RightUpperLeg, HumanBodyBones.RightLowerLeg, HumanBodyBones.RightFoot, 0.92f);
-
-            AddShoe(animator, look, map, true);
-            AddShoe(animator, look, map, false);
-
             root.AddComponent<NpcAnimator>();
             root.transform.localScale = look.Scale; // al final: el pelo y los accesorios se pegan en la pose original
             var path = $"{PrefabFolder}/chr_{look.Id}.prefab";
             PrefabUtility.SaveAsPrefabAsset(root, path);
             Object.DestroyImmediate(root);
         }
-
-        /// <summary>
-        /// Adelgaza un segmento (brazo o pierna): escala el hueso solo en los dos ejes perpendiculares a su largo y deshace
-        /// la escala en el hueso siguiente, así el antebrazo queda algo más delgado y la mano o el pie conservan su tamaño.
-        /// </summary>
-        static void Thin(Animator animator, HumanBodyBones upper, HumanBodyBones lower, HumanBodyBones end, float factor)
-        {
-            var a = animator.GetBoneTransform(upper);
-            var b = animator.GetBoneTransform(lower);
-            var c = animator.GetBoneTransform(end);
-            if (a == null || b == null || c == null) return;
-            a.localScale = AxisScale(b.localPosition, factor);
-            float lowerFactor = Mathf.Lerp(factor, 1f, 0.5f);
-            b.localScale = Div(AxisScale(c.localPosition, lowerFactor), a.localScale);
-            c.localScale = Div(Vector3.one, Vector3.Scale(a.localScale, b.localScale));
-        }
-
-        /// <summary>
-        /// Zapato con volumen sobre el pie (el cuerpo base tiene dedos y, pintado, parecía descalzo): capellada del color
-        /// del zapato y una suela un poco más ancha. Va pegado al hueso del pie.
-        /// </summary>
-        static void AddShoe(Animator animator, Look look, BodyMap map, bool positiveX)
-        {
-            var b = positiveX ? map.FootLeft : map.FootRight;
-            if (b.size.sqrMagnitude < 1e-6f) return;
-            var bone = animator.GetBoneTransform(positiveX ? HumanBodyBones.LeftFoot : HumanBodyBones.RightFoot);
-            if (bone == null) return;
-            bool light = Lum(look.Shoes) > 0.5f;
-            float h = Mathf.Min(b.size.y, 0.075f);
-            // Largo real de un zapato, medido desde la punta (el modelo mira a -Z en la pose T).
-            float length = Mathf.Min(b.size.z, look.Female ? 0.245f : 0.275f);
-            float zc = b.min.z + length * 0.5f;
-            float width = Mathf.Min(b.size.x, look.Female ? 0.085f : 0.1f);
-            Debug.Log($"[Caso404] Pie de {look.Id}: caja {b.size}, zapato {width:0.000} x {length:0.000} x {h:0.000}");
-            var upper = new Vector3(b.center.x, b.min.y + h * 0.5f, zc);
-            Prim(PrimitiveType.Capsule, "Zapato", bone, upper, Vector3.one, look.Shoes, light ? 0.3f : 0.55f);
-            var shoe = bone.Find("Zapato");
-            shoe.SetParent(null, true);
-            shoe.rotation = Quaternion.Euler(90f, 0f, 0f);       // la cápsula queda acostada a lo largo del pie
-            shoe.localScale = new Vector3(width * 1.1f, length * 0.5f, h);
-            shoe.SetParent(bone, true);
-            var soleColor = light ? C(0.95f, 0.95f, 0.93f) : C(0.05f, 0.05f, 0.05f);
-            Prim(PrimitiveType.Cube, "Suela", bone, new Vector3(b.center.x, b.min.y + 0.007f, zc),
-                new Vector3(width * 1.05f, 0.014f, length * 0.92f), soleColor, 0.15f);
-        }
-
-        /// <summary>Escala 1 en el eje del hueso (hacia su hijo) y factor en los otros dos.</summary>
-        static Vector3 AxisScale(Vector3 towardChild, float factor)
-        {
-            var d = new Vector3(Mathf.Abs(towardChild.x), Mathf.Abs(towardChild.y), Mathf.Abs(towardChild.z));
-            if (d.x >= d.y && d.x >= d.z) return new Vector3(1f, factor, factor);
-            if (d.y >= d.z) return new Vector3(factor, 1f, factor);
-            return new Vector3(factor, factor, 1f);
-        }
-
-        static Vector3 Div(Vector3 a, Vector3 b) => new(a.x / b.x, a.y / b.y, a.z / b.z);
 
         /// <summary>Pega un modelo estático (pelo, barba) al hueso de la cabeza conservando su posición de la pose T.</summary>
         static void AttachStatic(string fbxPath, Transform bone, Material mat, string name)
