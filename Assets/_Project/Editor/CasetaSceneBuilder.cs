@@ -38,7 +38,6 @@ namespace Caso404.EditorTools
             Cylinder("Termo de tinto", env, new Vector3(-0.9f, 0.88f, 3.4f), new Vector3(0.09f, 0.14f, 0.09f), "red");
             Box("Servidor de la caseta (copias espejo)", env, new Vector3(-3.6f, 0.6f, 0.5f), new Vector3(0.6f, 1.2f, 0.6f), "dark");
             Box("Luces del servidor", env, new Vector3(-3.29f, 0.9f, 0.5f), new Vector3(0.01f, 0.3f, 0.3f), "screen", keepCollider: false);
-            Box("Silla de Inés", env, new Vector3(-2f, 0.25f, 2.6f), new Vector3(0.45f, 0.5f, 0.45f), "dark");
             Box("Casillero de Inés", env, new Vector3(-3.75f, 0.95f, 2.4f), new Vector3(0.45f, 1.9f, 0.5f), "locker");
 
             // Parqueadero subterráneo: x ∈ [0, 14], z ∈ [-4, 8]
