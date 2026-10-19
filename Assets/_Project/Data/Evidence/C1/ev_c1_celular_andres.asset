@@ -41,5 +41,6 @@ MonoBehaviour:
     _password: 
     _resultText: "El n\xFAmero de \"Soporte NX\" corresponde al canal de soporte t\xE9cnico de ALEX."
     _alexComment: "Ese canal lo usan cientos de clientes de Nexo. Es una coincidencia estad\xEDstica."
+    _alexGlitch: 0
     _setsFlags:
     - {fileID: 11400000, guid: 3972c095063d34540b14f79a4cf34ee7, type: 2}
