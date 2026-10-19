@@ -535,7 +535,8 @@ namespace Caso404.EditorTools
             }
             if (color != null)
             {
-                mat.SetColor("_BaseColor", color.Value);
+                if (key == "glass") MakeTransparent(mat);
+                mat.SetColor("_BaseColor", key == "glass" ? new Color(color.Value.r, color.Value.g, color.Value.b, 0.22f) : color.Value);
                 mat.SetFloat("_Smoothness", smooth);
                 mat.SetFloat("_Metallic", metal);
                 mat.enableInstancing = true;
@@ -543,6 +544,19 @@ namespace Caso404.EditorTools
             }
             Materials[key] = mat;
             return mat;
+        }
+
+        /// <summary>URP Lit transparente (vidrios: se ve la ciudad a través).</summary>
+        static void MakeTransparent(Material mat)
+        {
+            mat.SetFloat("_Surface", 1f);
+            mat.SetFloat("_Blend", 0f);
+            mat.SetFloat("_ZWrite", 0f);
+            mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
+            mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
+            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            mat.renderQueue = (int)RenderQueue.Transparent;
+            mat.SetOverrideTag("RenderType", "Transparent");
         }
 
         // ================= Serialización =================
