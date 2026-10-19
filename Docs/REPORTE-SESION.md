@@ -1,5 +1,39 @@
 # Reporte de sesiones — El Caso 404
 
+## Sesión 4 (19 de octubre de 2026, hasta las 9:30 AM)
+
+**En resumen:** quedaron hechos la **tarea 1 (personajes)** y la **tarea 4 (cartas de contexto)**. También se generó el **build de Windows** y se **subió todo a GitHub** en ramas por integrante. **No alcanzó el tiempo** para la **tarea 2 (espacios más grandes)** ni para la **tarea 3 (la ciudad alrededor)**.
+
+### Qué se hizo
+| Tarea | Estado | Detalle |
+|---|---|---|
+| Subida a GitHub | Hecha | `tools/split_by_owner.py` reparte el trabajo en una rama por integrante, con commits pequeños firmados por cada uno y la fecha original. Verifica que fusionar las 3 ramas da exactamente el mismo proyecto. Ramas: `jose/base-juego`, `majo/docs-ui-datos`, `daniel/core-pruebas`; las de esta sesión son `jose/sesion4`, `majo/sesion4` y `daniel/sesion4`. |
+| 1. Personajes | Hecha | Los 8 personajes usan modelos humanoides de Quaternius en vez de cápsulas, con ropa según el guion, peinado, barba, gorra o placa, y escala según edad. Tienen animaciones de reposo, hablar, sentado y sentado hablando, creadas por código porque el paquete no trae ninguna. Al hablar, el personaje mira al jugador. Se conservan los colliders, `CharacterNpc` y el resaltado. Los sentados tienen su propia silla. |
+| 4. Cartas de contexto | Hecha | Antes de c1_s1 (**Nueva partida**) y antes de c2_s1 (**Comenzar «Protocolo 404»**): fondo oscuro, hoja de expediente, sello CONFIDENCIAL, máquina de escribir (un clic muestra todo) y el botón "Comenzar investigación". Usan los textos exactos que me diste. La Comisaria Lozano quedó agregada al guion (§1 y §6). |
+| Build de Windows | Hecho | `Builds/ElCaso404/ElCaso404.exe` (115 MB). Se regenera con **Caso404 → Build de Windows**. |
+| Capturas | Parcial | En `Docs/capturas/`: la carta del caso 1 (escribiéndose y completa) y los personajes de pie, sentados y hablando. Faltan las capturas de la carta del caso 2 y de cada escena. |
+| 2. Espacios más grandes | **No se hizo** | El apartamento sigue del tamaño anterior. |
+| 3. Ciudad alrededor | **No se hizo** | Por las ventanas se sigue viendo el piso infinito y el cielo por defecto. Ya revisé el kit de Kenney: **solo trae edificios**, así que calles, andenes, faroles, carros y montañas habrá que hacerlos con primitivas. |
+
+Pruebas: **40 EditMode y 6 PlayMode en verde** antes y después de los cambios. Las PlayMode ahora también pasan por las dos cartas.
+
+### Qué debes revisar tú
+1. **Cómo se ven los personajes.** Los cuerpos base del paquete gratuito son muy musculosos y la ropa queda ajustada, como un enterizo, porque está pintada sobre la piel. Si no te convence, la alternativa es un paquete con ropa modelada.
+2. **Las poses en el juego.** En Play los personajes deben estar en reposo; los sentados, en su silla; y al hablarles, gesticular y mirarte. Revisa sobre todo la Comisaría y el café.
+3. **Las dos cartas**: que el texto se lea bien en tu pantalla y que el clic complete el texto.
+4. **El vestuario que elegí** sin que lo pidieras: Laura con uniforme de enfermera, Sebastián con buzo con capota y Elena con chaqueta y jeans (`DECISIONES.md`, N2).
+5. **Los PR en GitHub** (enlaces abajo). Te recomiendo fusionar primero las ramas de la subida inicial y después las de la sesión 4: las de la sesión 4 continúan a las anteriores y no tienen conflictos.
+
+### Cómo probar
+- **En el Editor:** **Caso404 → Jugar desde el menú** (Ctrl+Shift+P) → **Nueva partida**. Debe aparecer la carta.
+- **En el ejecutable:** abre `Builds/ElCaso404/ElCaso404.exe`.
+
+### Para la próxima sesión
+- **"Hagamos las tareas 2 y 3"**: apartamento ampliado con pasillo 401–405 y ascensor, y la ciudad alrededor de cada escena con niebla, cielo según la hora y colliders invisibles en el balcón.
+- Capturas de cada escena y de la carta del caso 2 (necesita jugar el caso 1 hasta el final o una prueba que llegue ahí).
+
+---
+
 ## Resumen (sesión 2, 18 de octubre de 2026)
 
 **El caso 1 se juega completo**, desde el menú principal hasta sus 3 finales y "Tres meses después...". **El caso 2 también se juega completo**: sus 4 escenas, la Comisaría compartida, los 4 finales y el final secreto con la decisión sobre ALEX.
