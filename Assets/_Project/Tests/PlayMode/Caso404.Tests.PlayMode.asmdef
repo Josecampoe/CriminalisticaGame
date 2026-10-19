@@ -1,0 +1,21 @@
+{
+    "name": "Caso404.Tests.PlayMode",
+    "rootNamespace": "Caso404.Tests",
+    "references": [
+        "Caso404.Runtime",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "noEngineReferences": false
+}
