@@ -224,53 +224,18 @@ def verb_for(changes: list[Change]) -> str:
 
 
 def clean_subject(subject: str) -> str:
-    """Primera cláusula del asunto original, sin el prefijo de fase, para dar contexto."""
-    s = re.sub(r"^(Fase [A-Z]( \(\d/\d\))?|Caso \d|[a-z]+\([^)]*\)):\s*", "", subject).strip()
-    s = re.split(r" \(|; |: ", s)[0].strip()
-    if len(s) > 55:
-        cut = max(s.rfind(", ", 0, 55), s.rfind(" y ", 0, 55))
-        s = s[:cut] if cut > 20 else s[:55].rsplit(" ", 1)[0]
-    first = s.split(" ", 1)[0]
-    if first[:1].isupper() and first[1:].islower():
-        s = s[:1].lower() + s[1:]
-    return s
-
-
-def is_folder_meta(c: Change) -> bool:
-    return c.path.endswith(".meta") and "." not in strip_meta(c.path).rsplit("/", 1)[-1]
-
-
-def area_label(part: Part) -> str:
-    k = part.key
-    if part.area == "docs":
-        stem = strip_meta(part.changes[0].path).rsplit("/", 1)[-1].rsplit(".", 1)[0].lower()
-        return {"claude": "instrucciones", "leeme-primero": "leeme", "reporte-sesion": "reporte"}.get(stem, stem)
-    if part.area == "config":
-        names = {strip_meta(c.path) for c in part.changes}
-        if k == "raiz":
-            return "git" if names <= {".gitignore", ".gitattributes"} else "raiz"
-        return {".claude": "claude", "Packages": "paquetes", "ProjectSettings": "proyecto",
-                "Assets/TextMesh Pro": "tmp", "Assets/Settings": "urp", P.rstrip("/"): "estructura",
-                P + "Scripts": "asmdef"}.get(k, "plantilla" if k.startswith("Assets/") else "config")
-    if part.area == "arte":
-        return {P + "Art/Materials": "materiales", P + "Art/ThirdParty": "modelos", P + "Prefabs": "prefabs",
-                P + "Audio": "audio"}.get(k, "arte")
-    return AREA_LABEL[part.area]
+    s = re.sub(r"^(Fase [A-Z]( \(\d/\d\))?|Caso \d|tipo\([^)]*\)):\s*", "", subject).strip()
+    return s[:1].lower() + s[1:] if s else s
 
 
 def build_message(part: Part, subject: str, orig_sha: str, index: int, total: int) -> str:
     ctype = commit_type(part.area, {c.status for c in part.changes}, subject)
-    if all(is_folder_meta(c) for c in part.changes):
-        ctype = "chore"
-        what = "carpeta" if len(part.changes) == 1 else "carpetas"
-        head = f"{ctype}({area_label(part)}): {verb_for(part.changes)} {what} {short_names(part.changes)}"
-    else:
-        files = [c for c in part.changes if not is_folder_meta(c)]
-        head = f"{ctype}({area_label(part)}): {verb_for(files)} {short_names(files)}"
+    head = f"{ctype}({AREA_LABEL[part.area]}): {verb_for(part.changes)} {short_names(part.changes)}"
     context = clean_subject(subject)
-    full = f"{head} ({context})" if context and len(head) + len(context) + 3 <= 120 else head
+    full = f"{head} — {context}" if context else head
+    if len(full) > 110:
+        full = full[:107].rstrip() + "..."
     files = "\n".join(f"- {c.status} {c.path}" for c in part.changes if not c.path.endswith(".meta"))
-    files = files or "\n".join(f"- {c.status} {c.path}" for c in part.changes)
     body = f"Parte {index}/{total} de {orig_sha[:7]}: {subject}\n\nArchivos:\n{files}\n"
     return f"{full}\n\n{body}\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\n"
 
