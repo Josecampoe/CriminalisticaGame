@@ -14,12 +14,18 @@ namespace Caso404.Dialogue
         [SerializeField] private GameContext _game;
         [SerializeField] private Transform _head;
         [SerializeField] private float _turnSpeed = 4f;
+        [Tooltip("Desactívalo en personajes sentados: solo giran la cabeza.")]
+        [SerializeField] private bool _turnBody = true;
 
         Transform _lookTarget;
         bool _talkedOnce;
 
         public CharacterProfile Profile => _profile;
         public Transform Head => _head != null ? _head : transform;
+        /// <summary>True mientras el jugador conversa con este personaje.</summary>
+        public bool IsTalking => _lookTarget != null;
+        /// <summary>A quién mira el personaje mientras conversa (la cámara del jugador), o null.</summary>
+        public Transform LookTarget => _lookTarget;
 
         public string Prompt => $"Hablar con {_profile.DisplayName}";
         public bool CanInteract => _profile != null;
@@ -62,7 +68,7 @@ namespace Caso404.Dialogue
 
         void Update()
         {
-            if (_lookTarget == null) return;
+            if (_lookTarget == null || !_turnBody) return;
             var dir = _lookTarget.position - transform.position;
             dir.y = 0f;
             if (dir.sqrMagnitude < 0.01f) return;
