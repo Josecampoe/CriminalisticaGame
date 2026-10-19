@@ -136,10 +136,15 @@ namespace Caso404.UI
             var g = _game;
             var scene = g.Scene;
             if (g.State.State.accusations.Exists(a => a.caseId == g.Case.Id)) return "Objetivo: caso cerrado.";
-            int pending = 0;
+            int pending = 0, found = 0;
             foreach (var e in scene.Evidence)
-                if (e.Source == EvidenceSource.Scene && g.Evidence.IsAvailable(e) && !g.Evidence.IsFound(e)) pending++;
+            {
+                if (e.Source != EvidenceSource.Scene || !g.Evidence.IsAvailable(e)) continue;
+                if (g.Evidence.IsFound(e)) found++; else pending++;
+            }
             string explore = pending > 0 ? $"  ·  Objetos por revisar aquí: {pending}" : "";
+            // Al llegar a una escena grande, lo primero es recorrerla.
+            if (found == 0 && pending > 0) return $"Objetivo: recorre todo el lugar y revisa los objetos sospechosos (E)  ·  Por revisar: {pending}";
             if (g.Evidence.UnanalyzedCount > 0) return "Objetivo: analiza tus evidencias nuevas (Tab)" + explore;
             if (scene.Hypothesis != null && !g.Hypotheses.IsComplete(scene.Hypothesis)) return "Objetivo: investiga y completa la hipótesis (H)" + explore;
             if (scene.ClosingDecision != null && !g.Decisions.HasTaken(scene.ClosingDecision)) return "Objetivo: toma la decisión de cierre (H)" + explore;
