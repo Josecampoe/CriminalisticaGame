@@ -13,7 +13,7 @@ Capturas en `Docs/capturas/antes/` y `Docs/capturas/despues/` con los mismos nom
 | Escena | Antes → después | Qué cambió |
 |---|---|---|
 | **Menú principal** | `ui_00_menu` | Detrás del título se ve Valdora de noche con lluvia y la silueta de una persiana (antes, fondo plano). |
-| **c1_s1 Apartamento 404** | `c1s1_pasillo`, `c1s1_sala`, `c1s1_estudio`, `c1s1_balcon`, `c1s1_ciudad` | Día nublado frío con lámparas cálidas. Piso de tablas con brillo, yeso, baldosa del pasillo con manchas. Escena del crimen revuelta: libros y cojines en el piso, cuadro caído con vidrio roto, cajón abierto, papeles, taza rota. **Marcadores amarillos numerados** junto a las evidencias. Huella con dibujo de suela. Persianas, lámpara de pie encendida, libros individuales, cojines, cobija, microondas, plantas, cuadros, rayos de luz por las ventanas. |
+| **c1_s1 Apartamento 404** | `c1s1_pasillo`, `c1s1_sala`, `c1s1_estudio`, `c1s1_balcon`, `c1s1_ciudad` | Día nublado frío con lámparas cálidas. Piso de tablas con brillo, yeso, baldosa del pasillo con manchas. Aviso verde iluminado de "ESCALERAS" en el pasillo. Escena del crimen revuelta: libros y cojines en el piso, cuadro caído con vidrio roto, cajón abierto, papeles, taza rota. **Marcadores amarillos numerados** junto a las evidencias. Huella con dibujo de suela. Persianas, lámpara de pie encendida, libros individuales, cojines, cobija, microondas, plantas, cuadros, rayos de luz por las ventanas. |
 | **c1_s2 Café La Esquina** | `c1s2_entrada`, `c1s2_barra`, `c1s2_trastienda` | **De noche, como dice el guion.** Pared de ladrillo, baldosa, lámparas colgantes sobre el salón, butacos tapizados, letrero de neón "CAFÉ LA ESQUINA", lluvia tras las vitrinas, murmullo de café. |
 | **c1_s3 Portería y sótano** | `c1s3_porteria`, `c1s3_sotano`, `c1s3_parqueadero` | Fluorescente verdoso. Concreto manchado, tuberías y tubería contra incendios en el techo, tubos que parpadean, casilleros con rejillas, estanterías con cajas, archivadores, carros con cabina y llantas, más tubos en el parqueadero. |
 | **c1_s4 / c2_s4 Comisaría** | `c1s4_oficina`, `c1s4_ventana`, `c1s4_interrogatorio` | Persianas con franjas de luz, **lámparas de banquero verdes** en los escritorios, lámpara única sobre la mesa de interrogatorio, archivadores y dispensador de agua. En el caso 2 cambia sola a noche (perfil de post-procesado incluido). |
@@ -41,15 +41,15 @@ Máquina de prueba: **portátil con Intel Core i5-13420H y gráficos integrados 
 
 | Escena | Primer build de la sesión (sin optimizar) | Final | Percentil 95 final |
 |---|---|---|---|
-| Apartamento 404 | 61 FPS | **97 FPS** | 12.4 ms |
-| Café La Esquina | 59 FPS | **77 FPS** | 16.0 ms |
-| Portería y sótano | 72 FPS | **82 FPS** | 15.0 ms |
-| Comisaría | 68 FPS | **77 FPS** | 14.2 ms |
-| Sala de servidores B | 66 FPS | **90 FPS** | 12.4 ms |
-| Piso ejecutivo | 70 FPS | **84 FPS** | 16.2 ms |
-| Caseta y parqueadero | 48 FPS | **69 FPS** | 15.9 ms |
+| Apartamento 404 | 61 FPS | **94 FPS** | 12.5 ms |
+| Café La Esquina | 59 FPS | **82 FPS** | 14.8 ms |
+| Portería y sótano | 72 FPS | **96 FPS** | 14.4 ms |
+| Comisaría | 68 FPS | **81 FPS** | 13.5 ms |
+| Sala de servidores B | 66 FPS | **89 FPS** | 12.8 ms |
+| Piso ejecutivo | 70 FPS | **95 FPS** | 14.0 ms |
+| Caseta y parqueadero | 48 FPS | **70 FPS** | 15.8 ms |
 
-Todas las escenas quedan sobre 60 FPS de promedio, y también el 5 % de frames más lentos (el peor es la caseta: 15.9 ms ≈ 63 FPS). El build anterior a la sesión no tenía el medidor, así que la comparación "antes/después" exacta es la del Editor:
+Todas las escenas quedan sobre 60 FPS de promedio, y también el 5 % de frames más lentos (el peor es la caseta: 15.8 ms ≈ 63 FPS). El build anterior a la sesión no tenía el medidor, así que la comparación "antes/después" exacta es la del Editor:
 
 **En el Editor** (`VisualAudit`, mismo método antes y después: 40 frames a 1920×1080 por vista; promedio de las vistas de cada escena). El Editor tiene sobrecosto y el portátil se calienta tras muchas corridas, así que sirve para comparar, no como cifra real:
 
