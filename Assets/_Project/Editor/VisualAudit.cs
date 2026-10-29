@@ -127,7 +127,7 @@ namespace Caso404.EditorTools
             foreach (var (scene, views) in Plan)
             foreach (var v in views)
             {
-                if (v.Name != "c1s1_sala" && v.Name != "c2s2_ventanal" && v.Name != "c1s3_parqueadero" && v.Name != "c1s2_barra") continue;
+                if (v.Name != "c1s2_entrada" && v.Name != "c1s2_barra" && v.Name != "c2s3_calle" && v.Name != "c2s3_caseta") continue;
                 EditorSceneManager.OpenScene(scene, OpenSceneMode.Single);
                 var rot = Quaternion.Euler(v.Euler);
                 void Row(string what) => csv.Append($"{v.Name};{what};{Benchmark(v.Position, rot):F2}\n");
@@ -150,6 +150,10 @@ namespace Caso404.EditorTools
                 foreach (var r in particles) r.enabled = false;
                 Row("partículas");
                 foreach (var r in particles) r.enabled = true;
+                var cityLights = Object.FindObjectsByType<Light>(FindObjectsSortMode.None).Where(l => l.transform.root.name == "Ciudad de Valdora").ToList();
+                foreach (var l in cityLights) l.enabled = false;
+                Row($"luces de la ciudad ({cityLights.Count})");
+                foreach (var l in cityLights) l.enabled = true;
                 var city = GameObject.Find("Ciudad de Valdora");
                 if (city != null) { city.SetActive(false); Row("ciudad"); city.SetActive(true); }
                 var decor = GameObject.Find("Ambiente visual/Utilería");
