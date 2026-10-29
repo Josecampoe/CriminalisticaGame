@@ -58,6 +58,7 @@ namespace Caso404.EditorTools
             Shelves(group);
             Lockers(group);
             ParkingDetails(group);
+            if (sceneName == "CasetaSeguridad") BoothFront(group);
             if (sceneName is "Comisaria" or "PisoEjecutivo" or "PorteriaSotano") OfficeFurniture(group, renderers);
             if (sceneName == "ServidoresB") CableTrays(group, renderers);
             return _count;
@@ -802,6 +803,45 @@ namespace Caso404.EditorTools
                     t.color = new Color(0.08f, 0.08f, 0.08f);
                     t.rectTransform.sizeDelta = new Vector2(1.4f, 0.45f);
                 }
+            }
+        }
+
+        /// <summary>Fachada de la caseta (pared este, x = 0): letrero "VIGILANCIA" sobre la ventanilla y aplique cálido sobre la puerta.</summary>
+        static void BoothFront(Transform g)
+        {
+            var plate = SceneKit.Mat("libro_negro");
+            var lampMat = SceneKit.Mat("emit_aplique", new Color(1f, 0.8f, 0.5f), 0.5f);
+            lampMat.EnableKeyword("_EMISSION");
+            lampMat.SetColor("_EmissionColor", new Color(1f, 0.78f, 0.5f) * 4f);
+            EditorUtility.SetDirty(lampMat);
+            var signPos = new Vector3(0.1f, 2.3f, 2.9f);
+            if (!Blocked(new Bounds(signPos, new Vector3(0.3f, 0.4f, 1.6f))))
+            {
+                Piece(g, "Letrero VIGILANCIA", PrimitiveType.Cube, signPos, new Vector3(0.03f, 0.3f, 1.4f), plate, shadows: false);
+                var t = new GameObject("Texto VIGILANCIA").AddComponent<TextMeshPro>();
+                t.transform.SetParent(g, false);
+                t.transform.position = signPos + Vector3.right * 0.02f;
+                t.transform.rotation = Quaternion.Euler(0f, -90f, 0f);
+                t.text = "VIGILANCIA";
+                t.fontSize = 2.2f;
+                t.fontStyle = FontStyles.Bold;
+                t.characterSpacing = 8f;
+                t.alignment = TextAlignmentOptions.Center;
+                t.color = new Color(0.95f, 0.8f, 0.2f);
+                t.rectTransform.sizeDelta = new Vector2(1.4f, 0.3f);
+            }
+            var lampPos = new Vector3(0.12f, 2.35f, 1f);
+            if (!Blocked(new Bounds(lampPos, Vector3.one * 0.4f)))
+            {
+                Piece(g, "Aplique", PrimitiveType.Cube, lampPos, new Vector3(0.14f, 0.12f, 0.22f), lampMat, shadows: false);
+                var l = new GameObject("Luz del aplique").AddComponent<Light>();
+                l.transform.SetParent(g, false);
+                l.transform.position = lampPos + Vector3.right * 0.3f + Vector3.down * 0.1f;
+                l.type = LightType.Point;
+                l.color = new Color(1f, 0.78f, 0.5f);
+                l.intensity = 1.2f;
+                l.range = 3.5f;
+                l.shadows = LightShadows.None;
             }
         }
 
