@@ -115,7 +115,7 @@ namespace Caso404.EditorTools
 
             foreach (var cam in Object.FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                 SetupCamera(cam, menu);
-            if (menu) return;
+            if (menu) { MenuBackdrop(root); return; }
 
             // SceneKit.BeginEmpty vuelve a poner colores planos en los materiales compartidos: se reaplican las texturas.
             ProceduralMaterials.Build(false);
@@ -148,6 +148,37 @@ namespace Caso404.EditorTools
                 SceneKit.Set(atmosphere, "_nightProfile", Profile(Ambience.Night));
             }
             Debug.Log($"[Caso404] Paso visual en {sceneName}: {lights.Count} luces con lámpara visible, {boxes} cubos con UV en metros, {props} piezas de utilería.");
+        }
+
+        /// <summary>
+        /// Fondo del menú principal: Valdora de noche vista desde una oficina alta, con lluvia en el vidrio y la silueta de
+        /// una persiana arriba. El panel del menú es semitransparente, así que la ciudad se ve detrás del título.
+        /// </summary>
+        static void MenuBackdrop(Transform root)
+        {
+            CityKit.Surround(new CityKit.Options
+            {
+                StreetY = -34f, Night = true, Seed = 2031, Downtown = true,
+                HostMin = new Vector2(-8f, -8f), HostMax = new Vector2(8f, 8f), HostHeight = 0f,
+            });
+            var city = GameObject.Find("Ciudad de Valdora");
+            if (city != null) city.transform.SetParent(root, true);
+            var cam = Object.FindAnyObjectByType<Camera>();
+            if (cam != null)
+            {
+                cam.clearFlags = CameraClearFlags.Skybox;
+                cam.transform.SetPositionAndRotation(new Vector3(0f, 22f, -30f), Quaternion.Euler(8f, 20f, 0f));
+                cam.fieldOfView = 55f;
+                cam.farClipPlane = 900f;
+            }
+            var slat = SceneKit.Mat("persiana_silueta", new Color(0.05f, 0.05f, 0.055f), 0.2f);
+            var camT = cam != null ? cam.transform : root;
+            Rain(root, camT.position + camT.forward * 3.5f + Vector3.down * 2.5f, camT.position.y + 2.5f, 10f, true);
+            for (int i = 0; i < 4; i++)
+            {
+                var piece = Part(root, "Persiana (menú)", PrimitiveType.Cube, camT.position + camT.forward * 1.2f + camT.up * (0.62f - i * 0.055f), new Vector3(3f, 0.006f, 0.035f), slat);
+                piece.transform.rotation = camT.rotation * Quaternion.Euler(35f, 0f, 0f);
+            }
         }
 
         // ================= Cámara =================
