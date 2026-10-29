@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Caso404.Characters;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
@@ -111,6 +113,54 @@ namespace Caso404.EditorTools
             }
             File.WriteAllText(Path.Combine(dir, "tiempos_frame.csv"), csv.ToString());
             Debug.Log($"[Caso404] Auditoría visual guardada en {dir}\n{csv}");
+        }
+
+        /// <summary>
+        /// Costo de cada efecto: en las vistas más caras, mide el tiempo de frame con todo y luego apagando un efecto a la vez
+        /// (post-procesado, SSAO, sombras de luces puntuales, sombra del sol, partículas, ciudad). Resultado en Logs/costo_efectos.csv.
+        /// </summary>
+        public static void ProfileEffects()
+        {
+            var csv = new StringBuilder("vista;efecto_apagado;ms\n");
+            var renderer = AssetDatabase.LoadAssetAtPath<ScriptableRendererData>("Assets/Settings/PC_Renderer.asset");
+            var ssao = renderer != null ? renderer.rendererFeatures.Find(f => f != null && f.name.Contains("Ambient")) : null;
+            foreach (var (scene, views) in Plan)
+            foreach (var v in views)
+            {
+                if (v.Name != "c1s1_sala" && v.Name != "c2s2_ventanal" && v.Name != "c1s3_parqueadero" && v.Name != "c1s2_barra") continue;
+                EditorSceneManager.OpenScene(scene, OpenSceneMode.Single);
+                var rot = Quaternion.Euler(v.Euler);
+                void Row(string what) => csv.Append($"{v.Name};{what};{Benchmark(v.Position, rot):F2}\n");
+                Row("(nada)");
+                Row("(nada, repetido)");
+                var player = Object.FindAnyObjectByType<Caso404.Player.FirstPersonController>();
+                var pdata = player != null ? player.GetComponentInChildren<UniversalAdditionalCameraData>(true) : null;
+                if (pdata != null) { pdata.renderPostProcessing = false; Row("post-procesado"); pdata.renderPostProcessing = true; }
+                if (ssao != null) { ssao.SetActive(false); Row("SSAO"); ssao.SetActive(true); }
+                var lights = Object.FindObjectsByType<Light>(FindObjectsSortMode.None);
+                var shadowed = lights.Where(l => l.type != LightType.Directional && l.shadows != LightShadows.None).ToList();
+                foreach (var l in shadowed) l.shadows = LightShadows.None;
+                Row("sombras de luces puntuales");
+                foreach (var l in shadowed) l.shadows = LightShadows.Soft;
+                var sun = lights.Where(l => l.type == LightType.Directional && l.shadows != LightShadows.None).ToList();
+                foreach (var l in sun) l.shadows = LightShadows.None;
+                Row("sombra del sol");
+                foreach (var l in sun) l.shadows = LightShadows.Soft;
+                var particles = Object.FindObjectsByType<ParticleSystemRenderer>(FindObjectsSortMode.None);
+                foreach (var r in particles) r.enabled = false;
+                Row("partículas");
+                foreach (var r in particles) r.enabled = true;
+                var city = GameObject.Find("Ciudad de Valdora");
+                if (city != null) { city.SetActive(false); Row("ciudad"); city.SetActive(true); }
+                var decor = GameObject.Find("Ambiente visual/Utilería");
+                if (decor != null) { decor.SetActive(false); Row("utilería"); decor.SetActive(true); }
+                var extra = Object.FindObjectsByType<Light>(FindObjectsSortMode.None).Where(l => l.type == LightType.Point).ToList();
+                foreach (var l in extra) l.enabled = false;
+                Row("todas las luces puntuales");
+                foreach (var l in extra) l.enabled = true;
+            }
+            File.WriteAllText("Logs/costo_efectos.csv", csv.ToString());
+            Debug.Log("[Caso404] Costo de efectos:\n" + csv);
         }
 
         /// <summary>Primer plano de cada personaje de la escena, con la luz de la escena (a 1 m de la cara).</summary>
