@@ -501,7 +501,15 @@ namespace Caso404.EditorTools
                 shade = Mathf.Lerp(1f, shade, 0.45f); // conserva un poco del volumen pintado, sin músculos marcados
                 Color? cloth = ClothAt(look, region, p, waist);
                 if (cloth != null) cloth = Details(look, region, p, h, waist, cloth.Value, i);
-                px[i] = cloth != null ? cloth.Value * shade : baseSkin;
+                if (cloth != null)
+                {
+                    // La ropa casi no conserva el relieve de los músculos del cuerpo base (parecía piel pintada);
+                    // en su lugar lleva una trama de tela suave.
+                    float clothShade = Mathf.Lerp(1f, shade, 0.12f);
+                    float weave = 0.95f + 0.05f * Mathf.PerlinNoise(i % TexSize * 0.45f, i / TexSize * 0.45f);
+                    px[i] = cloth.Value * clothShade * weave;
+                }
+                else px[i] = baseSkin;
                 px[i].a = 1f;
             }
             var tex = new Texture2D(TexSize, TexSize, TextureFormat.RGB24, false);
