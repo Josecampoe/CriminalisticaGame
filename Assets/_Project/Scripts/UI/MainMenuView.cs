@@ -41,7 +41,8 @@ namespace Caso404.UI
         void Build()
         {
             var rt = UIFactory.Stretch((RectTransform)transform);
-            var bg = UIFactory.Panel(rt, "Bg", _theme.BgDark);
+            // Semitransparente: detrás se ve Valdora de noche (la arma el paso visual en la escena del menú).
+            var bg = UIFactory.Panel(rt, "Bg", UITheme.WithAlpha(_theme.BgDark, 0.62f));
             UIFactory.Stretch(bg.rectTransform);
 
             _title = UIFactory.Text(rt, "Title", "EL CASO 404", _theme.TitleFont, 96, _theme.TextLight, TextAlignmentOptions.Center);
