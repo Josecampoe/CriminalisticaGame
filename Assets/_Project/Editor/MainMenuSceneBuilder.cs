@@ -29,6 +29,7 @@ namespace Caso404.EditorTools
             Set(menu, "_database", Db);
             Set(menu, "_fader", fader);
 
+            VisualPass.Apply("MainMenu");
             EditorSceneManager.SaveScene(scene, ScenePath);
             RefreshBuildSettings();
             Debug.Log($"[Caso404] Escena {ScenePath} construida.");
@@ -42,6 +43,7 @@ namespace Caso404.EditorTools
             Case2DataBuilder.Build();
             SharedAssetsBuilder.Build();
             CharacterArtBuilder.Build();
+            CityKit.RebuildFarCity();
             Build();
             Apartment404SceneBuilder.Build();
             CafeSceneBuilder.Build();

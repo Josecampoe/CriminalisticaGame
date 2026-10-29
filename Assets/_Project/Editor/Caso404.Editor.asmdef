@@ -5,6 +5,8 @@
         "Caso404.Runtime",
         "Unity.TextMeshPro",
         "UnityEngine.UI",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime",
         "Unity.InputSystem"
     ],
     "includePlatforms": [

@@ -99,6 +99,7 @@ namespace Caso404.EditorTools
         public static void Finish(UnityEngine.SceneManagement.Scene scene, string path)
         {
             BuildGameUi();
+            VisualPass.Apply(Path.GetFileNameWithoutExtension(path)); // post-procesado, luces, materiales y ambiente
             EditorSceneManager.SaveScene(scene, path);
             RefreshBuildSettings();
             AssetDatabase.SaveAssets();
@@ -465,7 +466,7 @@ namespace Caso404.EditorTools
             RenderSettings.fogEndDistance = fogEnd;
         }
 
-        public static void Sun(string name, Color color, float intensity, Vector3 euler)
+        public static Light Sun(string name, Color color, float intensity, Vector3 euler)
         {
             var sun = new GameObject(name).AddComponent<Light>();
             sun.type = LightType.Directional;
@@ -473,6 +474,7 @@ namespace Caso404.EditorTools
             sun.intensity = intensity;
             sun.shadows = LightShadows.Soft;
             sun.transform.rotation = Quaternion.Euler(euler);
+            return sun;
         }
 
         public static void PointLight(string name, Vector3 pos, Color color, float intensity, float range)
