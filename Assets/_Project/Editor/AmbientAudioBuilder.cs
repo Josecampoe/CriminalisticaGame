@@ -23,7 +23,7 @@ namespace Caso404.EditorTools
         static (string clip, float volume) For(string scene) => scene switch
         {
             "Apartamento404" => ("amb_ciudad_dia", 0.35f),
-            "CafeLaEsquina" => ("amb_cafe", 0.4f),
+            "CafeLaEsquina" => ("amb_cafe", 0.4f), // de noche; la lluvia se ve por las vitrinas
             "PorteriaSotano" => ("amb_zumbido", 0.3f),
             "Comisaria" => ("amb_zumbido", 0.22f),
             "ServidoresB" => ("amb_servidores", 0.4f),
