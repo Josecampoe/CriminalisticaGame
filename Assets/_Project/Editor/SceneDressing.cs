@@ -52,6 +52,8 @@ namespace Caso404.EditorTools
             if (sceneName == "CafeLaEsquina") CafeSign(group, renderers);
             Pictures(group, renderers, sceneName);
             Cars(group, renderers);
+            Books(group);
+            SofaCushions(group);
             if (sceneName is "Comisaria" or "PisoEjecutivo" or "PorteriaSotano") OfficeFurniture(group, renderers);
             if (sceneName == "ServidoresB") CableTrays(group, renderers);
             return _count;
@@ -565,6 +567,59 @@ namespace Caso404.EditorTools
                 {
                     Piece(g, "Faro", PrimitiveType.Cube, b.center + side * sx * (wid / 2f - 0.3f) + fwd * (len / 2f + 0.005f) + Vector3.up * 0.15f, alongZ ? new Vector3(0.3f, 0.12f, 0.02f) : new Vector3(0.02f, 0.12f, 0.3f), head, shadows: false);
                     Piece(g, "Luz trasera", PrimitiveType.Cube, b.center + side * sx * (wid / 2f - 0.25f) - fwd * (len / 2f + 0.005f) + Vector3.up * 0.15f, alongZ ? new Vector3(0.35f, 0.1f, 0.02f) : new Vector3(0.02f, 0.1f, 0.35f), tail, shadows: false);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Los bloques de color que hacían de libros ("Libros i", "Archivos i") se reemplazan por lomos individuales de
+        /// alturas, grosores y colores distintos (el bloque original se oculta, no se borra).
+        /// </summary>
+        static void Books(Transform g)
+        {
+            Material[] covers =
+            {
+                SceneKit.Mat("libro_rojo"), SceneKit.Mat("libro_azul"), SceneKit.Mat("libro_verde"),
+                SceneKit.Mat("libro_crema", new Color(0.75f, 0.7f, 0.58f), 0.3f), SceneKit.Mat("libro_negro", new Color(0.08f, 0.08f, 0.09f), 0.35f),
+            };
+            foreach (var r in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None).Where(r => r.name.StartsWith("Libros ") || r.name.StartsWith("Archivos ")))
+            {
+                var b = r.bounds;
+                bool alongZ = b.size.z >= b.size.x;
+                float len = alongZ ? b.size.z : b.size.x, depth = alongZ ? b.size.x : b.size.z;
+                if (len < 0.3f) continue;
+                r.enabled = false;
+                var axis = alongZ ? Vector3.forward : Vector3.right;
+                float t = -len / 2f + 0.01f;
+                while (t < len / 2f - 0.03f)
+                {
+                    float thick = 0.02f + (float)_rnd.NextDouble() * 0.035f;
+                    float hgt = b.size.y * (0.7f + (float)_rnd.NextDouble() * 0.3f);
+                    if (_rnd.NextDouble() < 0.06) { t += 0.08f; continue; } // hueco
+                    var pos = b.center + axis * (t + thick / 2f) + Vector3.up * (hgt / 2f - b.size.y / 2f);
+                    var size = alongZ ? new Vector3(depth * 0.9f, hgt, thick) : new Vector3(thick, hgt, depth * 0.9f);
+                    var book = Piece(g, "Libro", PrimitiveType.Cube, pos, size, covers[_rnd.Next(covers.Length)], shadows: false);
+                    if (_rnd.NextDouble() < 0.08) book.transform.rotation = Quaternion.AngleAxis(alongZ ? 12f : -12f, alongZ ? Vector3.right : Vector3.forward);
+                    t += thick + 0.002f;
+                }
+            }
+        }
+
+        /// <summary>Cojines del asiento y del respaldo sobre los sofás (con una separación entre ellos).</summary>
+        static void SofaCushions(Transform g)
+        {
+            var fabric = SceneKit.Mat("fabric");
+            foreach (var seat in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None).Where(r => r.name == "Sofá base"))
+            {
+                var b = seat.bounds;
+                bool alongZ = b.size.z >= b.size.x;
+                var axis = alongZ ? Vector3.forward : Vector3.right;
+                float len = alongZ ? b.size.z : b.size.x, depth = alongZ ? b.size.x : b.size.z;
+                for (int k = 0; k < 2; k++)
+                {
+                    var c = b.center + axis * ((k - 0.5f) * len / 2f) + Vector3.up * (b.extents.y + 0.06f);
+                    var size = alongZ ? new Vector3(depth * 0.92f, 0.12f, len / 2f - 0.03f) : new Vector3(len / 2f - 0.03f, 0.12f, depth * 0.92f);
+                    Piece(g, "Cojín del asiento", PrimitiveType.Cube, c, size, fabric);
                 }
             }
         }
