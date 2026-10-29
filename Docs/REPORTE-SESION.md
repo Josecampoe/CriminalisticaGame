@@ -41,29 +41,29 @@ Máquina de prueba: **portátil con Intel Core i5-13420H y gráficos integrados 
 
 | Escena | Primer build de la sesión (sin optimizar) | Final | Percentil 95 final |
 |---|---|---|---|
-| Apartamento 404 | 61 FPS | **88 FPS** | 13.4 ms |
-| Café La Esquina | 59 FPS | **77 FPS** | 15.3 ms |
-| Portería y sótano | 72 FPS | **79 FPS** | 16.1 ms |
-| Comisaría | 68 FPS | **74 FPS** | 14.9 ms |
-| Sala de servidores B | 66 FPS | **83 FPS** | 14.1 ms |
-| Piso ejecutivo | 70 FPS | **87 FPS** | 15.5 ms |
-| Caseta y parqueadero | 48 FPS | **64 FPS** | 17.2 ms |
+| Apartamento 404 | 61 FPS | **92 FPS** | 13.2 ms |
+| Café La Esquina | 59 FPS | **81 FPS** | 14.7 ms |
+| Portería y sótano | 72 FPS | **84 FPS** | 14.7 ms |
+| Comisaría | 68 FPS | **80 FPS** | 13.6 ms |
+| Sala de servidores B | 66 FPS | **89 FPS** | 12.6 ms |
+| Piso ejecutivo | 70 FPS | **94 FPS** | 14.2 ms |
+| Caseta y parqueadero | 48 FPS | **72 FPS** | 15.7 ms |
 
-Todas las escenas quedan sobre 60 FPS de promedio; en la caseta, el 5 % de frames más lentos ronda los 58 FPS. El build anterior a la sesión no tenía el medidor, así que la comparación "antes/después" exacta es la del Editor:
+Todas las escenas quedan sobre 60 FPS de promedio, y también el 5 % de frames más lentos (el peor es la caseta: 15.7 ms ≈ 64 FPS). El build anterior a la sesión no tenía el medidor, así que la comparación "antes/después" exacta es la del Editor:
 
 **En el Editor** (`VisualAudit`, mismo método antes y después: 40 frames a 1920×1080 por vista; promedio de las vistas de cada escena). El Editor tiene sobrecosto y el portátil se calienta tras muchas corridas, así que sirve para comparar, no como cifra real:
 
 | Escena | Antes | Después |
 |---|---|---|
-| Apartamento 404 | 19.3 ms (52 FPS) | 22.4 ms (45 FPS) |
-| Café La Esquina | 21.5 ms (46 FPS) | 21.2 ms (47 FPS) |
-| Portería y sótano | 19.0 ms (53 FPS) | 22.2 ms (45 FPS) |
-| Comisaría | 16.8 ms (60 FPS) | 19.9 ms (50 FPS) |
-| Sala de servidores B | 18.7 ms (54 FPS) | 20.8 ms (48 FPS) |
-| Piso ejecutivo | 21.9 ms (46 FPS) | 24.6 ms (41 FPS) |
-| Caseta y parqueadero | 20.5 ms (49 FPS) | 23.1 ms (43 FPS) |
+| Apartamento 404 | 19.3 ms (52 FPS) | 22.8 ms (44 FPS) |
+| Café La Esquina | 21.5 ms (46 FPS) | 20.2 ms (49 FPS) |
+| Portería y sótano | 19.0 ms (53 FPS) | 24.0 ms (42 FPS) |
+| Comisaría | 16.8 ms (60 FPS) | 22.8 ms (44 FPS) |
+| Sala de servidores B | 18.7 ms (54 FPS) | 21.4 ms (47 FPS) |
+| Piso ejecutivo | 21.9 ms (46 FPS) | 25.1 ms (40 FPS) |
+| Caseta y parqueadero | 20.5 ms (49 FPS) | 24.0 ms (42 FPS) |
 
-Es decir, el look nuevo cuesta entre 0 y 3 ms más por frame que el greybox (el café incluso bajó), y el ejecutable lo absorbe. Lo que más costaba eran **las luces puntuales** y **la ciudad dibujada detrás de las paredes**; se resolvió con occlusion culling, una sola sombra puntual por escena, sin sombra direccional de noche y menos luces reales en parqueaderos y café (medido con **Caso404 → `VisualAudit.ProfileEffects`**, que apaga un efecto a la vez).
+Es decir, el look nuevo cuesta hasta unos 5 ms más por frame que el greybox en el Editor (el café incluso bajó), y el ejecutable lo absorbe. Lo que más costaba eran **las luces puntuales** y **la ciudad dibujada detrás de las paredes**; se resolvió con occlusion culling, una sola sombra puntual por escena, sin sombra direccional de noche y menos luces reales en parqueaderos y café (medido con **Caso404 → `VisualAudit.ProfileEffects`**, que apaga un efecto a la vez).
 
 **Build:** `Builds/ElCaso404/ElCaso404.exe`, 179 MB (antes 135 MB: texturas, audio y variantes de shaders del post-procesado). Tarda unos 5 min la primera vez y menos de 1 min después.
 
@@ -85,6 +85,11 @@ Es decir, el look nuevo cuesta entre 0 y 3 ms más por frame que el greybox (el 
 6. **Sonido ambiente**: revisa el volumen frente a los sonidos de la interfaz.
 7. **La caseta y el café** son las escenas más pesadas: si en tu portátil bajan de 60 FPS, dime y quito la lluvia o reduzco luces ahí.
 8. **Los PR** (enlaces abajo): fusiónalos en cualquier orden; el script verifica que juntos dan exactamente `dev-visual`.
+
+### Pull requests (sin fusionar)
+- José: https://github.com/Josecampoe/CriminalisticaGame/pull/8
+- Majo: https://github.com/Josecampoe/CriminalisticaGame/pull/9
+- Daniel: https://github.com/Josecampoe/CriminalisticaGame/pull/10
 
 
 ---
