@@ -86,10 +86,11 @@ Es decir, el look nuevo cuesta hasta unos 5 ms más por frame que el greybox en 
 7. **La caseta y el café** son las escenas más pesadas: si en tu portátil bajan de 60 FPS, dime y quito la lluvia o reduzco luces ahí.
 8. **Los PR** (enlaces abajo): fusiónalos en cualquier orden; el script verifica que juntos dan exactamente `dev-visual`.
 
-### Pull requests (sin fusionar)
-- José: https://github.com/Josecampoe/CriminalisticaGame/pull/8
-- Majo: https://github.com/Josecampoe/CriminalisticaGame/pull/9
-- Daniel: https://github.com/Josecampoe/CriminalisticaGame/pull/10
+### Pull requests
+- Primera entrega (ya fusionados por el equipo durante la sesión): José #8, Majo #9, Daniel #10.
+- **Pendientes de revisar y fusionar** (el trabajo hecho después de esa fusión):
+  - José: https://github.com/Josecampoe/CriminalisticaGame/pull/11
+  - Majo: https://github.com/Josecampoe/CriminalisticaGame/pull/12
 
 
 ---
