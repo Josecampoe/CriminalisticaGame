@@ -26,11 +26,10 @@ namespace Caso404.EditorTools
         /// <summary>Los tres ambientes de luz del juego.</summary>
         public enum Ambience { Overcast, Fluorescent, Night }
 
-        /// <summary>Ambiente de cada escena: día nublado (apartamento), fluorescente (sótano, Comisaría), noche (café y caso 2).</summary>
+        /// <summary>Ambiente de cada escena: día nublado (apartamento, café), fluorescente (sótano, Comisaría), noche (caso 2).</summary>
         public static Ambience For(string sceneName) => sceneName switch
         {
-            "Apartamento404" => Ambience.Overcast,
-            "CafeLaEsquina" => Ambience.Night, // GUION §3.2: "café pequeño de barrio, de noche" (10:20 PM)
+            "Apartamento404" or "CafeLaEsquina" => Ambience.Overcast,
             "PorteriaSotano" or "Comisaria" => Ambience.Fluorescent,
             _ => Ambience.Night,
         };
@@ -65,13 +64,6 @@ namespace Caso404.EditorTools
         /// Línea de comandos: reconstruye las escenas con sus builders (cada uno aplica el paso visual al final; la ciudad
         /// incluye semáforos, cables y avisos), hornea la luz y toma las capturas. No toca datos ni personajes.
         /// </summary>
-        /// <summary>Como <see cref="RebuildBakeAndAudit"/>, pero también regenera los personajes (texturas y prefabs).</summary>
-        public static void RebuildWithCharactersBakeAndAudit()
-        {
-            CharacterArtBuilder.Build();
-            RebuildBakeAndAudit();
-        }
-
         public static void RebuildBakeAndAudit()
         {
             SharedAssetsBuilder.Build();
@@ -115,22 +107,18 @@ namespace Caso404.EditorTools
 
             foreach (var cam in Object.FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                 SetupCamera(cam, menu);
-            if (menu) { MenuBackdrop(root); return; }
+            if (menu) return;
 
             // SceneKit.BeginEmpty vuelve a poner colores planos en los materiales compartidos: se reaplican las texturas.
             ProceduralMaterials.Build(false);
 
             SetupDialogueFocus(root);
             Glass();
-            Footprint();
             int boxes = ProceduralMaterials.ApplyBoxUVs();
             SetAmbient(ambience);
-            NightPerformance(ambience);
             var lights = RoomLights();
             Fixtures(root, lights, ambience);
             ExtraTubes(root);
-            if (sceneName == "CafeLaEsquina") CafeLamps(root);
-            Accents(root);
             Shadows(lights);
             ReflectionProbes(root);
             Dust(root, lights, ambience);
@@ -149,37 +137,6 @@ namespace Caso404.EditorTools
                 SceneKit.Set(atmosphere, "_nightProfile", Profile(Ambience.Night));
             }
             Debug.Log($"[Caso404] Paso visual en {sceneName}: {lights.Count} luces con lámpara visible, {boxes} cubos con UV en metros, {props} piezas de utilería.");
-        }
-
-        /// <summary>
-        /// Fondo del menú principal: Valdora de noche vista desde una oficina alta, con lluvia en el vidrio y la silueta de
-        /// una persiana arriba. El panel del menú es semitransparente, así que la ciudad se ve detrás del título.
-        /// </summary>
-        static void MenuBackdrop(Transform root)
-        {
-            CityKit.Surround(new CityKit.Options
-            {
-                StreetY = -34f, Night = true, Seed = 2031, Downtown = true,
-                HostMin = new Vector2(-8f, -8f), HostMax = new Vector2(8f, 8f), HostHeight = 0f,
-            });
-            var city = GameObject.Find("Ciudad de Valdora");
-            if (city != null) city.transform.SetParent(root, true);
-            var cam = Object.FindAnyObjectByType<Camera>();
-            if (cam != null)
-            {
-                cam.clearFlags = CameraClearFlags.Skybox;
-                cam.transform.SetPositionAndRotation(new Vector3(0f, 22f, -30f), Quaternion.Euler(8f, 20f, 0f));
-                cam.fieldOfView = 55f;
-                cam.farClipPlane = 900f;
-            }
-            var slat = SceneKit.Mat("persiana_silueta", new Color(0.05f, 0.05f, 0.055f), 0.2f);
-            var camT = cam != null ? cam.transform : root;
-            Rain(root, camT.position + camT.forward * 3.5f + Vector3.down * 2.5f, camT.position.y + 2.5f, 10f, true);
-            for (int i = 0; i < 4; i++)
-            {
-                var piece = Part(root, "Persiana (menú)", PrimitiveType.Cube, camT.position + camT.forward * 1.2f + camT.up * (0.62f - i * 0.055f), new Vector3(3f, 0.006f, 0.035f), slat);
-                piece.transform.rotation = camT.rotation * Quaternion.Euler(35f, 0f, 0f);
-            }
         }
 
         // ================= Cámara =================
@@ -232,56 +189,6 @@ namespace Caso404.EditorTools
             EditorUtility.SetDirty(glass);
         }
 
-        /// <summary>
-        /// La huella del balcón (evidencia clave) deja de ser una tabla marrón: textura de suela con tacón, antepié y
-        /// dibujo de la banda de rodadura, recortada con alfa para que alrededor se vea el piso.
-        /// </summary>
-        static void Footprint()
-        {
-            const string texPath = "Assets/_Project/Art/Textures/Procedural/T_huella.png";
-            if (!File.Exists(texPath))
-            {
-                const int w = 128, h = 320;
-                var tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
-                for (int y = 0; y < h; y++)
-                    for (int x = 0; x < w; x++)
-                    {
-                        float u = (x + 0.5f) / w, v = (y + 0.5f) / h;
-                        float fore = Sq((u - 0.5f) / 0.44f) + Sq((v - 0.68f) / 0.3f);
-                        float heel = Sq((u - 0.5f) / 0.36f) + Sq((v - 0.19f) / 0.17f);
-                        float arch = Sq((u - 0.56f) / 0.26f) + Sq((v - 0.42f) / 0.22f);
-                        float edge = Mathf.PerlinNoise(x * 0.25f, y * 0.25f) * 0.25f;
-                        bool inside = fore < 1f - edge || heel < 1f - edge || arch < 0.8f - edge;
-                        bool groove = Mathf.Abs(Mathf.Repeat(v * 26f + Mathf.Abs(u - 0.5f) * 3f, 1f) - 0.5f) < 0.16f; // zigzag
-                        float dirt = 0.75f + 0.25f * Mathf.PerlinNoise(x * 0.12f + 3f, y * 0.12f);
-                        var c = new Color(0.27f, 0.19f, 0.11f) * (groove ? 0.55f : 1f) * dirt;
-                        float a = inside ? (groove ? 0.75f : 1f) * Mathf.Clamp01(dirt + 0.1f) : 0f;
-                        tex.SetPixel(x, y, new Color(c.r, c.g, c.b, a));
-                    }
-                tex.Apply();
-                File.WriteAllBytes(texPath, tex.EncodeToPNG());
-                Object.DestroyImmediate(tex);
-                AssetDatabase.ImportAsset(texPath);
-                var imp = (TextureImporter)AssetImporter.GetAtPath(texPath);
-                imp.alphaIsTransparency = true;
-                imp.wrapMode = TextureWrapMode.Clamp;
-                imp.SaveAndReimport();
-            }
-            var mud = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Art/Materials/mat_mud.mat");
-            if (mud == null) return;
-            mud.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(texPath));
-            mud.SetColor("_BaseColor", Color.white);
-            mud.SetFloat("_AlphaClip", 1f);
-            mud.SetFloat("_Cutoff", 0.45f);
-            mud.EnableKeyword("_ALPHATEST_ON");
-            mud.SetFloat("_Smoothness", 0.35f);
-            mud.SetOverrideTag("RenderType", "TransparentCutout");
-            mud.renderQueue = (int)RenderQueue.AlphaTest;
-            EditorUtility.SetDirty(mud);
-        }
-
-        static float Sq(float x) => x * x;
-
         static Material Emissive(string name, Color color, float hdr)
         {
             SharedAssetsBuilder.EnsureFolder(FxMatFolder);
@@ -299,24 +206,6 @@ namespace Caso404.EditorTools
         }
 
         // ================= Luces =================
-
-        /// <summary>
-        /// Rendimiento: de noche la luz direccional (luna o calle, intensidad 0.2) no proyecta sombra, porque casi no se
-        /// ve y sus 4 cascadas costaban 3-4 ms en gráficos integrados. Y la cámara no dibuja más allá del final de la niebla.
-        /// </summary>
-        static void NightPerformance(Ambience a)
-        {
-            if (a == Ambience.Night)
-                foreach (var l in Object.FindObjectsByType<Light>(FindObjectsSortMode.None))
-                {
-                    if (l.type == LightType.Directional) l.shadows = LightShadows.None;
-                    // Farolas de la ciudad: alcance corto (el charco de luz en la calle); costaban 3-4 ms vistas desde la calle.
-                    else if (l.transform.root.name == "Ciudad de Valdora") l.range = Mathf.Min(l.range, 6f);
-                }
-            if (RenderSettings.fog && RenderSettings.fogMode == FogMode.Linear)
-                foreach (var cam in Object.FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None))
-                    cam.farClipPlane = Mathf.Min(cam.farClipPlane, RenderSettings.fogEndDistance + 30f);
-        }
 
         /// <summary>Luz ambiente más baja que antes: más contraste entre lo iluminado por las lámparas y las sombras.</summary>
         static void SetAmbient(Ambience a)
@@ -397,86 +286,6 @@ namespace Caso404.EditorTools
         }
 
         /// <summary>
-        /// Acentos de luz cálida a la altura de la mesa, típicos del cine negro: lámpara de banquero verde en cada
-        /// escritorio de la Comisaría y la lámpara de pie de la sala del apartamento encendida.
-        /// </summary>
-        static void Accents(Transform root)
-        {
-            var group = new GameObject("Acentos de luz").transform;
-            group.SetParent(root, false);
-            var brass = SceneKit.Mat("laton", new Color(0.55f, 0.42f, 0.18f), 0.75f, 0.9f);
-            var green = Emissive("emit_pantalla_banquero", new Color(0.1f, 0.45f, 0.2f), 0.8f);
-            var warm = Emissive("emit_bombillo_calido", new Color(1f, 0.78f, 0.5f), 6f);
-            var shade = SceneKit.Mat("pantalla_tela", new Color(0.75f, 0.68f, 0.55f), 0.1f);
-            var evidence = Object.FindObjectsByType<Caso404.Evidence.EvidencePickup>(FindObjectsInactive.Include, FindObjectsSortMode.None)
-                .Select(e => e.GetComponent<Collider>()).Where(c => c != null).Select(c => c.bounds).ToList();
-            bool NearEvidence(Vector3 p) => evidence.Any(b => b.SqrDistance(p) < 0.5f * 0.5f);
-
-            foreach (var desk in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None).Where(r => r.name == "Escritorio"))
-            {
-                var b = desk.bounds;
-                var p = new Vector3(b.max.x - 0.22f, b.max.y, b.max.z - 0.18f);
-                if (NearEvidence(p)) continue;
-                Part(group, "Base de lámpara", PrimitiveType.Cylinder, p + Vector3.up * 0.01f, new Vector3(0.14f, 0.01f, 0.14f), brass);
-                Part(group, "Brazo de lámpara", PrimitiveType.Cylinder, p + Vector3.up * 0.17f, new Vector3(0.018f, 0.16f, 0.018f), brass);
-                var cap = Part(group, "Pantalla verde", PrimitiveType.Cylinder, p + Vector3.up * 0.34f, new Vector3(0.11f, 0.15f, 0.11f), green);
-                cap.transform.rotation = Quaternion.Euler(0, 0, 90);
-                var l = new GameObject("Luz de la lámpara de banquero").AddComponent<Light>();
-                l.transform.SetParent(group, false);
-                l.transform.position = p + Vector3.up * 0.27f;
-                l.type = LightType.Point;
-                l.color = new Color(1f, 0.82f, 0.55f);
-                l.intensity = 0.9f;
-                l.range = 2.2f;
-                l.shadows = LightShadows.None;
-            }
-
-            foreach (var stand in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None).Where(r => r.name == "Lámpara de pie"))
-            {
-                var b = stand.bounds;
-                var top = new Vector3(b.center.x, b.max.y, b.center.z);
-                Part(group, "Pantalla de la lámpara de pie", PrimitiveType.Cylinder, top + Vector3.up * 0.12f, new Vector3(0.38f, 0.14f, 0.38f), shade);
-                Part(group, "Bombillo", PrimitiveType.Sphere, top + Vector3.up * 0.05f, Vector3.one * 0.08f, warm);
-                var l = new GameObject("Luz de la lámpara de pie").AddComponent<Light>();
-                l.transform.SetParent(group, false);
-                l.transform.position = top - Vector3.up * 0.05f + Vector3.right * 0.2f;
-                l.type = LightType.Point;
-                l.color = new Color(1f, 0.75f, 0.45f);
-                l.intensity = 1.1f;
-                l.range = 3.5f;
-                l.shadows = LightShadows.None;
-            }
-        }
-
-        /// <summary>Tres lámparas colgantes cálidas sobre el centro del salón del café, que quedaba casi a oscuras.</summary>
-        static void CafeLamps(Transform root)
-        {
-            var group = new GameObject("Lámparas del salón").transform;
-            group.SetParent(root, false);
-            var housing = SceneKit.Mat("dark");
-            var shade = SceneKit.Mat("lamp_shade");
-            var bulbMat = Emissive("emit_bombillo_calido", new Color(1f, 0.78f, 0.5f), 6f);
-            float ceiling = SceneKit.WallHeight, bulbY = ceiling - 0.6f;
-            int index = 0;
-            foreach (var p in new[] { new Vector3(0f, 0f, 2.2f), new Vector3(0f, 0f, 4.6f), new Vector3(-2f, 0f, 1.2f) })
-            {
-                bool withLight = index++ == 0; // solo la del centro ilumina; las otras dos solo brillan (rendimiento)
-                var lamp = Part(group, "Lámpara colgante", PrimitiveType.Cylinder, new Vector3(p.x, (ceiling + bulbY) / 2f + 0.1f, p.z), new Vector3(0.012f, (ceiling - bulbY) / 2f - 0.1f, 0.012f), housing);
-                Part(group, "Pantalla", PrimitiveType.Cylinder, new Vector3(p.x, bulbY + 0.07f, p.z), new Vector3(0.36f, 0.07f, 0.36f), shade).transform.SetParent(lamp.transform, true);
-                Part(group, "Bombillo", PrimitiveType.Sphere, new Vector3(p.x, bulbY - 0.01f, p.z), Vector3.one * 0.1f, bulbMat).transform.SetParent(lamp.transform, true);
-                if (!withLight) continue;
-                var l = new GameObject("Luz").AddComponent<Light>();
-                l.transform.SetParent(lamp.transform, false);
-                l.transform.position = new Vector3(p.x, bulbY - 0.12f, p.z);
-                l.type = LightType.Point;
-                l.color = new Color(1f, 0.76f, 0.48f);
-                l.intensity = 1.6f;
-                l.range = 5f;
-                l.shadows = LightShadows.None;
-            }
-        }
-
-        /// <summary>
         /// Los parqueaderos son grandes y tenían dos luces: se agrega una cuadrícula de tubos (cada uno con su luz, sin sombra)
         /// cada 4 m. Van dentro de "Ambiente visual", así que el paso se puede repetir sin duplicarlos.
         /// </summary>
@@ -490,11 +299,10 @@ namespace Caso404.EditorTools
             {
                 var b = f.bounds;
                 int n = 0;
-                int every = b.size.x * b.size.z > 150f ? 3 : 2; // parqueaderos grandes: menos luces reales (rendimiento)
                 for (float x = b.min.x + 2f; x < b.max.x - 1f; x += 4f)
                     for (float z = b.min.z + 2f; z < b.max.z - 1f; z += 4f)
                     {
-                        bool withLight = n++ % every == 0; // los demás tubos solo brillan
+                        bool withLight = n++ % 2 == 0; // en tablero: la mitad de los tubos ilumina, la otra solo brilla
                         var p = new Vector3(x, SceneKit.WallHeight, z);
                         var t = Part(group, "Fluorescente (parqueadero)", PrimitiveType.Cube, p + Vector3.down * 0.05f, new Vector3(1.25f, 0.05f, 0.18f), housing);
                         var tube = Part(group, "Tubo", PrimitiveType.Cube, p + Vector3.down * 0.085f, new Vector3(1.18f, 0.03f, 0.1f), tubeMat);
@@ -505,8 +313,8 @@ namespace Caso404.EditorTools
                         l.transform.position = p + Vector3.down * 0.3f;
                         l.type = LightType.Point;
                         l.color = new Color(0.85f, 0.92f, 1f);
-                        l.intensity = 2.2f;
-                        l.range = 8f;
+                        l.intensity = 1.5f;
+                        l.range = 7f;
                         l.shadows = LightShadows.None;
                     }
             }
@@ -618,11 +426,6 @@ namespace Caso404.EditorTools
                     var q = Part(group, "Frente de rack", PrimitiveType.Quad, new Vector3(side > 0 ? b.max.x + 0.004f : b.min.x - 0.004f, b.center.y, b.center.z),
                         new Vector3(b.size.z, b.size.y, 1f), mat);
                     q.transform.rotation = Quaternion.Euler(0f, side > 0 ? -90f : 90f, 0f);
-                    var pulse = q.AddComponent<EmissionPulse>();
-                    SceneKit.Set(pulse, "_renderer", q.GetComponent<Renderer>());
-                    var so = new SerializedObject(pulse);
-                    so.FindProperty("_emission").colorValue = Color.white * 6f;
-                    so.ApplyModifiedPropertiesWithoutUndo();
                 }
             }
         }
@@ -673,7 +476,7 @@ namespace Caso404.EditorTools
             mat.SetTextureScale("_BaseMap", new Vector2(10f, 1f));
             mat.EnableKeyword("_EMISSION");
             mat.SetTexture("_EmissionMap", t);
-            mat.SetColor("_EmissionColor", Color.white * 6f);
+            mat.SetColor("_EmissionColor", Color.white * 4f);
             mat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
             EditorUtility.SetDirty(mat);
             return mat;
@@ -693,7 +496,6 @@ namespace Caso404.EditorTools
                 .Where(r => r.bounds.size.y > 0.8f && Mathf.Max(r.bounds.size.x, r.bounds.size.z) > 1.1f && Mathf.Min(r.bounds.size.x, r.bounds.size.z) < 0.1f)
                 .OrderByDescending(r => r.bounds.size.x * r.bounds.size.z + r.bounds.size.y).Take(4).ToList();
             if (panes.Count == 0) return;
-            int rainCount = 0;
             var group = new GameObject(a == Ambience.Night ? "Lluvia" : "Rayos de luz").transform;
             group.SetParent(root, false);
             foreach (var pane in panes)
@@ -705,7 +507,7 @@ namespace Caso404.EditorTools
                 var inward = InRoom(b.center + n * 0.8f) ? n : InRoom(b.center - n * 0.8f) ? -n : Vector3.zero;
                 if (inward == Vector3.zero) continue;
                 float width = alongX ? b.size.x : b.size.z;
-                if (a == Ambience.Night && rainCount++ < 2) Rain(group, b.center - inward * 2.5f, b.max.y, width, alongX);
+                if (a == Ambience.Night) Rain(group, b.center - inward * 2.5f, b.max.y, width, alongX);
                 else if (a == Ambience.Overcast) Shaft(group, b.center, inward, width, b.size.y);
             }
         }
@@ -783,7 +585,7 @@ namespace Caso404.EditorTools
             main.startSpeed = 0f;
             main.startSize = new ParticleSystem.MinMaxCurve(0.012f, 0.02f);
             main.startColor = new Color(0.7f, 0.78f, 0.9f, 0.35f);
-            main.maxParticles = 350;
+            main.maxParticles = 500;
             main.simulationSpace = ParticleSystemSimulationSpace.World;
             var vel = ps.velocityOverLifetime;
             vel.enabled = true;
@@ -792,7 +594,7 @@ namespace Caso404.EditorTools
             vel.y = new ParticleSystem.MinMaxCurve(-11f);
             vel.z = new ParticleSystem.MinMaxCurve(0f);
             var em = ps.emission;
-            em.rateOverTime = 280f;
+            em.rateOverTime = 380f;
             var shape = ps.shape;
             shape.shapeType = ParticleSystemShapeType.Box;
             shape.scale = alongX ? new Vector3(width + 6f, 0.1f, 3f) : new Vector3(3f, 0.1f, width + 6f);
