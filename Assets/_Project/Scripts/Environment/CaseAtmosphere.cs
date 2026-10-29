@@ -1,11 +1,12 @@
 using Caso404.Core;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Caso404.Environment
 {
     /// <summary>
     /// Ambiente de una escena compartida entre casos (la Comisaría): de día en el caso 1 y de noche en el caso 2.
-    /// Cambia cielo, niebla, luz ambiente, la luz exterior y enciende ventanas y faroles de la ciudad.
+    /// Cambia cielo, niebla, luz ambiente, el perfil de post-procesado, la luz exterior y enciende ventanas y faroles de la ciudad.
     /// </summary>
     public class CaseAtmosphere : MonoBehaviour
     {
@@ -24,11 +25,14 @@ namespace Caso404.Environment
         [SerializeField] private Color _windowEmission = new(1.1f, 0.88f, 0.5f);
         [SerializeField] private Color _lampEmission = new(2.2f, 1.7f, 0.9f);
         [SerializeField] private Material _lampMaterial;
+        [SerializeField] private Volume _volume;
+        [SerializeField] private VolumeProfile _nightProfile;
 
         void Start()
         {
             if (_game == null || _game.Case == null || _game.Case.Id != _nightCaseId) return;
             if (_nightSkybox != null) RenderSettings.skybox = _nightSkybox;
+            if (_volume != null && _nightProfile != null) _volume.sharedProfile = _nightProfile;
             RenderSettings.fogColor = _nightFog;
             RenderSettings.ambientLight = _nightAmbient;
             if (_sun != null) { _sun.color = _nightSunColor; _sun.intensity = _nightSunIntensity; }
