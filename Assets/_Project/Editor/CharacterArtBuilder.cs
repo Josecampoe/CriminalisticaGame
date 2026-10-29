@@ -108,6 +108,7 @@ namespace Caso404.EditorTools
                 var tex = PaintOutfit(look, regionMaps[look.Female], skins[look.Female]);
                 BuildPrefab(look, tex, controller, regionMaps[look.Female]);
             }
+            BuildSurfaceMasks(); // piel, ropa y zapatos con brillo distinto
             AssetDatabase.SaveAssets();
             Debug.Log($"[Caso404] {Looks.Length} personajes construidos en {PrefabFolder}.");
         }
@@ -430,6 +431,62 @@ namespace Caso404.EditorTools
 
         static float Lum(Color c) => c.r * 0.3f + c.g * 0.59f + c.b * 0.11f;
 
+        /// <summary>Color de la ropa en un punto del cuerpo, o null si ahí se ve la piel.</summary>
+        static Color? ClothAt(Look look, Region region, Vector3 p, float waist) => region switch
+        {
+            Region.Torso => p.y < waist ? look.Pants : look.Top,
+            Region.UpperArm => look.Top,
+            Region.LowerArm => look.ShortSleeves ? null : look.Top,
+            Region.Hips => p.y > waist + 0.02f && look.Pattern != Pattern.Overall ? look.Top : look.Pants,
+            Region.Legs => look.Pants,
+            Region.Feet => look.Shoes,
+            _ => null,
+        };
+
+        /// <summary>
+        /// Piel, ropa y zapatos con brillo distinto: genera un mapa de metal/brillo por personaje (alfa = brillo) con las
+        /// mismas zonas de la ropa pintada y lo asigna a su material. No reconstruye los prefabs.
+        /// </summary>
+        [MenuItem("Caso404/Arte/Brillo de piel, ropa y zapatos")]
+        public static void BuildSurfaceMasks()
+        {
+            var regionMaps = new Dictionary<bool, BodyMap> { [false] = BuildBodyMap(MaleFbx), [true] = BuildBodyMap(FemaleFbx) };
+            foreach (var look in Looks)
+            {
+                var map = regionMaps[look.Female];
+                float waist = map.Height * 0.585f;
+                var px = new Color[TexSize * TexSize];
+                for (int i = 0; i < px.Length; i++)
+                {
+                    var region = map.Regions[i];
+                    var cloth = ClothAt(look, region, map.Positions[i], waist);
+                    float smooth = cloth == null ? 0.42f : region == Region.Feet ? 0.55f : 0.1f;
+                    if (cloth != null && region != Region.Feet) smooth += 0.06f * Mathf.PerlinNoise(i % TexSize * 0.3f, i / TexSize * 0.3f); // tela
+                    px[i] = new Color(0f, 0f, 0f, smooth);
+                }
+                var tex = new Texture2D(TexSize, TexSize, TextureFormat.RGBA32, false, true);
+                tex.SetPixels(px);
+                tex.Apply();
+                var path = $"{TexFolder}/T_chr_{look.Id}_M.png";
+                File.WriteAllBytes(path, tex.EncodeToPNG());
+                Object.DestroyImmediate(tex);
+                AssetDatabase.ImportAsset(path);
+                var imp = (TextureImporter)AssetImporter.GetAtPath(path);
+                imp.sRGBTexture = false;
+                imp.maxTextureSize = TexSize;
+                imp.SaveAndReimport();
+                var mat = AssetDatabase.LoadAssetAtPath<Material>($"{MatFolder}/M_chr_{look.Id}.mat");
+                if (mat == null) continue;
+                mat.SetTexture("_MetallicGlossMap", AssetDatabase.LoadAssetAtPath<Texture2D>(path));
+                mat.EnableKeyword("_METALLICSPECGLOSSMAP");
+                mat.SetFloat("_Smoothness", 1f);
+                EditorUtility.SetDirty(mat);
+                var hair = AssetDatabase.LoadAssetAtPath<Material>($"{MatFolder}/M_hair_{look.Id}.mat");
+                if (hair != null) { hair.SetFloat("_Smoothness", 0.55f); EditorUtility.SetDirty(hair); } // pelo con algo de brillo
+            }
+            AssetDatabase.SaveAssets();
+        }
+
         static Texture2D PaintOutfit(Look look, BodyMap map, (Color[] light, Color[] dark) skin)
         {
             var px = new Color[TexSize * TexSize];
@@ -442,28 +499,7 @@ namespace Caso404.EditorTools
                 var baseSkin = Color.Lerp(skin.light[i], skin.dark[i], look.SkinTone);
                 float shade = Mathf.Clamp(Lum(skin.light[i]) / 0.62f, 0.55f, 1.25f);
                 shade = Mathf.Lerp(1f, shade, 0.45f); // conserva un poco del volumen pintado, sin músculos marcados
-                Color? cloth = null;
-                switch (region)
-                {
-                    case Region.Torso:
-                        cloth = p.y < waist ? look.Pants : look.Top;
-                        break;
-                    case Region.UpperArm:
-                        cloth = look.Top;
-                        break;
-                    case Region.LowerArm:
-                        if (!look.ShortSleeves) cloth = look.Top;
-                        break;
-                    case Region.Hips:
-                        cloth = p.y > waist + 0.02f && look.Pattern != Pattern.Overall ? look.Top : look.Pants;
-                        break;
-                    case Region.Legs:
-                        cloth = look.Pants;
-                        break;
-                    case Region.Feet:
-                        cloth = look.Shoes;
-                        break;
-                }
+                Color? cloth = ClothAt(look, region, p, waist);
                 if (cloth != null) cloth = Details(look, region, p, h, waist, cloth.Value, i);
                 px[i] = cloth != null ? cloth.Value * shade : baseSkin;
                 px[i].a = 1f;
