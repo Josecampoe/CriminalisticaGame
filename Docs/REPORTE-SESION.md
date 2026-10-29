@@ -1,5 +1,94 @@
 # Reporte de sesiones — El Caso 404
 
+## Sesión visual (29 de octubre de 2026)
+
+**En resumen:** las 7 escenas tienen ahora un aspecto noir: post-procesado por ambiente, lámparas con fuente visible, texturas en pisos y paredes, reflejos, utilería, ciudad con semáforos, cables y avisos, lluvia de noche y sonido ambiente. La jugabilidad no cambió: las mismas evidencias, personajes y colliders. **Todas las pruebas en verde** antes y después de cada cambio (41 EditMode, una de ellas nueva, y 6 PlayMode).
+
+> **Nota sobre Git:** el `git pull` de `main` chocó (main local y `origin/main` tienen historias distintas: ~50 conflictos). No resolví nada a mano: guardé el intento en `git stash` ("restos-del-pull-fallido-main") y partí `dev-visual` de `dev-sesion4`, que tiene todo lo de `origin/main` más la luz horneada y la ciudad que no habían llegado a `main`. Puedes borrar ese stash con `git stash drop` cuando quieras.
+
+### Qué se mejoró en cada escena
+
+Capturas en `Docs/capturas/antes/` y `Docs/capturas/despues/` con los mismos nombres (mismo punto de vista, altura de los ojos).
+
+| Escena | Antes → después | Qué cambió |
+|---|---|---|
+| **Menú principal** | `ui_00_menu` | Detrás del título se ve Valdora de noche con lluvia y la silueta de una persiana (antes, fondo plano). |
+| **c1_s1 Apartamento 404** | `c1s1_pasillo`, `c1s1_sala`, `c1s1_estudio`, `c1s1_balcon`, `c1s1_ciudad` | Día nublado frío con lámparas cálidas. Piso de tablas con brillo, yeso, baldosa del pasillo con manchas. Escena del crimen revuelta: libros y cojines en el piso, cuadro caído con vidrio roto, cajón abierto, papeles, taza rota. **Marcadores amarillos numerados** junto a las evidencias. Huella con dibujo de suela. Persianas, lámpara de pie encendida, libros individuales, cojines, cobija, microondas, plantas, cuadros, rayos de luz por las ventanas. |
+| **c1_s2 Café La Esquina** | `c1s2_entrada`, `c1s2_barra`, `c1s2_trastienda` | **De noche, como dice el guion.** Pared de ladrillo, baldosa, lámparas colgantes sobre el salón, butacos tapizados, letrero de neón "CAFÉ LA ESQUINA", lluvia tras las vitrinas, murmullo de café. |
+| **c1_s3 Portería y sótano** | `c1s3_porteria`, `c1s3_sotano`, `c1s3_parqueadero` | Fluorescente verdoso. Concreto manchado, tuberías y tubería contra incendios en el techo, tubos que parpadean, casilleros con rejillas, estanterías con cajas, archivadores, carros con cabina y llantas, más tubos en el parqueadero. |
+| **c1_s4 / c2_s4 Comisaría** | `c1s4_oficina`, `c1s4_ventana`, `c1s4_interrogatorio` | Persianas con franjas de luz, **lámparas de banquero verdes** en los escritorios, lámpara única sobre la mesa de interrogatorio, archivadores y dispensador de agua. En el caso 2 cambia sola a noche (perfil de post-procesado incluido). |
+| **c2_s1 Sala de servidores B** | `c2s1_pasillo`, `c2s1_sala`, `c2s1_racks` | Noche fría: frentes de racks con LEDs verdes, ámbar y azules que laten, bandejas de cables, tubos fluorescentes que parpadean, zumbido de ventiladores. |
+| **c2_s2 Piso ejecutivo** | `c2s2_oficinas`, `c2s2_ventanal`, `c2s2_pasillo` | Ventanal limpio (el vidrio ya no "lava" la imagen), lluvia afuera, calle mojada, avisos de neón en la ciudad, lámparas colgantes, archivadores, cuadros. |
+| **c2_s3 Caseta y parqueadero** | `c2s3_caseta`, `c2s3_parqueadero`, `c2s3_calle` | Parqueadero con cuadrícula de tubos, tuberías, manchas de aceite, carro con cabina y luces, lluvia y calle mojada. |
+| **Personajes** | `personaje_*` | Ropa sin los músculos del cuerpo base y con trama de tela (Carlos ya no parece sin camisa), piel satinada, ropa mate, zapatos y pelo con brillo, luz de relleno en la cara. |
+| **UI** | `ui_*` | Carta y ficha del expediente como papel envejecido con sombra y sello "EVIDENCIA"; panel de ALEX como pantalla con líneas de barrido. |
+
+**En todas las escenas:**
+- **Render:** HDR, tone mapping ACES, bloom suave, viñeta, grano de película, contraste alto y saturación baja, con sombras frías y luces cálidas (split toning). SMAA. SSAO a media resolución. Sombras suaves con 4 cascadas a 35 m.
+- **Tres perfiles:** día nublado (apartamento), fluorescente verdoso (portería y sótano, Comisaría en el caso 1) y noche (café, caso 2 y la Comisaría en el caso 2, que cambia sola).
+- **Luz:** cada luz tiene su lámpara o tubo visible; la más fuerte de cada escena proyecta sombra suave; reflection probes por cuarto; polvo flotando bajo las lámparas; algunos fluorescentes parpadean; luz de relleno suave en la cara de cada personaje para que siempre se vean.
+- **Materiales:** texturas generadas por código (no había texturas en ThirdParty): tablas de madera y baldosas con brillo, ladrillo, yeso, concreto manchado y con grietas, madera con vetas, tela, metal cepillado y lockers con óxido. Vidrio casi transparente con reflejo.
+- **Detalle:** rodapiés, enchufes, interruptores, cuadros, tazas, libros y papeles en las mesas, plantas, manchas en los pisos de concreto, tuberías en sótanos y parqueaderos.
+- **Ciudad:** semáforos en las esquinas, cables entre postes, avisos luminosos (encendidos de noche), calle mojada de noche y lluvia detrás de los ventanales.
+- **Vida:** sonido ambiente por escena (ciudad, café, zumbido de fluorescentes, servidores, lluvia), cámara que se acerca y desenfoca el fondo al hablar, y balanceo suave al caminar (se apaga en **Opciones → Balanceo de cámara al caminar**).
+- **UI:** la carta y la ficha del expediente son hojas de papel envejecido con sombra y sello; el panel de ALEX es una pantalla con líneas de barrido y borde con brillo.
+
+### Rendimiento (FPS)
+
+Máquina de prueba: **portátil con Intel Core i5-13420H y gráficos integrados Intel UHD** (gama media o algo menos en gráficos), a **1920×1080 en pantalla completa**, sin VSync.
+
+**En el ejecutable** (`ElCaso404.exe -benchmark`: recorre las 7 escenas y gira la vista 360° durante 6 s en el punto de inicio; archivo `Docs/capturas/despues/benchmark_ejecutable.csv`):
+
+| Escena | Primer build de la sesión (sin optimizar) | Final | Percentil 95 final |
+|---|---|---|---|
+| Apartamento 404 | 61 FPS | **88 FPS** | 13.4 ms |
+| Café La Esquina | 59 FPS | **77 FPS** | 15.3 ms |
+| Portería y sótano | 72 FPS | **79 FPS** | 16.1 ms |
+| Comisaría | 68 FPS | **74 FPS** | 14.9 ms |
+| Sala de servidores B | 66 FPS | **83 FPS** | 14.1 ms |
+| Piso ejecutivo | 70 FPS | **87 FPS** | 15.5 ms |
+| Caseta y parqueadero | 48 FPS | **64 FPS** | 17.2 ms |
+
+Todas las escenas quedan sobre 60 FPS de promedio; en la caseta, el 5 % de frames más lentos ronda los 58 FPS. El build anterior a la sesión no tenía el medidor, así que la comparación "antes/después" exacta es la del Editor:
+
+**En el Editor** (`VisualAudit`, mismo método antes y después: 40 frames a 1920×1080 por vista; promedio de las vistas de cada escena). El Editor tiene sobrecosto y el portátil se calienta tras muchas corridas, así que sirve para comparar, no como cifra real:
+
+| Escena | Antes | Después |
+|---|---|---|
+| Apartamento 404 | 19.3 ms (52 FPS) | 22.4 ms (45 FPS) |
+| Café La Esquina | 21.5 ms (46 FPS) | 21.2 ms (47 FPS) |
+| Portería y sótano | 19.0 ms (53 FPS) | 22.2 ms (45 FPS) |
+| Comisaría | 16.8 ms (60 FPS) | 19.9 ms (50 FPS) |
+| Sala de servidores B | 18.7 ms (54 FPS) | 20.8 ms (48 FPS) |
+| Piso ejecutivo | 21.9 ms (46 FPS) | 24.6 ms (41 FPS) |
+| Caseta y parqueadero | 20.5 ms (49 FPS) | 23.1 ms (43 FPS) |
+
+Es decir, el look nuevo cuesta entre 0 y 3 ms más por frame que el greybox (el café incluso bajó), y el ejecutable lo absorbe. Lo que más costaba eran **las luces puntuales** y **la ciudad dibujada detrás de las paredes**; se resolvió con occlusion culling, una sola sombra puntual por escena, sin sombra direccional de noche y menos luces reales en parqueaderos y café (medido con **Caso404 → `VisualAudit.ProfileEffects`**, que apaga un efecto a la vez).
+
+**Build:** `Builds/ElCaso404/ElCaso404.exe`, 179 MB (antes 135 MB: texturas, audio y variantes de shaders del post-procesado). Tarda unos 5 min la primera vez y menos de 1 min después.
+
+
+### Qué recursos conseguir para el siguiente salto de realismo
+1. **Personajes con ropa modelada y animaciones reales** (Mixamo: descarga gratuita con cuenta de Adobe). Es lo que más se nota hoy: los cuerpos base tienen la ropa pintada y algunos parecen sin camisa con luz cálida (Carlos).
+2. **Texturas PBR fotográficas** (Poly Haven o ambientCG, CC0): madera, concreto, baldosa, ladrillo y tela de 1K o 2K. Se cambian en los materiales sin tocar código.
+3. **Un HDRI de ciudad de noche y otro nublado** (Poly Haven) para el cielo y los reflejos.
+4. **Muebles low-poly** (Kenney Furniture Kit, Quaternius Ultimate Furniture): sofás, sillas, estantes y electrodomésticos en vez de cajas.
+5. **Sonidos grabados** (freesound.org, CC0): ambiente de café, lluvia, zumbido eléctrico, pasos.
+6. **Fuentes** de la skill diseno-ui (Special Elite, IBM Plex Mono) para la carta y ALEX.
+
+### Qué debes probar tú
+1. **Jugar el caso 1 completo** en el ejecutable (`Builds/ElCaso404/ElCaso404.exe`) y revisar que todas las evidencias se vean y se puedan recoger. Las pruebas automáticas lo verifican, pero nadie lo ha jugado con mouse y teclado después de estos cambios.
+2. **¿Muy oscuro?** El noir pide sombras, pero tu pantalla puede ser más oscura que la mía. Si cuesta ver, sube la exposición en `Art/PostProcess/VP_*.asset` (**Color Adjustments → Post Exposure**, +0.3) o en `VisualPass.Profile` y corre **Caso404 → Arte → Aplicar paso visual**.
+3. **Balanceo de cámara**: camina un rato; si marea, apágalo en **Opciones → Balanceo de cámara al caminar**.
+4. **Al hablar con un personaje** la cámara se acerca y el fondo se desenfoca: revisa que el texto del diálogo se lea bien.
+5. **El café ahora es de noche** (el guion lo dice); si preferías el día nublado que pediste, es un cambio de una línea en `VisualPass.For`.
+6. **Sonido ambiente**: revisa el volumen frente a los sonidos de la interfaz.
+7. **La caseta y el café** son las escenas más pesadas: si en tu portátil bajan de 60 FPS, dime y quito la lluvia o reduzco luces ahí.
+8. **Los PR** (enlaces abajo): fusiónalos en cualquier orden; el script verifica que juntos dan exactamente `dev-visual`.
+
+
+---
+
 ## Sesión 4 (19 de octubre de 2026)
 
 > **Actualización de las 11:30 AM:** quedaron hechas también la **tarea 2 (espacios más grandes)** y la **tarea 3 (ciudad completa)**, con iluminación horneada. Ver la tabla.
