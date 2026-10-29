@@ -565,6 +565,11 @@ namespace Caso404.EditorTools
                     var q = Part(group, "Frente de rack", PrimitiveType.Quad, new Vector3(side > 0 ? b.max.x + 0.004f : b.min.x - 0.004f, b.center.y, b.center.z),
                         new Vector3(b.size.z, b.size.y, 1f), mat);
                     q.transform.rotation = Quaternion.Euler(0f, side > 0 ? -90f : 90f, 0f);
+                    var pulse = q.AddComponent<EmissionPulse>();
+                    SceneKit.Set(pulse, "_renderer", q.GetComponent<Renderer>());
+                    var so = new SerializedObject(pulse);
+                    so.FindProperty("_emission").colorValue = Color.white * 6f;
+                    so.ApplyModifiedPropertiesWithoutUndo();
                 }
             }
         }
