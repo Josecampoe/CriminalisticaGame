@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using TMPro;
 using UnityEngine.Rendering;
 
 namespace Caso404.EditorTools
@@ -46,6 +47,12 @@ namespace Caso404.EditorTools
             if (sceneName == "Apartamento404") CrimeSceneMess(group);
             Pipes(group, renderers);
             Stools(group, renderers);
+            if (sceneName == "Apartamento404") EvidenceMarkers(group);
+            if (sceneName is "Comisaria" or "PorteriaSotano" or "Apartamento404") Blinds(group, renderers);
+            if (sceneName == "CafeLaEsquina") CafeSign(group, renderers);
+            Pictures(group, renderers, sceneName);
+            if (sceneName is "Comisaria" or "PisoEjecutivo" or "PorteriaSotano") OfficeFurniture(group, renderers);
+            if (sceneName == "ServidoresB") CableTrays(group, renderers);
             return _count;
         }
 
@@ -283,6 +290,240 @@ namespace Caso404.EditorTools
             {
                 var b = r.bounds;
                 Piece(g, "Asiento del butaco", PrimitiveType.Cylinder, new Vector3(b.center.x, b.max.y + 0.03f, b.center.z), new Vector3(b.size.x * 1.15f, 0.03f, b.size.z * 1.15f), leather);
+            }
+        }
+
+        // ================= Detalles noir =================
+
+        /// <summary>
+        /// Marcadores amarillos numerados junto a cada evidencia del apartamento, como en una escena del crimen ya
+        /// acordonada. Quedan a 50 cm del objeto (fuera de su zona libre) y sin collider.
+        /// </summary>
+        static void EvidenceMarkers(Transform g)
+        {
+            var yellow = SceneKit.Mat("marcador", new Color(0.95f, 0.75f, 0.1f), 0.4f);
+            int n = 1;
+            foreach (var p in Object.FindObjectsByType<Caso404.Evidence.EvidencePickup>(FindObjectsInactive.Exclude, FindObjectsSortMode.InstanceID)
+                         .OrderBy(e => e.Evidence != null ? e.Evidence.Id : e.name))
+            {
+                var c = p.GetComponent<Collider>();
+                if (c == null || c.bounds.min.y > 1.2f) continue; // la cámara del techo no lleva marcador
+                var floorY = c.bounds.min.y < 0.5f ? Mathf.Max(0f, c.bounds.min.y - 0.04f) : 0f;
+                Vector3? spot = null;
+                foreach (var dir in new[] { Vector3.back, Vector3.left, Vector3.right, Vector3.forward })
+                {
+                    var q = new Vector3(c.bounds.center.x, floorY, c.bounds.center.z) + dir * (Mathf.Max(c.bounds.extents.x, c.bounds.extents.z) + 0.5f);
+                    if (!Physics.CheckBox(q + Vector3.up * 0.12f, new Vector3(0.08f, 0.1f, 0.08f))) { spot = q; break; }
+                }
+                if (spot == null) continue;
+                var tent = Piece(g, $"Marcador {n}", PrimitiveType.Cube, spot.Value + Vector3.up * 0.06f, new Vector3(0.11f, 0.12f, 0.09f), yellow, 20f * n);
+                var label = new GameObject("Número").AddComponent<TextMeshPro>();
+                label.transform.SetParent(tent.transform, false);
+                label.transform.localPosition = new Vector3(0f, 0f, -0.52f);
+                label.transform.localScale = new Vector3(1f / 0.11f, 1f / 0.12f, 1f) * 0.1f;
+                label.text = n.ToString();
+                label.fontSize = 1.1f;
+                label.fontStyle = FontStyles.Bold;
+                label.alignment = TextAlignmentOptions.Center;
+                label.color = Color.black;
+                label.rectTransform.sizeDelta = new Vector2(1f, 1f);
+                n++;
+            }
+        }
+
+        /// <summary>
+        /// Persianas en las ventanas grandes: láminas inclinadas que proyectan las franjas de luz y sombra del cine negro.
+        /// Cubren solo la parte de arriba de la ventana, así la ciudad se sigue viendo.
+        /// </summary>
+        static void Blinds(Transform g, List<MeshRenderer> renderers)
+        {
+            var slat = SceneKit.Mat("persiana", new Color(0.78f, 0.75f, 0.68f), 0.35f, 0.2f);
+            foreach (var r in renderers.Concat(Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None).Where(m => m.GetComponent<Collider>() == null)))
+            {
+                if (r.sharedMaterial == null || r.sharedMaterial.name != "mat_glass" || r.transform.parent == null) continue;
+                var b = r.bounds;
+                bool alongX = b.size.x > b.size.z;
+                float width = alongX ? b.size.x : b.size.z;
+                if (b.size.y < 0.9f || width < 1.1f || width > 4.5f || Mathf.Min(b.size.x, b.size.z) > 0.1f) continue;
+                if (r.transform.parent.GetComponent<Caso404.Evidence.EvidencePickup>() != null) continue;
+                if (Blocked(b)) continue;
+                var n = alongX ? Vector3.forward : Vector3.right;
+                // del lado del cuarto: el que no choca con nada a 10 cm
+                var side = Physics.CheckBox(b.center + n * 0.12f, new Vector3(0.03f, 0.03f, 0.03f)) ? -1f : 1f;
+                float top = b.max.y - 0.02f, bottom = b.max.y - b.size.y * 0.6f;
+                for (float y = top; y > bottom; y -= 0.075f)
+                {
+                    var s2 = Piece(g, "Lámina de persiana", PrimitiveType.Cube, b.center + n * (side * 0.09f) + Vector3.up * (y - b.center.y),
+                        alongX ? new Vector3(width, 0.004f, 0.06f) : new Vector3(0.06f, 0.004f, width), slat);
+                    s2.transform.rotation = Quaternion.AngleAxis(35f, alongX ? Vector3.right : Vector3.forward);
+                }
+                Piece(g, "Riel de persiana", PrimitiveType.Cube, b.center + n * (side * 0.09f) + Vector3.up * (top + 0.04f - b.center.y),
+                    alongX ? new Vector3(width + 0.04f, 0.05f, 0.07f) : new Vector3(0.07f, 0.05f, width + 0.04f), slat);
+            }
+        }
+
+        /// <summary>El letrero de la fachada del café se vuelve neón: tubo ámbar encendido y las letras "CAFÉ LA ESQUINA".</summary>
+        static void CafeSign(Transform g, List<MeshRenderer> renderers)
+        {
+            var sign = Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None).FirstOrDefault(r => r.name.StartsWith("Letrero"));
+            if (sign == null) return;
+            var neon = SceneKit.Mat("neon_ambar", new Color(1f, 0.6f, 0.15f), 0.5f);
+            neon.EnableKeyword("_EMISSION");
+            neon.SetColor("_EmissionColor", new Color(1f, 0.55f, 0.12f) * 5f);
+            neon.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+            EditorUtility.SetDirty(neon);
+            var b = sign.bounds;
+            foreach (var face in new[] { -1f, 1f })
+            {
+                var text = new GameObject("Neón CAFÉ LA ESQUINA").AddComponent<TextMeshPro>();
+                text.transform.SetParent(g, false);
+                text.transform.position = new Vector3(b.center.x, b.center.y, face < 0 ? b.min.z - 0.01f : b.max.z + 0.01f);
+                text.transform.rotation = face < 0 ? Quaternion.identity : Quaternion.Euler(0, 180, 0);
+                text.text = "CAFÉ LA ESQUINA";
+                text.fontSize = 2.4f;
+                text.fontStyle = FontStyles.Bold;
+                text.characterSpacing = 6f;
+                text.alignment = TextAlignmentOptions.Center;
+                text.color = new Color(0.12f, 0.06f, 0.02f);
+                text.rectTransform.sizeDelta = new Vector2(b.size.x, b.size.y);
+            }
+            var tube = Piece(g, "Tubo de neón", PrimitiveType.Cube, new Vector3(b.center.x, b.max.y + 0.03f, b.min.z - 0.02f), new Vector3(b.size.x + 0.1f, 0.025f, 0.025f), neon, shadows: false);
+            var tube2 = Piece(g, "Tubo de neón", PrimitiveType.Cube, new Vector3(b.center.x, b.min.y - 0.03f, b.min.z - 0.02f), new Vector3(b.size.x + 0.1f, 0.025f, 0.025f), neon, shadows: false);
+            var glow = new GameObject("Brillo del neón").AddComponent<Light>();
+            glow.transform.SetParent(g, false);
+            glow.transform.position = new Vector3(b.center.x, b.center.y - 0.3f, b.min.z - 0.6f);
+            glow.type = LightType.Point;
+            glow.color = new Color(1f, 0.6f, 0.2f);
+            glow.intensity = 1.6f;
+            glow.range = 4f;
+            glow.shadows = LightShadows.None;
+            _ = tube; _ = tube2;
+        }
+
+        /// <summary>Cuadros enmarcados (imagen generada, oscura y desenfocada) en algunas paredes largas libres.</summary>
+        static void Pictures(Transform g, List<MeshRenderer> renderers, string sceneName)
+        {
+            if (sceneName is "ServidoresB" or "CasetaSeguridad") return;
+            var frame = SceneKit.Mat("marco", new Color(0.12f, 0.08f, 0.05f), 0.5f);
+            var art = PictureMaterial();
+            int placed = 0;
+            foreach (var r in renderers.Where(r => r.sharedMaterial != null && r.sharedMaterial.name.StartsWith("mat_wall")).OrderBy(r => r.name))
+            {
+                if (placed >= 6) break;
+                var b = r.bounds;
+                bool alongX = b.size.x > b.size.z;
+                float thin = alongX ? b.size.z : b.size.x, length = alongX ? b.size.x : b.size.z;
+                if (length < 3f || thin > 0.3f || b.size.y < 2f || _rnd.NextDouble() < 0.4) continue;
+                var normal = alongX ? Vector3.forward : Vector3.right;
+                foreach (var side in new[] { 1f, -1f })
+                {
+                    var pos = new Vector3(b.center.x, 1.55f, b.center.z) + normal * side * (thin / 2f + 0.02f);
+                    var probe = pos + normal * side * 0.25f;
+                    if (Physics.CheckBox(probe, new Vector3(0.4f, 0.5f, 0.4f)) || Blocked(new Bounds(pos, Vector3.one * 1.2f))) continue;
+                    var size = alongX ? new Vector3(0.75f, 0.55f, 0.03f) : new Vector3(0.03f, 0.55f, 0.75f);
+                    Piece(g, "Marco", PrimitiveType.Cube, pos, size, frame);
+                    var q = Piece(g, "Cuadro", PrimitiveType.Quad, pos + normal * side * 0.018f, new Vector3(0.65f, 0.45f, 1f), art, shadows: false);
+                    q.transform.rotation = Quaternion.LookRotation(-normal * side);
+                    placed++;
+                    break;
+                }
+            }
+        }
+
+        static Material PictureMaterial()
+        {
+            var texPath = $"{TexFolder}/T_cuadro.png";
+            if (!File.Exists(texPath))
+            {
+                const int w = 256, h = 180;
+                var tex = new Texture2D(w, h, TextureFormat.RGB24, false);
+                for (int y = 0; y < h; y++)
+                    for (int x = 0; x < w; x++)
+                    {
+                        float u = x / (float)w, v = y / (float)h;
+                        // Paisaje de montañas al atardecer, en tonos apagados (como una foto vieja)
+                        float ridge = 0.45f + 0.12f * Mathf.PerlinNoise(u * 4f, 1.3f) + 0.06f * Mathf.PerlinNoise(u * 13f, 4f);
+                        var sky = Color.Lerp(new Color(0.55f, 0.42f, 0.32f), new Color(0.25f, 0.28f, 0.33f), v);
+                        var land = Color.Lerp(new Color(0.12f, 0.13f, 0.11f), new Color(0.22f, 0.22f, 0.18f), v / ridge);
+                        var c = v < ridge ? land : sky;
+                        c *= 0.85f + 0.15f * Mathf.PerlinNoise(x * 0.2f, y * 0.2f);
+                        tex.SetPixel(x, y, c);
+                    }
+                tex.Apply();
+                File.WriteAllBytes(texPath, tex.EncodeToPNG());
+                Object.DestroyImmediate(tex);
+                AssetDatabase.ImportAsset(texPath);
+            }
+            var mat = SceneKit.Mat("cuadro", Color.white, 0.6f);
+            mat.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(texPath));
+            EditorUtility.SetDirty(mat);
+            return mat;
+        }
+
+        /// <summary>
+        /// Archivadores metálicos y un dispensador de agua contra paredes libres de las oficinas. Solo se ponen del lado
+        /// donde hay piso (dentro del edificio), donde no chocan con nada y lejos de lo interactivo. Sin collider.
+        /// </summary>
+        static void OfficeFurniture(Transform g, List<MeshRenderer> renderers)
+        {
+            var cabinet = SceneKit.Mat("locker");
+            var handle = SceneKit.Mat("metal");
+            var water = SceneKit.Mat("bidon", new Color(0.45f, 0.65f, 0.85f, 1f), 0.9f);
+            var white = SceneKit.Mat("plastico");
+            int placed = 0;
+            foreach (var r in renderers.Where(r => r.sharedMaterial != null && r.sharedMaterial.name.StartsWith("mat_wall")).OrderBy(r => r.name))
+            {
+                if (placed >= 5) break;
+                var b = r.bounds;
+                bool alongX = b.size.x > b.size.z;
+                float thin = alongX ? b.size.z : b.size.x, length = alongX ? b.size.x : b.size.z;
+                if (length < 2.2f || thin > 0.3f || b.size.y < 2f || b.min.y > 0.05f) continue;
+                var axis = alongX ? Vector3.right : Vector3.forward;
+                var normal = alongX ? Vector3.forward : Vector3.right;
+                foreach (var side in new[] { 1f, -1f })
+                {
+                    var basePos = new Vector3(b.center.x, 0f, b.center.z) + normal * side * (thin / 2f + 0.33f) - axis * (length / 2f - 0.55f);
+                    if (!Physics.Raycast(basePos + Vector3.up * 1f, Vector3.down, out var hit, 1.3f) || Mathf.Abs(hit.point.y) > 0.1f) continue;
+                    var area = new Bounds(basePos + Vector3.up * 0.75f, alongX ? new Vector3(0.6f, 1.3f, 0.55f) : new Vector3(0.55f, 1.3f, 0.6f));
+                    if (Physics.CheckBox(area.center, area.extents) || Blocked(area)) continue;
+                    bool cooler = placed % 3 == 2;
+                    if (cooler)
+                    {
+                        Piece(g, "Dispensador de agua", PrimitiveType.Cube, basePos + Vector3.up * 0.5f, new Vector3(0.32f, 1f, 0.32f), white);
+                        Piece(g, "Botellón", PrimitiveType.Cylinder, basePos + Vector3.up * 1.2f, new Vector3(0.27f, 0.2f, 0.27f), water);
+                    }
+                    else
+                    {
+                        var size = alongX ? new Vector3(0.48f, 1.32f, 0.6f) : new Vector3(0.6f, 1.32f, 0.48f);
+                        Piece(g, "Archivador", PrimitiveType.Cube, basePos + Vector3.up * 0.66f, size, cabinet);
+                        for (int d = 0; d < 4; d++)
+                        {
+                            var front = basePos + Vector3.up * (0.2f + d * 0.32f) + normal * side * 0.305f;
+                            Piece(g, "Manija", PrimitiveType.Cube, front, alongX ? new Vector3(0.14f, 0.025f, 0.02f) : new Vector3(0.02f, 0.025f, 0.14f), handle, shadows: false);
+                        }
+                    }
+                    placed++;
+                    break;
+                }
+            }
+        }
+
+        /// <summary>Bandejas de cables sobre cada fila de racks, con cables de colores que bajan a los equipos.</summary>
+        static void CableTrays(Transform g, List<MeshRenderer> renderers)
+        {
+            var tray = SceneKit.Mat("metal");
+            Material[] cables = { SceneKit.Mat("cable_azul", new Color(0.1f, 0.25f, 0.6f), 0.4f), SceneKit.Mat("cable_amarillo", new Color(0.75f, 0.6f, 0.1f), 0.4f), SceneKit.Mat("cable") };
+            foreach (var r in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None).Where(m => m.name.StartsWith("Fila de racks")))
+            {
+                var b = r.bounds;
+                var top = new Vector3(b.center.x, b.max.y + 0.32f, b.center.z);
+                Piece(g, "Bandeja de cables", PrimitiveType.Cube, top, new Vector3(0.45f, 0.05f, b.size.z), tray);
+                for (int k = 0; k < 6; k++)
+                {
+                    float z = b.min.z + 0.4f + k * (b.size.z - 0.8f) / 5f;
+                    Piece(g, "Cable", PrimitiveType.Cube, new Vector3(b.center.x + (k % 2 == 0 ? 0.1f : -0.1f), b.max.y + 0.15f, z), new Vector3(0.025f, 0.32f, 0.025f), cables[k % cables.Length], shadows: false);
+                }
+                Piece(g, "Mazo de cables", PrimitiveType.Cube, top + Vector3.up * 0.04f, new Vector3(0.3f, 0.05f, b.size.z - 0.1f), cables[0], shadows: false);
             }
         }
 
