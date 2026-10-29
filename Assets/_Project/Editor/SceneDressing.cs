@@ -55,6 +55,8 @@ namespace Caso404.EditorTools
             Books(group);
             SofaCushions(group);
             if (sceneName == "Apartamento404") HomeDetails(group);
+            Shelves(group);
+            Lockers(group);
             if (sceneName is "Comisaria" or "PisoEjecutivo" or "PorteriaSotano") OfficeFurniture(group, renderers);
             if (sceneName == "ServidoresB") CableTrays(group, renderers);
             return _count;
@@ -669,6 +671,73 @@ namespace Caso404.EditorTools
                     Piece(g, "Microondas", PrimitiveType.Cube, p + Vector3.up * 0.15f, new Vector3(0.5f, 0.3f, 0.36f), SceneKit.Mat("plastico"));
                     Piece(g, "Puerta del microondas", PrimitiveType.Cube, p + new Vector3(-0.04f, 0.15f, 0.181f), new Vector3(0.34f, 0.22f, 0.005f), dark, shadows: false);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Las estanterías (bloques de metal) pasan a ser estanterías de verdad: cuatro postes, repisas y cajas de cartón.
+        /// El bloque original conserva su collider y solo se oculta. Se omiten las que tienen una evidencia cerca.
+        /// </summary>
+        static void Shelves(Transform g)
+        {
+            var metal = SceneKit.Mat("metal");
+            var cardboard = SceneKit.Mat("carton", new Color(0.5f, 0.38f, 0.24f), 0.1f);
+            var binder = SceneKit.Mat("libro_negro");
+            foreach (var r in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None).Where(r => r.name == "Estantería"))
+            {
+                var b = r.bounds;
+                if (Blocked(b)) continue;
+                r.enabled = false;
+                bool alongX = b.size.x >= b.size.z;
+                float len = alongX ? b.size.x : b.size.z, depth = alongX ? b.size.z : b.size.x;
+                var axis = alongX ? Vector3.right : Vector3.forward;
+                var across = alongX ? Vector3.forward : Vector3.right;
+                foreach (var sa in new[] { -1f, 1f })
+                    foreach (var sb in new[] { -1f, 1f })
+                        Piece(g, "Poste", PrimitiveType.Cube, new Vector3(b.center.x, b.center.y, b.center.z) + axis * sa * (len / 2f - 0.02f) + across * sb * (depth / 2f - 0.02f),
+                            new Vector3(0.035f, b.size.y, 0.035f), metal);
+                int levels = Mathf.Max(3, Mathf.RoundToInt(b.size.y / 0.45f));
+                for (int k = 0; k < levels; k++)
+                {
+                    float y = b.min.y + 0.08f + k * (b.size.y - 0.12f) / (levels - 1);
+                    var shelfPos = new Vector3(b.center.x, y, b.center.z);
+                    Piece(g, "Repisa", PrimitiveType.Cube, shelfPos, alongX ? new Vector3(len, 0.02f, depth) : new Vector3(depth, 0.02f, len), metal);
+                    if (k == levels - 1) continue;
+                    float t = -len / 2f + 0.08f;
+                    while (t < len / 2f - 0.2f)
+                    {
+                        float w = 0.18f + (float)_rnd.NextDouble() * 0.2f;
+                        float h = 0.15f + (float)_rnd.NextDouble() * 0.17f;
+                        if (_rnd.NextDouble() < 0.25) { t += w; continue; }
+                        bool isBinder = _rnd.NextDouble() < 0.3;
+                        var size = isBinder ? new Vector3(0.06f, 0.3f, depth * 0.8f) : new Vector3(w, h, depth * 0.8f);
+                        if (!alongX) size = new Vector3(size.z, size.y, size.x);
+                        Piece(g, isBinder ? "Carpeta" : "Caja", PrimitiveType.Cube, shelfPos + axis * (t + (isBinder ? 0.03f : w / 2f)) + Vector3.up * (size.y / 2f + 0.01f), size, isBinder ? binder : cardboard);
+                        t += (isBinder ? 0.065f : w) + 0.02f;
+                    }
+                }
+            }
+        }
+
+        /// <summary>Casilleros metálicos con rejillas de ventilación, manija y número.</summary>
+        static void Lockers(Transform g)
+        {
+            var dark = SceneKit.Mat("dark");
+            var metal = SceneKit.Mat("metal");
+            int n = 1;
+            foreach (var r in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None).Where(r => r.name.StartsWith("Casillero ") && !r.name.Contains("correo")).OrderBy(r => r.name))
+            {
+                var b = r.bounds;
+                if (b.size.y < 1.5f || Mathf.Min(b.size.x, b.size.z) < 0.3f) continue;
+                if (Blocked(b)) { n++; continue; }
+                bool frontZ = b.size.x >= b.size.z; // el frente mira al lado largo (hacia el pasillo)
+                var front = frontZ ? new Vector3(b.center.x, 0f, b.max.z + 0.003f) : new Vector3(b.max.x + 0.003f, 0f, b.center.z);
+                float w = frontZ ? b.size.x : b.size.z;
+                for (int k = 0; k < 3; k++)
+                    Piece(g, "Rejilla", PrimitiveType.Cube, front + Vector3.up * (b.max.y - 0.15f - k * 0.05f), frontZ ? new Vector3(w * 0.6f, 0.012f, 0.004f) : new Vector3(0.004f, 0.012f, w * 0.6f), dark, shadows: false);
+                Piece(g, "Manija", PrimitiveType.Cube, front + Vector3.up * 1.0f + (frontZ ? Vector3.right : Vector3.forward) * (w * 0.32f), frontZ ? new Vector3(0.03f, 0.12f, 0.02f) : new Vector3(0.02f, 0.12f, 0.03f), metal);
+                Piece(g, "Placa", PrimitiveType.Cube, front + Vector3.up * (b.max.y - 0.35f), frontZ ? new Vector3(0.08f, 0.05f, 0.004f) : new Vector3(0.004f, 0.05f, 0.08f), SceneKit.Mat("paper"), shadows: false);
+                n++;
             }
         }
 
