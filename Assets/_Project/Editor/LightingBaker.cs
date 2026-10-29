@@ -31,7 +31,7 @@ namespace Caso404.EditorTools
             var t0 = EditorApplication.timeSinceStartup;
 
             foreach (var light in Object.FindObjectsByType<Light>(FindObjectsInactive.Include, FindObjectsSortMode.None))
-                light.lightmapBakeType = LightmapBakeType.Mixed; // luz directa en tiempo real + rebotes horneados
+                if (light.name != "Luz de relleno") light.lightmapBakeType = LightmapBakeType.Mixed; // luz directa en tiempo real + rebotes horneados
 
             AddProbes();
 
@@ -58,9 +58,30 @@ namespace Caso404.EditorTools
             Lightmapping.lightingSettings = settings;
 
             bool ok = Lightmapping.Bake();
+            BakeOcclusion();
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             Debug.Log($"[Caso404] Iluminación horneada en {name}: {(ok ? "OK" : "FALLÓ")} ({EditorApplication.timeSinceStartup - t0:F0} s)");
+        }
+
+        /// <summary>
+        /// Occlusion culling: las paredes del nivel jugable tapan (Occluder) y los edificios de la ciudad se ocultan
+        /// (Occludee). Así no se dibuja la ciudad que queda detrás de las paredes: era el mayor costo en los interiores.
+        /// </summary>
+        static void BakeOcclusion()
+        {
+            var city = GameObject.Find("Ciudad de Valdora");
+            if (city != null)
+                foreach (var r in city.GetComponentsInChildren<Renderer>(true))
+                    GameObjectUtility.SetStaticEditorFlags(r.gameObject, GameObjectUtility.GetStaticEditorFlags(r.gameObject) | StaticEditorFlags.OccludeeStatic);
+            // Los vidrios no tapan: por las ventanas se tiene que seguir viendo la ciudad.
+            foreach (var r in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None))
+                if (r.sharedMaterial != null && r.sharedMaterial.name == "mat_glass")
+                    GameObjectUtility.SetStaticEditorFlags(r.gameObject, GameObjectUtility.GetStaticEditorFlags(r.gameObject) & ~StaticEditorFlags.OccluderStatic);
+            StaticOcclusionCulling.smallestOccluder = 1.5f;
+            StaticOcclusionCulling.smallestHole = 0.25f;
+            StaticOcclusionCulling.backfaceThreshold = 100f;
+            StaticOcclusionCulling.Compute();
         }
 
         /// <summary>Cuadrícula de light probes sobre el piso jugable (cada 2 m, a 0.6 m y 1.7 m de altura).</summary>
