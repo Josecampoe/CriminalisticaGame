@@ -51,6 +51,7 @@ namespace Caso404.EditorTools
             if (sceneName is "Comisaria" or "PorteriaSotano" or "Apartamento404") Blinds(group, renderers);
             if (sceneName == "CafeLaEsquina") CafeSign(group, renderers);
             Pictures(group, renderers, sceneName);
+            Cars(group, renderers);
             if (sceneName is "Comisaria" or "PisoEjecutivo" or "PorteriaSotano") OfficeFurniture(group, renderers);
             if (sceneName == "ServidoresB") CableTrays(group, renderers);
             return _count;
@@ -524,6 +525,47 @@ namespace Caso404.EditorTools
                     Piece(g, "Cable", PrimitiveType.Cube, new Vector3(b.center.x + (k % 2 == 0 ? 0.1f : -0.1f), b.max.y + 0.15f, z), new Vector3(0.025f, 0.32f, 0.025f), cables[k % cables.Length], shadows: false);
                 }
                 Piece(g, "Mazo de cables", PrimitiveType.Cube, top + Vector3.up * 0.04f, new Vector3(0.3f, 0.05f, b.size.z - 0.1f), cables[0], shadows: false);
+            }
+        }
+
+        /// <summary>Los carros de los parqueaderos (cajas) ganan cabina con vidrios oscuros, llantas, faros y luces traseras.</summary>
+        static void Cars(Transform g, List<MeshRenderer> renderers)
+        {
+            var glass = SceneKit.Mat("vidrio_carro", new Color(0.08f, 0.1f, 0.13f), 0.9f);
+            var tire = SceneKit.Mat("llanta", new Color(0.05f, 0.05f, 0.05f));
+            var body = SceneKit.Mat("car");
+            var tail = SceneKit.Mat("luz_trasera", new Color(0.6f, 0.05f, 0.04f), 0.8f);
+            tail.EnableKeyword("_EMISSION");
+            tail.SetColor("_EmissionColor", new Color(1f, 0.05f, 0.03f) * 0.6f);
+            EditorUtility.SetDirty(tail);
+            var head = SceneKit.Mat("faro", new Color(0.85f, 0.85f, 0.8f), 0.9f, 0.3f);
+            foreach (var r in renderers.Where(r => r.sharedMaterial != null && r.sharedMaterial.name == "mat_car"))
+            {
+                var b = r.bounds;
+                var around = b; around.Expand(new Vector3(0.2f, 0.8f, 0.2f));
+                if (Blocked(around)) continue; // hay una evidencia en el carro o junto a él
+                bool alongZ = b.size.z >= b.size.x;
+                var fwd = alongZ ? Vector3.forward : Vector3.right;
+                var side = alongZ ? Vector3.right : Vector3.forward;
+                float len = alongZ ? b.size.z : b.size.x, wid = alongZ ? b.size.x : b.size.z;
+                var cabin = new Bounds(b.center + Vector3.up * (b.extents.y + 0.25f) - fwd * 0.2f, Vector3.zero);
+                var rot = Quaternion.LookRotation(fwd);
+                var c1 = Piece(g, "Cabina", PrimitiveType.Cube, cabin.center, new Vector3(wid * 0.86f, 0.5f, len * 0.5f), glass);
+                c1.transform.rotation = rot;
+                var roof = Piece(g, "Techo", PrimitiveType.Cube, cabin.center + Vector3.up * 0.26f, new Vector3(wid * 0.84f, 0.04f, len * 0.42f), body);
+                roof.transform.rotation = rot;
+                foreach (var sx in new[] { -1f, 1f })
+                    foreach (var sz in new[] { -1f, 1f })
+                    {
+                        var w = Piece(g, "Llanta", PrimitiveType.Cylinder, b.center + side * sx * (wid / 2f - 0.12f) + fwd * sz * (len / 2f - 0.75f) + Vector3.up * (0.33f - b.center.y + b.min.y - 0.15f),
+                            new Vector3(0.64f, 0.12f, 0.64f), tire);
+                        w.transform.rotation = Quaternion.LookRotation(fwd) * Quaternion.Euler(0, 0, 90);
+                    }
+                foreach (var sx in new[] { -1f, 1f })
+                {
+                    Piece(g, "Faro", PrimitiveType.Cube, b.center + side * sx * (wid / 2f - 0.3f) + fwd * (len / 2f + 0.005f) + Vector3.up * 0.15f, alongZ ? new Vector3(0.3f, 0.12f, 0.02f) : new Vector3(0.02f, 0.12f, 0.3f), head, shadows: false);
+                    Piece(g, "Luz trasera", PrimitiveType.Cube, b.center + side * sx * (wid / 2f - 0.25f) - fwd * (len / 2f + 0.005f) + Vector3.up * 0.15f, alongZ ? new Vector3(0.35f, 0.1f, 0.02f) : new Vector3(0.02f, 0.1f, 0.35f), tail, shadows: false);
+                }
             }
         }
 
