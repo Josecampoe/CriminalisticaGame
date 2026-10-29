@@ -74,6 +74,17 @@ namespace Caso404.EditorTools
             var leaves = SceneKit.Mat("follaje", new Color(0.2f, 0.32f, 0.2f));
             var tire = SceneKit.Mat("llanta", new Color(0.05f, 0.05f, 0.05f));
             var carGlass = SceneKit.Mat("vidrio_carro", new Color(0.08f, 0.1f, 0.13f), 0.9f);
+            var cable = SceneKit.Mat("cable", new Color(0.05f, 0.05f, 0.05f));
+            var lightRed = Glow("semaforo_rojo", new Color(1f, 0.12f, 0.08f), 3f);
+            var lightGreen = Glow("semaforo_verde", new Color(0.15f, 1f, 0.45f), 3f);
+            var lightOff = SceneKit.Mat("semaforo_apagado", new Color(0.08f, 0.08f, 0.07f), 0.6f);
+            Material[] signs =
+            {
+                Glow(o.Night ? "aviso_rojo_noche" : "aviso_rojo", new Color(1f, 0.15f, 0.2f), o.Night ? 4f : 0.6f),
+                Glow(o.Night ? "aviso_cian_noche" : "aviso_cian", new Color(0.2f, 0.9f, 1f), o.Night ? 4f : 0.6f),
+                Glow(o.Night ? "aviso_ambar_noche" : "aviso_ambar", new Color(1f, 0.65f, 0.15f), o.Night ? 4f : 0.6f),
+                Glow(o.Night ? "aviso_blanco_noche" : "aviso_blanco", new Color(0.95f, 0.93f, 0.85f), o.Night ? 3f : 0.5f),
+            };
             var carColors = new[] { "carro_rojo", "carro_blanco", "carro_gris", "carro_azul", "carro_amarillo" };
             var carTints = new[] { new Color(0.55f, 0.1f, 0.1f), new Color(0.85f, 0.85f, 0.83f), new Color(0.4f, 0.42f, 0.44f), new Color(0.14f, 0.22f, 0.45f), new Color(0.85f, 0.65f, 0.1f) };
 
@@ -135,6 +146,42 @@ namespace Caso404.EditorTools
                         int k = rnd.Next(carColors.Length);
                         var body = SceneKit.Mat(carColors[k], carTints[k], 0.6f, 0.3f);
                         Car(batch, curbLine + along * t, Quaternion.LookRotation(along), body, carGlass, tire);
+                    }
+                }
+                // Semáforos en las cuatro esquinas de la cuadra (rojo o verde según la esquina)
+                for (int k = 0; k < 4; k++)
+                {
+                    var corner = c + new Vector3((k % 2 == 0 ? -1 : 1) * (block / 2f - 0.5f), Curb, (k < 2 ? -1 : 1) * (block / 2f - 0.5f));
+                    if (InsideHost(corner, o.HostMin, o.HostMax, 1f)) continue;
+                    var face = Quaternion.LookRotation(new Vector3(k % 2 == 0 ? -1 : 1, 0, 0));
+                    TrafficLight(batch, corner, face, pole, (k + i + j) % 2 == 0 ? lightRed : lightGreen, lightOff);
+                }
+                // Cables entre los faroles de cada lado (con una leve curva) y avisos en las fachadas
+                for (int side = 0; side < 4; side++)
+                {
+                    var dir = side switch { 0 => Vector3.forward, 1 => Vector3.back, 2 => Vector3.right, _ => Vector3.left };
+                    var along = new Vector3(dir.z, 0, dir.x);
+                    var edge = c + dir * (block / 2f - 0.6f) + Vector3.up * (Curb + 6.6f);
+                    float from = -block / 2f + 4f, to = block / 2f - 4f;
+                    if (!InsideHost(edge + along * from, o.HostMin, o.HostMax, 0.5f) && !InsideHost(edge + along * to, o.HostMin, o.HostMax, 0.5f))
+                        for (float t = from; t < to - 1f; t += 10f)
+                        {
+                            var p0 = edge + along * t; var p1 = edge + along * Mathf.Min(t + 10f, to);
+                            var mid = (p0 + p1) / 2f + Vector3.down * 0.35f;
+                            Segment(batch, cable, p0, mid, 0.025f);
+                            Segment(batch, cable, mid, p1, 0.025f);
+                        }
+                    // Avisos de locales a la altura del primer piso (2 por lado, algunos verticales)
+                    for (int n = 0; n < 2; n++)
+                    {
+                        if (rnd.NextDouble() < 0.35) continue;
+                        var sp = c + dir * (block / 2f - 2.15f) + along * R(-block / 3f, block / 3f) + Vector3.up * (Curb + R(3.2f, 4.2f));
+                        if (InsideHost(sp, o.HostMin, o.HostMax, 2f)) continue;
+                        bool vertical = rnd.NextDouble() < 0.4;
+                        var size = vertical ? new Vector3(0.6f, 2.2f, 0.18f) : new Vector3(R(2.2f, 3.6f), 0.7f, 0.18f);
+                        var rot = Quaternion.LookRotation(dir);
+                        if (vertical) { sp += dir * 0.6f; size = new Vector3(0.18f, 2.2f, 0.6f); rot = Quaternion.identity; }
+                        batch.Box(signs[rnd.Next(signs.Length)], sp, size, rot);
                     }
                 }
                 // Líneas discontinuas en el centro de las calles cercanas
@@ -219,6 +266,39 @@ namespace Caso404.EditorTools
             var arm = basePos + Vector3.up * 5.9f + facing * Vector3.forward * 0.7f;
             b.Box(pole, arm, new Vector3(0.1f, 0.1f, 1.4f), facing);
             b.Box(lamp, arm + facing * Vector3.forward * 0.7f + Vector3.down * 0.12f, new Vector3(0.35f, 0.15f, 0.6f), facing);
+        }
+
+        /// <summary>Semáforo: poste, caja oscura y tres luces (una encendida).</summary>
+        static void TrafficLight(Batcher b, Vector3 basePos, Quaternion facing, Material pole, Material lit, Material off)
+        {
+            b.Box(pole, basePos + Vector3.up * 1.6f, new Vector3(0.12f, 3.2f, 0.12f), Quaternion.identity);
+            var head = basePos + Vector3.up * 3.55f;
+            b.Box(pole, head, new Vector3(0.32f, 0.9f, 0.28f), facing);
+            for (int k = 0; k < 3; k++)
+            {
+                var lp = head + Vector3.up * (0.28f - k * 0.28f) + facing * Vector3.forward * 0.15f;
+                bool on = (k == 0 && lit.name.Contains("rojo")) || (k == 2 && lit.name.Contains("verde"));
+                b.Box(on ? lit : off, lp, new Vector3(0.18f, 0.18f, 0.04f), facing);
+            }
+        }
+
+        /// <summary>Cable recto entre dos puntos (caja delgada).</summary>
+        static void Segment(Batcher b, Material mat, Vector3 a, Vector3 c, float thickness)
+        {
+            var d = c - a;
+            if (d.sqrMagnitude < 0.01f) return;
+            b.Box(mat, (a + c) / 2f, new Vector3(thickness, thickness, d.magnitude), Quaternion.LookRotation(d));
+        }
+
+        /// <summary>Material con emisión (luces de semáforo, avisos).</summary>
+        static Material Glow(string key, Color color, float intensity)
+        {
+            var mat = SceneKit.Mat(key, color * 0.6f, 0.5f);
+            mat.EnableKeyword("_EMISSION");
+            mat.SetColor("_EmissionColor", color * intensity);
+            mat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+            EditorUtility.SetDirty(mat);
+            return mat;
         }
 
         static void Car(Batcher b, Vector3 pos, Quaternion rot, Material body, Material glass, Material tire)
