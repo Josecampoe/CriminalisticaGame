@@ -19,7 +19,7 @@ Capturas en `Docs/capturas/antes/` y `Docs/capturas/despues/` con los mismos nom
 | **c1_s4 / c2_s4 Comisaría** | `c1s4_oficina`, `c1s4_ventana`, `c1s4_interrogatorio` | Persianas con franjas de luz, **lámparas de banquero verdes** en los escritorios, lámpara única sobre la mesa de interrogatorio, archivadores y dispensador de agua. En el caso 2 cambia sola a noche (perfil de post-procesado incluido). |
 | **c2_s1 Sala de servidores B** | `c2s1_pasillo`, `c2s1_sala`, `c2s1_racks` | Noche fría: frentes de racks con LEDs verdes, ámbar y azules que laten, bandejas de cables, tubos fluorescentes que parpadean, zumbido de ventiladores. |
 | **c2_s2 Piso ejecutivo** | `c2s2_oficinas`, `c2s2_ventanal`, `c2s2_pasillo` | Ventanal limpio (el vidrio ya no "lava" la imagen), lluvia afuera, calle mojada, avisos de neón en la ciudad, lámparas colgantes, archivadores, cuadros. |
-| **c2_s3 Caseta y parqueadero** | `c2s3_caseta`, `c2s3_parqueadero`, `c2s3_calle` | Parqueadero con cuadrícula de tubos, tuberías, manchas de aceite, carro con cabina y luces, lluvia y calle mojada. |
+| **c2_s3 Caseta y parqueadero** | `c2s3_caseta`, `c2s3_parqueadero`, `c2s3_calle` | Letrero "VIGILANCIA" y aplique de luz en la caseta. Parqueadero con franjas en las columnas, conos, topes, números de puesto, letrero "SÓTANO -1", cuadrícula de tubos, tuberías, manchas de aceite, carro con cabina y luces, lluvia y calle mojada. |
 | **Personajes** | `personaje_*` | Ropa sin los músculos del cuerpo base y con trama de tela (Carlos ya no parece sin camisa), piel satinada, ropa mate, zapatos y pelo con brillo, luz de relleno en la cara. |
 | **UI** | `ui_*` | Carta y ficha del expediente como papel envejecido con sombra y sello "EVIDENCIA"; panel de ALEX como pantalla con líneas de barrido. |
 
@@ -41,15 +41,15 @@ Máquina de prueba: **portátil con Intel Core i5-13420H y gráficos integrados 
 
 | Escena | Primer build de la sesión (sin optimizar) | Final | Percentil 95 final |
 |---|---|---|---|
-| Apartamento 404 | 61 FPS | **92 FPS** | 13.2 ms |
-| Café La Esquina | 59 FPS | **81 FPS** | 14.7 ms |
-| Portería y sótano | 72 FPS | **84 FPS** | 14.7 ms |
-| Comisaría | 68 FPS | **80 FPS** | 13.6 ms |
-| Sala de servidores B | 66 FPS | **89 FPS** | 12.6 ms |
-| Piso ejecutivo | 70 FPS | **94 FPS** | 14.2 ms |
-| Caseta y parqueadero | 48 FPS | **72 FPS** | 15.7 ms |
+| Apartamento 404 | 61 FPS | **97 FPS** | 12.4 ms |
+| Café La Esquina | 59 FPS | **77 FPS** | 16.0 ms |
+| Portería y sótano | 72 FPS | **82 FPS** | 15.0 ms |
+| Comisaría | 68 FPS | **77 FPS** | 14.2 ms |
+| Sala de servidores B | 66 FPS | **90 FPS** | 12.4 ms |
+| Piso ejecutivo | 70 FPS | **84 FPS** | 16.2 ms |
+| Caseta y parqueadero | 48 FPS | **69 FPS** | 15.9 ms |
 
-Todas las escenas quedan sobre 60 FPS de promedio, y también el 5 % de frames más lentos (el peor es la caseta: 15.7 ms ≈ 64 FPS). El build anterior a la sesión no tenía el medidor, así que la comparación "antes/después" exacta es la del Editor:
+Todas las escenas quedan sobre 60 FPS de promedio, y también el 5 % de frames más lentos (el peor es la caseta: 15.9 ms ≈ 63 FPS). El build anterior a la sesión no tenía el medidor, así que la comparación "antes/después" exacta es la del Editor:
 
 **En el Editor** (`VisualAudit`, mismo método antes y después: 40 frames a 1920×1080 por vista; promedio de las vistas de cada escena). El Editor tiene sobrecosto y el portátil se calienta tras muchas corridas, así que sirve para comparar, no como cifra real:
 
