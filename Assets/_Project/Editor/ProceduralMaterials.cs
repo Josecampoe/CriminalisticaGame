@@ -198,7 +198,7 @@ namespace Caso404.EditorTools
                 {
                     float big = Fbm(u, v, 3, 4, seed + 9f);
                     float stain = Mathf.Clamp01((Fbm(u, v, 5, 3, seed + 21f) - 0.5f) * 4f);
-                    float pits = Hash(Mathf.FloorToInt(u * 900), Mathf.FloorToInt(v * 900)) > 0.97f ? 1f : 0f;
+                    float pits = Hash(Mathf.FloorToInt(u * 700), Mathf.FloorToInt(v * 700)) > 0.992f ? 0.5f : 0f; // poros escasos y suaves
                     float crack = Mathf.Clamp01(1f - Mathf.Abs(Tileable(u, v, 4, 4, seed + 77f) - 0.5f) * 90f)
                                   * Mathf.Clamp01((Fbm(u, v, 2, 2, seed + 91f) - 0.62f) * 6f) * 0.6f; // grietas finas y escasas
                     tint = (0.82f + 0.3f * big) * (1f - 0.3f * stain) * (1f - 0.35f * pits) * (1f - 0.4f * crack);
