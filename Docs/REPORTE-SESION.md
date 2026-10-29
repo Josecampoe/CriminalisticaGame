@@ -13,13 +13,13 @@ Capturas en `Docs/capturas/antes/` y `Docs/capturas/despues/` con los mismos nom
 | Escena | Antes → después | Qué cambió |
 |---|---|---|
 | **Menú principal** | `ui_00_menu` | Detrás del título se ve Valdora de noche con lluvia y la silueta de una persiana (antes, fondo plano). |
-| **c1_s1 Apartamento 404** | `c1s1_pasillo`, `c1s1_sala`, `c1s1_estudio`, `c1s1_balcon`, `c1s1_ciudad` | Día nublado frío con lámparas cálidas. Piso de tablas con brillo, yeso, baldosa del pasillo con manchas. Escena del crimen revuelta: libros y cojines en el piso, cuadro caído con vidrio roto, cajón abierto, papeles, taza rota. **Marcadores amarillos numerados** junto a las evidencias. Huella con dibujo de suela. Persianas, lámpara de pie encendida, libros individuales, cojines, cobija, microondas, plantas, cuadros, rayos de luz por las ventanas. |
+| **c1_s1 Apartamento 404** | `c1s1_pasillo`, `c1s1_sala`, `c1s1_estudio`, `c1s1_balcon`, `c1s1_ciudad` | Día nublado frío con lámparas cálidas. Piso de tablas con brillo, yeso, baldosa del pasillo con manchas. Aviso verde iluminado de "ESCALERAS" en el pasillo. Escena del crimen revuelta: libros y cojines en el piso, cuadro caído con vidrio roto, cajón abierto, papeles, taza rota. **Marcadores amarillos numerados** junto a las evidencias. Huella con dibujo de suela. Persianas, lámpara de pie encendida, libros individuales, cojines, cobija, microondas, plantas, cuadros, rayos de luz por las ventanas. |
 | **c1_s2 Café La Esquina** | `c1s2_entrada`, `c1s2_barra`, `c1s2_trastienda` | **De noche, como dice el guion.** Pared de ladrillo, baldosa, lámparas colgantes sobre el salón, butacos tapizados, letrero de neón "CAFÉ LA ESQUINA", lluvia tras las vitrinas, murmullo de café. |
 | **c1_s3 Portería y sótano** | `c1s3_porteria`, `c1s3_sotano`, `c1s3_parqueadero` | Fluorescente verdoso. Concreto manchado, tuberías y tubería contra incendios en el techo, tubos que parpadean, casilleros con rejillas, estanterías con cajas, archivadores, carros con cabina y llantas, más tubos en el parqueadero. |
 | **c1_s4 / c2_s4 Comisaría** | `c1s4_oficina`, `c1s4_ventana`, `c1s4_interrogatorio` | Persianas con franjas de luz, **lámparas de banquero verdes** en los escritorios, lámpara única sobre la mesa de interrogatorio, archivadores y dispensador de agua. En el caso 2 cambia sola a noche (perfil de post-procesado incluido). |
 | **c2_s1 Sala de servidores B** | `c2s1_pasillo`, `c2s1_sala`, `c2s1_racks` | Noche fría: frentes de racks con LEDs verdes, ámbar y azules que laten, bandejas de cables, tubos fluorescentes que parpadean, zumbido de ventiladores. |
 | **c2_s2 Piso ejecutivo** | `c2s2_oficinas`, `c2s2_ventanal`, `c2s2_pasillo` | Ventanal limpio (el vidrio ya no "lava" la imagen), lluvia afuera, calle mojada, avisos de neón en la ciudad, lámparas colgantes, archivadores, cuadros. |
-| **c2_s3 Caseta y parqueadero** | `c2s3_caseta`, `c2s3_parqueadero`, `c2s3_calle` | Parqueadero con cuadrícula de tubos, tuberías, manchas de aceite, carro con cabina y luces, lluvia y calle mojada. |
+| **c2_s3 Caseta y parqueadero** | `c2s3_caseta`, `c2s3_parqueadero`, `c2s3_calle` | Letrero "VIGILANCIA" y aplique de luz en la caseta. Parqueadero con franjas en las columnas, conos, topes, números de puesto, letrero "SÓTANO -1", cuadrícula de tubos, tuberías, manchas de aceite, carro con cabina y luces, lluvia y calle mojada. |
 | **Personajes** | `personaje_*` | Ropa sin los músculos del cuerpo base y con trama de tela (Carlos ya no parece sin camisa), piel satinada, ropa mate, zapatos y pelo con brillo, luz de relleno en la cara. |
 | **UI** | `ui_*` | Carta y ficha del expediente como papel envejecido con sombra y sello "EVIDENCIA"; panel de ALEX como pantalla con líneas de barrido. |
 
@@ -41,29 +41,29 @@ Máquina de prueba: **portátil con Intel Core i5-13420H y gráficos integrados 
 
 | Escena | Primer build de la sesión (sin optimizar) | Final | Percentil 95 final |
 |---|---|---|---|
-| Apartamento 404 | 61 FPS | **88 FPS** | 13.4 ms |
-| Café La Esquina | 59 FPS | **77 FPS** | 15.3 ms |
-| Portería y sótano | 72 FPS | **79 FPS** | 16.1 ms |
-| Comisaría | 68 FPS | **74 FPS** | 14.9 ms |
-| Sala de servidores B | 66 FPS | **83 FPS** | 14.1 ms |
-| Piso ejecutivo | 70 FPS | **87 FPS** | 15.5 ms |
-| Caseta y parqueadero | 48 FPS | **64 FPS** | 17.2 ms |
+| Apartamento 404 | 61 FPS | **94 FPS** | 12.5 ms |
+| Café La Esquina | 59 FPS | **82 FPS** | 14.8 ms |
+| Portería y sótano | 72 FPS | **96 FPS** | 14.4 ms |
+| Comisaría | 68 FPS | **81 FPS** | 13.5 ms |
+| Sala de servidores B | 66 FPS | **89 FPS** | 12.8 ms |
+| Piso ejecutivo | 70 FPS | **95 FPS** | 14.0 ms |
+| Caseta y parqueadero | 48 FPS | **70 FPS** | 15.8 ms |
 
-Todas las escenas quedan sobre 60 FPS de promedio; en la caseta, el 5 % de frames más lentos ronda los 58 FPS. El build anterior a la sesión no tenía el medidor, así que la comparación "antes/después" exacta es la del Editor:
+Todas las escenas quedan sobre 60 FPS de promedio, y también el 5 % de frames más lentos (el peor es la caseta: 15.8 ms ≈ 63 FPS). El build anterior a la sesión no tenía el medidor, así que la comparación "antes/después" exacta es la del Editor:
 
 **En el Editor** (`VisualAudit`, mismo método antes y después: 40 frames a 1920×1080 por vista; promedio de las vistas de cada escena). El Editor tiene sobrecosto y el portátil se calienta tras muchas corridas, así que sirve para comparar, no como cifra real:
 
 | Escena | Antes | Después |
 |---|---|---|
-| Apartamento 404 | 19.3 ms (52 FPS) | 22.4 ms (45 FPS) |
-| Café La Esquina | 21.5 ms (46 FPS) | 21.2 ms (47 FPS) |
-| Portería y sótano | 19.0 ms (53 FPS) | 22.2 ms (45 FPS) |
-| Comisaría | 16.8 ms (60 FPS) | 19.9 ms (50 FPS) |
-| Sala de servidores B | 18.7 ms (54 FPS) | 20.8 ms (48 FPS) |
-| Piso ejecutivo | 21.9 ms (46 FPS) | 24.6 ms (41 FPS) |
-| Caseta y parqueadero | 20.5 ms (49 FPS) | 23.1 ms (43 FPS) |
+| Apartamento 404 | 19.3 ms (52 FPS) | 22.8 ms (44 FPS) |
+| Café La Esquina | 21.5 ms (46 FPS) | 20.2 ms (49 FPS) |
+| Portería y sótano | 19.0 ms (53 FPS) | 24.0 ms (42 FPS) |
+| Comisaría | 16.8 ms (60 FPS) | 22.8 ms (44 FPS) |
+| Sala de servidores B | 18.7 ms (54 FPS) | 21.4 ms (47 FPS) |
+| Piso ejecutivo | 21.9 ms (46 FPS) | 25.1 ms (40 FPS) |
+| Caseta y parqueadero | 20.5 ms (49 FPS) | 24.0 ms (42 FPS) |
 
-Es decir, el look nuevo cuesta entre 0 y 3 ms más por frame que el greybox (el café incluso bajó), y el ejecutable lo absorbe. Lo que más costaba eran **las luces puntuales** y **la ciudad dibujada detrás de las paredes**; se resolvió con occlusion culling, una sola sombra puntual por escena, sin sombra direccional de noche y menos luces reales en parqueaderos y café (medido con **Caso404 → `VisualAudit.ProfileEffects`**, que apaga un efecto a la vez).
+Es decir, el look nuevo cuesta hasta unos 5 ms más por frame que el greybox en el Editor (el café incluso bajó), y el ejecutable lo absorbe. Lo que más costaba eran **las luces puntuales** y **la ciudad dibujada detrás de las paredes**; se resolvió con occlusion culling, una sola sombra puntual por escena, sin sombra direccional de noche y menos luces reales en parqueaderos y café (medido con **Caso404 → `VisualAudit.ProfileEffects`**, que apaga un efecto a la vez).
 
 **Build:** `Builds/ElCaso404/ElCaso404.exe`, 179 MB (antes 135 MB: texturas, audio y variantes de shaders del post-procesado). Tarda unos 5 min la primera vez y menos de 1 min después.
 
@@ -85,6 +85,11 @@ Es decir, el look nuevo cuesta entre 0 y 3 ms más por frame que el greybox (el 
 6. **Sonido ambiente**: revisa el volumen frente a los sonidos de la interfaz.
 7. **La caseta y el café** son las escenas más pesadas: si en tu portátil bajan de 60 FPS, dime y quito la lluvia o reduzco luces ahí.
 8. **Los PR** (enlaces abajo): fusiónalos en cualquier orden; el script verifica que juntos dan exactamente `dev-visual`.
+
+### Pull requests (sin fusionar)
+- José: https://github.com/Josecampoe/CriminalisticaGame/pull/8
+- Majo: https://github.com/Josecampoe/CriminalisticaGame/pull/9
+- Daniel: https://github.com/Josecampoe/CriminalisticaGame/pull/10
 
 
 ---
