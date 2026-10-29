@@ -30,6 +30,12 @@ namespace Caso404.Player
         /// <summary>True mientras un panel o el modo inspección bloquean el movimiento.</summary>
         public bool IsLocked => _locked;
 
+        /// <summary>True mientras la vista está fija en un personaje (conversación).</summary>
+        public bool IsFocusing => _locked && _focusTarget != null;
+
+        /// <summary>Velocidad horizontal actual en m/s (para el balanceo de la cámara).</summary>
+        public float PlanarSpeed { get; private set; }
+
         void Awake()
         {
             _controller = GetComponent<CharacterController>();
@@ -74,6 +80,7 @@ namespace Caso404.Player
             ApplyGravity();
             if (_locked)
             {
+                PlanarSpeed = 0f;
                 UpdateFocus();
                 return;
             }
@@ -94,6 +101,7 @@ namespace Caso404.Player
         {
             var dir = transform.right * input.x + transform.forward * input.y;
             if (dir.sqrMagnitude > 1f) dir.Normalize();
+            PlanarSpeed = dir.magnitude * _walkSpeed;
             _controller.Move((dir * _walkSpeed + Vector3.up * _verticalVelocity) * Time.deltaTime);
         }
 
