@@ -122,6 +122,7 @@ namespace Caso404.EditorTools
 
             SetupDialogueFocus(root);
             Glass();
+            Footprint();
             int boxes = ProceduralMaterials.ApplyBoxUVs();
             SetAmbient(ambience);
             var lights = RoomLights();
@@ -197,6 +198,56 @@ namespace Caso404.EditorTools
             glass.SetFloat("_SpecularHighlights", 1f);
             EditorUtility.SetDirty(glass);
         }
+
+        /// <summary>
+        /// La huella del balcón (evidencia clave) deja de ser una tabla marrón: textura de suela con tacón, antepié y
+        /// dibujo de la banda de rodadura, recortada con alfa para que alrededor se vea el piso.
+        /// </summary>
+        static void Footprint()
+        {
+            const string texPath = "Assets/_Project/Art/Textures/Procedural/T_huella.png";
+            if (!File.Exists(texPath))
+            {
+                const int w = 128, h = 320;
+                var tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+                for (int y = 0; y < h; y++)
+                    for (int x = 0; x < w; x++)
+                    {
+                        float u = (x + 0.5f) / w, v = (y + 0.5f) / h;
+                        float fore = Sq((u - 0.5f) / 0.44f) + Sq((v - 0.68f) / 0.3f);
+                        float heel = Sq((u - 0.5f) / 0.36f) + Sq((v - 0.19f) / 0.17f);
+                        float arch = Sq((u - 0.56f) / 0.26f) + Sq((v - 0.42f) / 0.22f);
+                        float edge = Mathf.PerlinNoise(x * 0.25f, y * 0.25f) * 0.25f;
+                        bool inside = fore < 1f - edge || heel < 1f - edge || arch < 0.8f - edge;
+                        bool groove = Mathf.Abs(Mathf.Repeat(v * 26f + Mathf.Abs(u - 0.5f) * 3f, 1f) - 0.5f) < 0.16f; // zigzag
+                        float dirt = 0.75f + 0.25f * Mathf.PerlinNoise(x * 0.12f + 3f, y * 0.12f);
+                        var c = new Color(0.27f, 0.19f, 0.11f) * (groove ? 0.55f : 1f) * dirt;
+                        float a = inside ? (groove ? 0.75f : 1f) * Mathf.Clamp01(dirt + 0.1f) : 0f;
+                        tex.SetPixel(x, y, new Color(c.r, c.g, c.b, a));
+                    }
+                tex.Apply();
+                File.WriteAllBytes(texPath, tex.EncodeToPNG());
+                Object.DestroyImmediate(tex);
+                AssetDatabase.ImportAsset(texPath);
+                var imp = (TextureImporter)AssetImporter.GetAtPath(texPath);
+                imp.alphaIsTransparency = true;
+                imp.wrapMode = TextureWrapMode.Clamp;
+                imp.SaveAndReimport();
+            }
+            var mud = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Art/Materials/mat_mud.mat");
+            if (mud == null) return;
+            mud.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(texPath));
+            mud.SetColor("_BaseColor", Color.white);
+            mud.SetFloat("_AlphaClip", 1f);
+            mud.SetFloat("_Cutoff", 0.45f);
+            mud.EnableKeyword("_ALPHATEST_ON");
+            mud.SetFloat("_Smoothness", 0.35f);
+            mud.SetOverrideTag("RenderType", "TransparentCutout");
+            mud.renderQueue = (int)RenderQueue.AlphaTest;
+            EditorUtility.SetDirty(mud);
+        }
+
+        static float Sq(float x) => x * x;
 
         static Material Emissive(string name, Color color, float hdr)
         {
@@ -510,7 +561,7 @@ namespace Caso404.EditorTools
             mat.SetTextureScale("_BaseMap", new Vector2(10f, 1f));
             mat.EnableKeyword("_EMISSION");
             mat.SetTexture("_EmissionMap", t);
-            mat.SetColor("_EmissionColor", Color.white * 4f);
+            mat.SetColor("_EmissionColor", Color.white * 6f);
             mat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
             EditorUtility.SetDirty(mat);
             return mat;
