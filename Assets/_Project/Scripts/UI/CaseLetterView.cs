@@ -49,7 +49,7 @@ namespace Caso404.UI
             bg.color = UITheme.WithAlpha(theme.BgDark, 0.97f);
 
             // Hoja de papel tipo expediente
-            var paper = UIFactory.Panel(transform, "Hoja", theme.Paper);
+            var paper = UIFactory.AsPaper(UIFactory.Panel(transform, "Hoja", theme.Paper), theme);
             UIFactory.Region(paper.rectTransform, new Vector2(0.2f, 0.04f), new Vector2(0.8f, 0.96f));
             paper.rectTransform.localRotation = Quaternion.Euler(0, 0, -0.4f);
             var margin = UIFactory.Panel(paper.transform, "Margen", UITheme.WithAlpha(theme.AccentRed, 0.35f));
