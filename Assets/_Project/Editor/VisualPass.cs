@@ -648,14 +648,14 @@ namespace Caso404.EditorTools
                     }
                 for (int row = 0; row < h / unit; row++)
                 {
-                    int n = 1 + rnd.Next(4);
+                    int n = 2 + rnd.Next(5);
                     for (int k = 0; k < n; k++)
                     {
                         if (rnd.NextDouble() < 0.2) continue; // algunos apagados
                         var c = leds[rnd.Next(leds.Length)] * (0.7f + (float)rnd.NextDouble() * 0.3f);
-                        int cx = 12 + k * 11, cy = row * unit + unit / 2;
-                        for (int dy = -1; dy <= 1; dy++)
-                            for (int dx = -2; dx <= 2; dx++)
+                        int cx = 12 + k * 9, cy = row * unit + unit / 2;
+                        for (int dy = -2; dy <= 2; dy++)
+                            for (int dx = -3; dx <= 3; dx++)
                                 if (cy + dy >= 0 && cy + dy < h) tex.SetPixel(cx + dx, cy + dy, c);
                     }
                 }
