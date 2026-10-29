@@ -129,6 +129,7 @@ namespace Caso404.EditorTools
             Fixtures(root, lights, ambience);
             ExtraTubes(root);
             if (sceneName == "CafeLaEsquina") CafeLamps(root);
+            Accents(root);
             Shadows(lights);
             ReflectionProbes(root);
             Dust(root, lights, ambience);
@@ -342,6 +343,58 @@ namespace Caso404.EditorTools
                     bulb.transform.SetParent(lamp.transform, true);
                     l.transform.position = new Vector3(p.x, bulbY - 0.12f, p.z);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Acentos de luz cálida a la altura de la mesa, típicos del cine negro: lámpara de banquero verde en cada
+        /// escritorio de la Comisaría y la lámpara de pie de la sala del apartamento encendida.
+        /// </summary>
+        static void Accents(Transform root)
+        {
+            var group = new GameObject("Acentos de luz").transform;
+            group.SetParent(root, false);
+            var brass = SceneKit.Mat("laton", new Color(0.55f, 0.42f, 0.18f), 0.75f, 0.9f);
+            var green = Emissive("emit_pantalla_banquero", new Color(0.1f, 0.45f, 0.2f), 0.8f);
+            var warm = Emissive("emit_bombillo_calido", new Color(1f, 0.78f, 0.5f), 6f);
+            var shade = SceneKit.Mat("pantalla_tela", new Color(0.75f, 0.68f, 0.55f), 0.1f);
+            var evidence = Object.FindObjectsByType<Caso404.Evidence.EvidencePickup>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+                .Select(e => e.GetComponent<Collider>()).Where(c => c != null).Select(c => c.bounds).ToList();
+            bool NearEvidence(Vector3 p) => evidence.Any(b => b.SqrDistance(p) < 0.5f * 0.5f);
+
+            foreach (var desk in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None).Where(r => r.name == "Escritorio"))
+            {
+                var b = desk.bounds;
+                var p = new Vector3(b.max.x - 0.22f, b.max.y, b.max.z - 0.18f);
+                if (NearEvidence(p)) continue;
+                Part(group, "Base de lámpara", PrimitiveType.Cylinder, p + Vector3.up * 0.01f, new Vector3(0.14f, 0.01f, 0.14f), brass);
+                Part(group, "Brazo de lámpara", PrimitiveType.Cylinder, p + Vector3.up * 0.17f, new Vector3(0.018f, 0.16f, 0.018f), brass);
+                var cap = Part(group, "Pantalla verde", PrimitiveType.Cylinder, p + Vector3.up * 0.34f, new Vector3(0.11f, 0.15f, 0.11f), green);
+                cap.transform.rotation = Quaternion.Euler(0, 0, 90);
+                var l = new GameObject("Luz de la lámpara de banquero").AddComponent<Light>();
+                l.transform.SetParent(group, false);
+                l.transform.position = p + Vector3.up * 0.27f;
+                l.type = LightType.Point;
+                l.color = new Color(1f, 0.82f, 0.55f);
+                l.intensity = 0.9f;
+                l.range = 2.2f;
+                l.shadows = LightShadows.None;
+            }
+
+            foreach (var stand in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None).Where(r => r.name == "Lámpara de pie"))
+            {
+                var b = stand.bounds;
+                var top = new Vector3(b.center.x, b.max.y, b.center.z);
+                Part(group, "Pantalla de la lámpara de pie", PrimitiveType.Cylinder, top + Vector3.up * 0.12f, new Vector3(0.38f, 0.14f, 0.38f), shade);
+                Part(group, "Bombillo", PrimitiveType.Sphere, top + Vector3.up * 0.05f, Vector3.one * 0.08f, warm);
+                var l = new GameObject("Luz de la lámpara de pie").AddComponent<Light>();
+                l.transform.SetParent(group, false);
+                l.transform.position = top - Vector3.up * 0.05f + Vector3.right * 0.2f;
+                l.type = LightType.Point;
+                l.color = new Color(1f, 0.75f, 0.45f);
+                l.intensity = 1.1f;
+                l.range = 3.5f;
+                l.shadows = LightShadows.None;
             }
         }
 
