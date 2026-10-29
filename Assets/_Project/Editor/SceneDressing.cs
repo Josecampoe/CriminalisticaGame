@@ -59,6 +59,7 @@ namespace Caso404.EditorTools
             Lockers(group);
             ParkingDetails(group);
             if (sceneName == "CasetaSeguridad") BoothFront(group);
+            ExitSigns(group);
             if (sceneName is "Comisaria" or "PisoEjecutivo" or "PorteriaSotano") OfficeFurniture(group, renderers);
             if (sceneName == "ServidoresB") CableTrays(group, renderers);
             return _count;
@@ -842,6 +843,31 @@ namespace Caso404.EditorTools
                 l.intensity = 1.2f;
                 l.range = 3.5f;
                 l.shadows = LightShadows.None;
+            }
+        }
+
+        /// <summary>La señal de escaleras del pasillo se vuelve un aviso verde iluminado con su texto.</summary>
+        static void ExitSigns(Transform g)
+        {
+            var green = SceneKit.Mat("aviso_salida", new Color(0.1f, 0.6f, 0.25f), 0.5f);
+            green.EnableKeyword("_EMISSION");
+            green.SetColor("_EmissionColor", new Color(0.15f, 1f, 0.4f) * 2.5f);
+            EditorUtility.SetDirty(green);
+            foreach (var r in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None).Where(r => r.name == "Señal de escaleras"))
+            {
+                var b = r.bounds;
+                r.enabled = false;
+                Piece(g, "Aviso de escaleras", PrimitiveType.Cube, b.center, b.size, green, shadows: false);
+                var t = new GameObject("Texto ESCALERAS").AddComponent<TextMeshPro>();
+                t.transform.SetParent(g, false);
+                t.transform.position = b.center + Vector3.forward * (b.extents.z + 0.003f);
+                t.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+                t.text = "ESCALERAS";
+                t.fontSize = 1.1f;
+                t.fontStyle = FontStyles.Bold;
+                t.alignment = TextAlignmentOptions.Center;
+                t.color = Color.white;
+                t.rectTransform.sizeDelta = new Vector2(b.size.x, b.size.y);
             }
         }
 
