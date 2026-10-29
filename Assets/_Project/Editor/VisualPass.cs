@@ -437,10 +437,11 @@ namespace Caso404.EditorTools
             {
                 var b = f.bounds;
                 int n = 0;
+                int every = b.size.x * b.size.z > 150f ? 3 : 2; // parqueaderos grandes: menos luces reales (rendimiento)
                 for (float x = b.min.x + 2f; x < b.max.x - 1f; x += 4f)
                     for (float z = b.min.z + 2f; z < b.max.z - 1f; z += 4f)
                     {
-                        bool withLight = n++ % 3 == 0; // uno de cada tres tubos ilumina; los demás solo brillan (rendimiento)
+                        bool withLight = n++ % every == 0; // los demás tubos solo brillan
                         var p = new Vector3(x, SceneKit.WallHeight, z);
                         var t = Part(group, "Fluorescente (parqueadero)", PrimitiveType.Cube, p + Vector3.down * 0.05f, new Vector3(1.25f, 0.05f, 0.18f), housing);
                         var tube = Part(group, "Tubo", PrimitiveType.Cube, p + Vector3.down * 0.085f, new Vector3(1.18f, 0.03f, 0.1f), tubeMat);
@@ -451,7 +452,7 @@ namespace Caso404.EditorTools
                         l.transform.position = p + Vector3.down * 0.3f;
                         l.type = LightType.Point;
                         l.color = new Color(0.85f, 0.92f, 1f);
-                        l.intensity = 1.9f;
+                        l.intensity = 2.2f;
                         l.range = 8f;
                         l.shadows = LightShadows.None;
                     }

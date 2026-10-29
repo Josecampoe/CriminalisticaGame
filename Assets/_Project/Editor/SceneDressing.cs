@@ -54,6 +54,7 @@ namespace Caso404.EditorTools
             Cars(group, renderers);
             Books(group);
             SofaCushions(group);
+            if (sceneName == "Apartamento404") HomeDetails(group);
             if (sceneName is "Comisaria" or "PisoEjecutivo" or "PorteriaSotano") OfficeFurniture(group, renderers);
             if (sceneName == "ServidoresB") CableTrays(group, renderers);
             return _count;
@@ -620,6 +621,53 @@ namespace Caso404.EditorTools
                     var c = b.center + axis * ((k - 0.5f) * len / 2f) + Vector3.up * (b.extents.y + 0.06f);
                     var size = alongZ ? new Vector3(depth * 0.92f, 0.12f, len / 2f - 0.03f) : new Vector3(len / 2f - 0.03f, 0.12f, depth * 0.92f);
                     Piece(g, "Cojín del asiento", PrimitiveType.Cube, c, size, fabric);
+                }
+            }
+        }
+
+        /// <summary>Habitación y cocina del apartamento: cobija arrugada, lámpara de noche, manijas de la nevera y microondas.</summary>
+        static void HomeDetails(Transform g)
+        {
+            MeshRenderer Find(string n) => Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None).FirstOrDefault(r => r.name == n);
+            var blanket = SceneKit.Mat("cobija", new Color(0.32f, 0.12f, 0.1f), 0.08f);
+            var metal = SceneKit.Mat("metal");
+            var dark = SceneKit.Mat("dark");
+            var bed = Find("Cama");
+            if (bed != null)
+            {
+                var b = bed.bounds;
+                var c = Piece(g, "Cobija", PrimitiveType.Cube, new Vector3(b.center.x, b.max.y + 0.03f, b.center.z - 0.25f), new Vector3(b.size.x + 0.06f, 0.06f, b.size.z * 0.6f), blanket);
+                c.transform.rotation = Quaternion.Euler(2f, 4f, 0f);
+                var fold = Piece(g, "Cobija doblada", PrimitiveType.Cube, new Vector3(b.center.x + 0.2f, b.max.y + 0.08f, b.center.z + 0.15f), new Vector3(b.size.x * 0.7f, 0.08f, 0.3f), blanket);
+                fold.transform.rotation = Quaternion.Euler(0f, -8f, 3f);
+            }
+            var night = Find("Mesa de noche");
+            if (night != null)
+            {
+                var b = night.bounds;
+                var top = new Vector3(b.center.x, b.max.y, b.center.z);
+                Piece(g, "Base de la lámpara de noche", PrimitiveType.Cylinder, top + Vector3.up * 0.1f, new Vector3(0.08f, 0.1f, 0.08f), dark);
+                var shade = SceneKit.Mat("pantalla_tela");
+                Piece(g, "Pantalla de la lámpara de noche", PrimitiveType.Cylinder, top + Vector3.up * 0.27f, new Vector3(0.2f, 0.08f, 0.2f), shade);
+            }
+            var fridge = Find("Nevera");
+            if (fridge != null)
+            {
+                var b = fridge.bounds;
+                var front = new Vector3(b.min.x - 0.02f, 0f, b.center.z + b.size.z * 0.35f);
+                Piece(g, "Manija de la nevera", PrimitiveType.Cube, front + Vector3.up * 1.35f, new Vector3(0.03f, 0.4f, 0.03f), metal);
+                Piece(g, "Manija del congelador", PrimitiveType.Cube, front + Vector3.up * 0.65f, new Vector3(0.03f, 0.3f, 0.03f), metal);
+                Piece(g, "Junta de la puerta", PrimitiveType.Cube, new Vector3(b.min.x - 0.003f, 1.05f, b.center.z), new Vector3(0.006f, 0.015f, b.size.z * 0.95f), dark, shadows: false);
+            }
+            var counter = Find("Cubierta");
+            if (counter != null)
+            {
+                var b = counter.bounds;
+                var p = new Vector3(b.min.x + 0.35f, b.max.y, b.center.z);
+                if (!Blocked(new Bounds(p, Vector3.one * 0.5f)))
+                {
+                    Piece(g, "Microondas", PrimitiveType.Cube, p + Vector3.up * 0.15f, new Vector3(0.5f, 0.3f, 0.36f), SceneKit.Mat("plastico"));
+                    Piece(g, "Puerta del microondas", PrimitiveType.Cube, p + new Vector3(-0.04f, 0.15f, 0.181f), new Vector3(0.34f, 0.22f, 0.005f), dark, shadows: false);
                 }
             }
         }
