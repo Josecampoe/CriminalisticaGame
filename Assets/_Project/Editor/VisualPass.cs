@@ -125,6 +125,7 @@ namespace Caso404.EditorTools
             Footprint();
             int boxes = ProceduralMaterials.ApplyBoxUVs();
             SetAmbient(ambience);
+            NightPerformance(ambience);
             var lights = RoomLights();
             Fixtures(root, lights, ambience);
             ExtraTubes(root);
@@ -299,6 +300,24 @@ namespace Caso404.EditorTools
 
         // ================= Luces =================
 
+        /// <summary>
+        /// Rendimiento: de noche la luz direccional (luna o calle, intensidad 0.2) no proyecta sombra, porque casi no se
+        /// ve y sus 4 cascadas costaban 3-4 ms en gráficos integrados. Y la cámara no dibuja más allá del final de la niebla.
+        /// </summary>
+        static void NightPerformance(Ambience a)
+        {
+            if (a == Ambience.Night)
+                foreach (var l in Object.FindObjectsByType<Light>(FindObjectsSortMode.None))
+                {
+                    if (l.type == LightType.Directional) l.shadows = LightShadows.None;
+                    // Farolas de la ciudad: alcance corto (el charco de luz en la calle); costaban 3-4 ms vistas desde la calle.
+                    else if (l.transform.root.name == "Ciudad de Valdora") l.range = Mathf.Min(l.range, 6f);
+                }
+            if (RenderSettings.fog && RenderSettings.fogMode == FogMode.Linear)
+                foreach (var cam in Object.FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                    cam.farClipPlane = Mathf.Min(cam.farClipPlane, RenderSettings.fogEndDistance + 30f);
+        }
+
         /// <summary>Luz ambiente más baja que antes: más contraste entre lo iluminado por las lámparas y las sombras.</summary>
         static void SetAmbient(Ambience a)
         {
@@ -438,18 +457,21 @@ namespace Caso404.EditorTools
             var shade = SceneKit.Mat("lamp_shade");
             var bulbMat = Emissive("emit_bombillo_calido", new Color(1f, 0.78f, 0.5f), 6f);
             float ceiling = SceneKit.WallHeight, bulbY = ceiling - 0.6f;
+            int index = 0;
             foreach (var p in new[] { new Vector3(0f, 0f, 2.2f), new Vector3(0f, 0f, 4.6f), new Vector3(-2f, 0f, 1.2f) })
             {
+                bool withLight = index++ == 0; // solo la del centro ilumina; las otras dos solo brillan (rendimiento)
                 var lamp = Part(group, "Lámpara colgante", PrimitiveType.Cylinder, new Vector3(p.x, (ceiling + bulbY) / 2f + 0.1f, p.z), new Vector3(0.012f, (ceiling - bulbY) / 2f - 0.1f, 0.012f), housing);
                 Part(group, "Pantalla", PrimitiveType.Cylinder, new Vector3(p.x, bulbY + 0.07f, p.z), new Vector3(0.36f, 0.07f, 0.36f), shade).transform.SetParent(lamp.transform, true);
                 Part(group, "Bombillo", PrimitiveType.Sphere, new Vector3(p.x, bulbY - 0.01f, p.z), Vector3.one * 0.1f, bulbMat).transform.SetParent(lamp.transform, true);
+                if (!withLight) continue;
                 var l = new GameObject("Luz").AddComponent<Light>();
                 l.transform.SetParent(lamp.transform, false);
                 l.transform.position = new Vector3(p.x, bulbY - 0.12f, p.z);
                 l.type = LightType.Point;
                 l.color = new Color(1f, 0.76f, 0.48f);
-                l.intensity = 1.3f;
-                l.range = 4.5f;
+                l.intensity = 1.6f;
+                l.range = 5f;
                 l.shadows = LightShadows.None;
             }
         }

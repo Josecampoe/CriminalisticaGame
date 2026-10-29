@@ -395,14 +395,7 @@ namespace Caso404.EditorTools
             }
             var tube = Piece(g, "Tubo de neón", PrimitiveType.Cube, new Vector3(b.center.x, b.max.y + 0.03f, b.min.z - 0.02f), new Vector3(b.size.x + 0.1f, 0.025f, 0.025f), neon, shadows: false);
             var tube2 = Piece(g, "Tubo de neón", PrimitiveType.Cube, new Vector3(b.center.x, b.min.y - 0.03f, b.min.z - 0.02f), new Vector3(b.size.x + 0.1f, 0.025f, 0.025f), neon, shadows: false);
-            var glow = new GameObject("Brillo del neón").AddComponent<Light>();
-            glow.transform.SetParent(g, false);
-            glow.transform.position = new Vector3(b.center.x, b.center.y - 0.3f, b.min.z - 0.6f);
-            glow.type = LightType.Point;
-            glow.color = new Color(1f, 0.6f, 0.2f);
-            glow.intensity = 1.6f;
-            glow.range = 4f;
-            glow.shadows = LightShadows.None;
+            // Sin luz puntual: el letrero emisivo y el bloom bastan (las luces puntuales eran lo más caro del café).
             _ = tube; _ = tube2;
         }
 
