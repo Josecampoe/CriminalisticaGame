@@ -46,8 +46,10 @@ namespace Caso404.UI
             _list = UIFactory.ScrollList(listBg.transform, "Cards", 10, 12);
             UIFactory.Stretch((RectTransform)_list.parent.parent);
 
-            var card = UIFactory.Panel(rt, "Detail", _theme.Paper);
+            var card = UIFactory.AsPaper(UIFactory.Panel(rt, "Detail", _theme.Paper), _theme);
             UIFactory.Region(card.rectTransform, new Vector2(0.41f, 0.06f), new Vector2(0.97f, 0.86f));
+            var stamp = UIFactory.Stamp(card.transform, "EVIDENCIA", _theme, _theme.SizeM, 8f);
+            UIFactory.Place(stamp.rectTransform, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-24, -18), new Vector2(260, 50));
             UIFactory.VLayout(card.gameObject, 12, 36);
             _name = UIFactory.Text(card.transform, "Name", "", _theme.TitleFont, _theme.SizeL, _theme.Ink);
             _description = UIFactory.Text(card.transform, "Description", "", _theme.BodyFont, _theme.SizeBody, _theme.Ink);

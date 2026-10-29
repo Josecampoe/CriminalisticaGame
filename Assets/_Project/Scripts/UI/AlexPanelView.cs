@@ -33,7 +33,7 @@ namespace Caso404.UI
         protected override void Build()
         {
             var rt = UIFactory.Stretch((RectTransform)transform);
-            var bg = UIFactory.Panel(rt, "Panel", UITheme.WithAlpha(_theme.BgDark, 0.97f));
+            var bg = UIFactory.AsScreen(UIFactory.Panel(rt, "Panel", UITheme.WithAlpha(_theme.BgDark, 0.97f)), _theme, _theme.AlexCyan);
             _panel = bg.rectTransform;
             _panel.anchorMin = new Vector2(1f, 0f);
             _panel.anchorMax = new Vector2(1f, 1f);

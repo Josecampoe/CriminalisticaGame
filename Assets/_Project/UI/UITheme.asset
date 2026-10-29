@@ -21,6 +21,8 @@ MonoBehaviour:
   _warningAmber: {r: 0.8784314, g: 0.64705884, b: 0.14901961, a: 1}
   _muted: {r: 0.41960785, g: 0.44705883, b: 0.5019608, a: 1}
   _titleFont: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  _paperSprite: {fileID: 5905042795047357967, guid: 5ff8f2c23d7787f4b80f04d67127c5a0, type: 3}
+  _screenSprite: {fileID: 8733379182513533629, guid: 6c1ac79d603f4b6448d1d41d21a3a54b, type: 3}
   _bodyFont: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   _monoFont: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   _sizeXL: 48

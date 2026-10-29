@@ -26,6 +26,7 @@ namespace Caso404.UI
         TextMeshProUGUI _sensValue;
         Button _invert;
         Button _fullscreen;
+        Button _headBob;
 
         void Awake()
         {
@@ -40,7 +41,8 @@ namespace Caso404.UI
         void Build()
         {
             var rt = UIFactory.Stretch((RectTransform)transform);
-            var bg = UIFactory.Panel(rt, "Bg", _theme.BgDark);
+            // Semitransparente: detrás se ve Valdora de noche (la arma el paso visual en la escena del menú).
+            var bg = UIFactory.Panel(rt, "Bg", UITheme.WithAlpha(_theme.BgDark, 0.62f));
             UIFactory.Stretch(bg.rectTransform);
 
             _title = UIFactory.Text(rt, "Title", "EL CASO 404", _theme.TitleFont, 96, _theme.TextLight, TextAlignmentOptions.Center);
@@ -68,7 +70,7 @@ namespace Caso404.UI
             var bg = UIFactory.Panel(root, "Options", _theme.BgDark);
             _options = UIFactory.Stretch(bg.rectTransform);
             var box = UIFactory.Rect("Box", _options);
-            UIFactory.Place(box, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(760, 520));
+            UIFactory.Place(box, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(760, 590));
             UIFactory.VLayout(box.gameObject, 18);
             var title = UIFactory.Text(box, "Title", "OPCIONES", _theme.TitleFont, _theme.SizeL, _theme.TextLight, TextAlignmentOptions.Center);
             UIFactory.Layout(title.gameObject, preferredHeight: 60);
@@ -88,6 +90,7 @@ namespace Caso404.UI
             slider.onValueChanged.AddListener(v => { GameSettings.Sensitivity = v; RefreshOptions(); });
 
             _invert = UIFactory.Button(box, "", _theme, _theme.Paper, _theme.Ink, () => { GameSettings.InvertY = !GameSettings.InvertY; RefreshOptions(); }, 52);
+            _headBob = UIFactory.Button(box, "", _theme, _theme.Paper, _theme.Ink, () => { GameSettings.HeadBob = !GameSettings.HeadBob; RefreshOptions(); }, 52);
             _fullscreen = UIFactory.Button(box, "", _theme, _theme.Paper, _theme.Ink, () => { GameSettings.Fullscreen = !GameSettings.Fullscreen; RefreshOptions(); }, 52);
             UIFactory.Button(box, "Volver", _theme, _theme.Muted, _theme.TextLight, () => _options.gameObject.SetActive(false), 52);
             RefreshOptions();
@@ -98,6 +101,7 @@ namespace Caso404.UI
         {
             _sensValue.text = $"Sensibilidad del mouse: {GameSettings.Sensitivity / GameSettings.DefaultSensitivity:0.0}x";
             UIFactory.SetLabel(_invert, (GameSettings.InvertY ? "[x]" : "[  ]") + "  Invertir eje Y");
+            UIFactory.SetLabel(_headBob, (GameSettings.HeadBob ? "[x]" : "[  ]") + "  Balanceo de cámara al caminar");
             UIFactory.SetLabel(_fullscreen, (GameSettings.Fullscreen ? "[x]" : "[  ]") + "  Pantalla completa");
         }
 
