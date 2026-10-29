@@ -99,6 +99,7 @@ namespace Caso404.EditorTools
         public static void Finish(UnityEngine.SceneManagement.Scene scene, string path)
         {
             BuildGameUi();
+            VisualPass.Apply(Path.GetFileNameWithoutExtension(path)); // post-procesado, luces, materiales y ambiente
             EditorSceneManager.SaveScene(scene, path);
             RefreshBuildSettings();
             AssetDatabase.SaveAssets();
