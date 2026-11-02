@@ -379,6 +379,7 @@ namespace Caso404.EditorTools
                 Evidence = new FallbackLine("Es posible que la rompiera al salir, para confundirnos."),
                 Press = new FallbackLine("Las fallas de almacenamiento son comunes en equipos antiguos. No le daría importancia."),
             };
+            c1.AlexQuestions = new[] { "¿Quién crees que fue?", "Pero la ventana se rompió desde adentro.", "¿Por qué tu archivo dio error justo en esos 15 minutos?" }; // GUION §3.5
             c1.Scenes = new[] { s1, s2, s3, s4 };
             c1.Suspects = new[] { carlos, laura, hernan, andres };
             c1.Culprit = andres;
