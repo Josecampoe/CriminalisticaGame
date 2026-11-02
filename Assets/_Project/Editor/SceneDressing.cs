@@ -57,6 +57,9 @@ namespace Caso404.EditorTools
             if (sceneName == "Apartamento404") HomeDetails(group);
             Shelves(group);
             Lockers(group);
+            ParkingDetails(group);
+            if (sceneName == "CasetaSeguridad") BoothFront(group);
+            ExitSigns(group);
             if (sceneName is "Comisaria" or "PisoEjecutivo" or "PorteriaSotano") OfficeFurniture(group, renderers);
             if (sceneName == "ServidoresB") CableTrays(group, renderers);
             return _count;
@@ -731,6 +734,140 @@ namespace Caso404.EditorTools
                 Piece(g, "Manija", PrimitiveType.Cube, front + Vector3.up * 1.0f + (frontZ ? Vector3.right : Vector3.forward) * (w * 0.32f), frontZ ? new Vector3(0.03f, 0.12f, 0.02f) : new Vector3(0.02f, 0.12f, 0.03f), metal);
                 Piece(g, "Placa", PrimitiveType.Cube, front + Vector3.up * (b.max.y - 0.35f), frontZ ? new Vector3(0.08f, 0.05f, 0.004f) : new Vector3(0.004f, 0.05f, 0.08f), SceneKit.Mat("paper"), shadows: false);
                 n++;
+            }
+        }
+
+        /// <summary>
+        /// Parqueaderos: franjas amarillas y negras de seguridad al pie de las columnas, topes de llanta, números de los
+        /// puestos pintados en el piso, conos y un letrero de nivel en la pared.
+        /// </summary>
+        static void ParkingDetails(Transform g)
+        {
+            var floors = Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None).Where(r => r.name == "Parqueadero piso").ToList();
+            if (floors.Count == 0) return;
+            var yellow = SceneKit.Mat("yellow");
+            var black = SceneKit.Mat("libro_negro");
+            var concrete = SceneKit.Mat("concrete");
+            var orange = SceneKit.Mat("cono", new Color(0.95f, 0.35f, 0.05f), 0.4f);
+            var white = SceneKit.Mat("plastico");
+            foreach (var col in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None).Where(r => r.name.StartsWith("Columna ")))
+            {
+                var b = col.bounds;
+                if (!floors.Any(f => f.bounds.Contains(new Vector3(b.center.x, f.bounds.center.y, b.center.z)))) continue;
+                for (int k = 0; k < 4; k++)
+                    Piece(g, k % 2 == 0 ? "Franja amarilla" : "Franja negra", PrimitiveType.Cube, new Vector3(b.center.x, 0.06f + k * 0.12f, b.center.z),
+                        new Vector3(b.size.x + 0.01f, 0.12f, b.size.z + 0.01f), k % 2 == 0 ? yellow : black, shadows: false);
+            }
+            foreach (var f in floors)
+            {
+                var b = f.bounds;
+                int n = 1;
+                // Puestos a lo largo del borde sur, cada 3 m
+                for (float x = b.min.x + 3.5f; x < b.max.x - 1.5f; x += 3f)
+                {
+                    var stop = new Vector3(x, 0.06f, b.min.z + 0.55f);
+                    if (!Blocked(new Bounds(stop, new Vector3(1.8f, 0.4f, 0.5f))) && !Physics.CheckBox(stop + Vector3.up * 0.1f, new Vector3(0.8f, 0.05f, 0.15f)))
+                        Piece(g, "Tope de llanta", PrimitiveType.Cube, stop, new Vector3(1.5f, 0.12f, 0.2f), concrete);
+                    var label = new GameObject($"Número de puesto {n}").AddComponent<TMPro.TextMeshPro>();
+                    label.transform.SetParent(g, false);
+                    label.transform.position = new Vector3(x, 0.006f, b.min.z + 1.4f);
+                    label.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+                    label.text = $"P-{n:00}";
+                    label.fontSize = 6f;
+                    label.alignment = TMPro.TextAlignmentOptions.Center;
+                    label.color = new Color(0.85f, 0.75f, 0.3f, 0.8f);
+                    label.rectTransform.sizeDelta = new Vector2(2f, 1f);
+                    n++;
+                }
+                // Conos en una esquina libre
+                var corner = new Vector3(b.max.x - 1f, 0f, b.max.z - 1f);
+                for (int k = 0; k < 3; k++)
+                {
+                    var c = corner + new Vector3(-k * 0.5f, 0f, -(k % 2) * 0.4f);
+                    if (Blocked(new Bounds(c + Vector3.up * 0.3f, new Vector3(0.4f, 0.6f, 0.4f))) || Physics.CheckBox(c + Vector3.up * 0.35f, new Vector3(0.15f, 0.25f, 0.15f))) continue;
+                    Piece(g, "Base del cono", PrimitiveType.Cube, c + Vector3.up * 0.015f, new Vector3(0.34f, 0.03f, 0.34f), orange);
+                    Piece(g, "Cono", PrimitiveType.Cylinder, c + Vector3.up * 0.3f, new Vector3(0.18f, 0.27f, 0.18f), orange);
+                    Piece(g, "Banda del cono", PrimitiveType.Cylinder, c + Vector3.up * 0.38f, new Vector3(0.185f, 0.04f, 0.185f), white, shadows: false);
+                }
+                // Letrero de nivel en la pared norte (cara interior)
+                var sign = new Vector3(b.center.x, 1.9f, b.max.z - 0.09f);
+                if (!Blocked(new Bounds(sign, new Vector3(1.6f, 0.6f, 0.4f))))
+                {
+                    Piece(g, "Letrero de nivel", PrimitiveType.Cube, sign, new Vector3(1.4f, 0.45f, 0.03f), yellow, shadows: false);
+                    var t = new GameObject("Texto del letrero").AddComponent<TMPro.TextMeshPro>();
+                    t.transform.SetParent(g, false);
+                    t.transform.position = sign + Vector3.back * 0.02f;
+                    t.text = "SÓTANO  -1";
+                    t.fontSize = 3f;
+                    t.fontStyle = TMPro.FontStyles.Bold;
+                    t.alignment = TMPro.TextAlignmentOptions.Center;
+                    t.color = new Color(0.08f, 0.08f, 0.08f);
+                    t.rectTransform.sizeDelta = new Vector2(1.4f, 0.45f);
+                }
+            }
+        }
+
+        /// <summary>Fachada de la caseta (pared este, x = 0): letrero "VIGILANCIA" sobre la ventanilla y aplique cálido sobre la puerta.</summary>
+        static void BoothFront(Transform g)
+        {
+            var plate = SceneKit.Mat("libro_negro");
+            var lampMat = SceneKit.Mat("emit_aplique", new Color(1f, 0.8f, 0.5f), 0.5f);
+            lampMat.EnableKeyword("_EMISSION");
+            lampMat.SetColor("_EmissionColor", new Color(1f, 0.78f, 0.5f) * 4f);
+            EditorUtility.SetDirty(lampMat);
+            var signPos = new Vector3(0.1f, 2.3f, 2.9f);
+            if (!Blocked(new Bounds(signPos, new Vector3(0.3f, 0.4f, 1.6f))))
+            {
+                Piece(g, "Letrero VIGILANCIA", PrimitiveType.Cube, signPos, new Vector3(0.03f, 0.3f, 1.4f), plate, shadows: false);
+                var t = new GameObject("Texto VIGILANCIA").AddComponent<TextMeshPro>();
+                t.transform.SetParent(g, false);
+                t.transform.position = signPos + Vector3.right * 0.02f;
+                t.transform.rotation = Quaternion.Euler(0f, -90f, 0f);
+                t.text = "VIGILANCIA";
+                t.fontSize = 2.2f;
+                t.fontStyle = FontStyles.Bold;
+                t.characterSpacing = 8f;
+                t.alignment = TextAlignmentOptions.Center;
+                t.color = new Color(0.95f, 0.8f, 0.2f);
+                t.rectTransform.sizeDelta = new Vector2(1.4f, 0.3f);
+            }
+            var lampPos = new Vector3(0.12f, 2.35f, 1f);
+            if (!Blocked(new Bounds(lampPos, Vector3.one * 0.4f)))
+            {
+                Piece(g, "Aplique", PrimitiveType.Cube, lampPos, new Vector3(0.14f, 0.12f, 0.22f), lampMat, shadows: false);
+                var l = new GameObject("Luz del aplique").AddComponent<Light>();
+                l.transform.SetParent(g, false);
+                l.transform.position = lampPos + Vector3.right * 0.3f + Vector3.down * 0.1f;
+                l.type = LightType.Point;
+                l.color = new Color(1f, 0.78f, 0.5f);
+                l.intensity = 1.2f;
+                l.range = 3.5f;
+                l.shadows = LightShadows.None;
+            }
+        }
+
+        /// <summary>La señal de escaleras del pasillo se vuelve un aviso verde iluminado con su texto.</summary>
+        static void ExitSigns(Transform g)
+        {
+            var green = SceneKit.Mat("aviso_salida", new Color(0.1f, 0.6f, 0.25f), 0.5f);
+            green.EnableKeyword("_EMISSION");
+            green.SetColor("_EmissionColor", new Color(0.15f, 1f, 0.4f) * 2.5f);
+            EditorUtility.SetDirty(green);
+            foreach (var r in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None).Where(r => r.name == "Señal de escaleras"))
+            {
+                var b = r.bounds;
+                r.enabled = false;
+                Piece(g, "Aviso de escaleras", PrimitiveType.Cube, b.center, b.size, green, shadows: false);
+                var t = new GameObject("Texto ESCALERAS").AddComponent<TextMeshPro>();
+                t.transform.SetParent(g, false);
+                t.transform.position = b.center + Vector3.forward * (b.extents.z + 0.003f);
+                t.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+                t.text = "ESCALERAS";
+                t.fontSize = 1.1f;
+                t.fontStyle = FontStyles.Bold;
+                t.alignment = TextAlignmentOptions.Center;
+                t.color = Color.white;
+                t.rectTransform.sizeDelta = new Vector2(b.size.x, b.size.y);
             }
         }
 
