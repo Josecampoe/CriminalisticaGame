@@ -57,6 +57,100 @@ namespace Caso404.UI
             return img;
         }
 
+        /// <summary>Le pone esquinas redondeadas a una imagen (sprite 9-slice del tema).</summary>
+        public static Image Round(Image img, UITheme theme, float radiusScale = 1f)
+        {
+            if (theme.RoundSprite == null) return img;
+            img.sprite = theme.RoundSprite;
+            img.type = Image.Type.Sliced;
+            img.pixelsPerUnitMultiplier = 1.6f / Mathf.Max(0.1f, radiusScale); // radio ~10 px a 1920×1080
+            return img;
+        }
+
+        /// <summary>Tarjeta: panel redondeado con una sombra suave debajo.</summary>
+        public static Image Card(Transform parent, string name, Color color, UITheme theme, bool shadow = true)
+        {
+            var img = Round(Panel(parent, name, color), theme);
+            if (shadow)
+            {
+                var s = img.gameObject.AddComponent<Shadow>();
+                s.effectColor = new Color(0f, 0f, 0f, 0.35f);
+                s.effectDistance = new Vector2(0f, -4f);
+            }
+            return img;
+        }
+
+        /// <summary>Marco redondeado de 2 px sobre un elemento (no participa del layout ni bloquea clics).</summary>
+        public static Image Frame(Transform target, UITheme theme, Color color)
+        {
+            var img = Panel(target, "Marco", color);
+            Stretch(img.rectTransform);
+            img.raycastTarget = false;
+            if (theme.FrameSprite != null)
+            {
+                img.sprite = theme.FrameSprite;
+                img.type = Image.Type.Sliced;
+                img.pixelsPerUnitMultiplier = 1.6f;
+            }
+            else img.color = UITheme.WithAlpha(color, 0f);
+            Ignore(img.gameObject);
+            return img;
+        }
+
+        /// <summary>Fondo de pantalla completa: velo oscuro y viñeta en los bordes (enfoca la vista en el centro).</summary>
+        public static Image Backdrop(RectTransform parent, UITheme theme, float alpha)
+        {
+            var dim = Panel(parent, "Dim", UITheme.WithAlpha(theme.BgDark, alpha));
+            Stretch(dim.rectTransform);
+            dim.raycastTarget = true;
+            if (theme.VignetteSprite != null)
+            {
+                var v = Panel(dim.transform, "Vineta", new Color(0f, 0f, 0f, 0.85f));
+                v.sprite = theme.VignetteSprite;
+                Stretch(v.rectTransform);
+                v.raycastTarget = false;
+            }
+            return dim;
+        }
+
+        /// <summary>Línea divisoria horizontal.</summary>
+        public static Image Divider(Transform parent, Color color, float height = 2f)
+        {
+            var img = Panel(parent, "Divisor", color);
+            img.raycastTarget = false;
+            Layout(img.gameObject, minHeight: height, preferredHeight: height);
+            return img;
+        }
+
+        /// <summary>Texto pequeño en mayúsculas con espaciado (rótulo de sección: "OBJETIVO", "FINAL"...).</summary>
+        public static TextMeshProUGUI Kicker(Transform parent, string text, UITheme theme, Color color,
+            TextAlignmentOptions align = TextAlignmentOptions.TopLeft)
+        {
+            var t = Text(parent, "Rotulo", text.ToUpperInvariant(), theme.MonoFont, theme.SizeS, color, align);
+            t.characterSpacing = 8f;
+            t.fontStyle = FontStyles.Bold;
+            Layout(t.gameObject, preferredHeight: 22);
+            return t;
+        }
+
+        /// <summary>Etiqueta tipo píldora (estado, emoción, "recomendado por ALEX"). Se ajusta al ancho del texto.</summary>
+        public static TextMeshProUGUI Chip(Transform parent, string text, UITheme theme, Color color, float fontSize = -1f)
+        {
+            var bg = Round(Panel(parent, "Chip", UITheme.WithAlpha(color, 0.16f)), theme, 1.4f);
+            bg.raycastTarget = false;
+            var h = HLayout(bg.gameObject, 0, 0, false);
+            h.padding = new RectOffset(14, 14, 4, 5);
+            h.childAlignment = TextAnchor.MiddleCenter;
+            var fit = bg.gameObject.AddComponent<ContentSizeFitter>();
+            fit.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+            fit.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            var t = Text(bg.transform, "Texto", text, theme.MonoFont, fontSize > 0 ? fontSize : theme.SizeS, Color.Lerp(color, Color.white, 0.15f), TextAlignmentOptions.Center);
+            t.textWrappingMode = TextWrappingModes.NoWrap;
+            t.fontStyle = FontStyles.Bold;
+            Frame(bg.transform, theme, UITheme.WithAlpha(color, 0.55f));
+            return t;
+        }
+
         /// <summary>True si el jugador está escribiendo en un campo de texto (los atajos de teclado no deben actuar).</summary>
         public static bool IsTyping()
         {
@@ -97,15 +191,14 @@ namespace Caso404.UI
         /// <summary>Sello de tinta rotado (ej. "EVIDENCIA"), como los de un expediente real.</summary>
         public static TextMeshProUGUI Stamp(Transform parent, string text, UITheme theme, float size, float angle)
         {
-            var stamp = Text(parent, "Sello", text, theme.TitleFont, size, UITheme.WithAlpha(theme.AccentRed, 0.55f), TextAlignmentOptions.Center);
-            stamp.fontStyle = FontStyles.Bold;
+            var stamp = Text(parent, "Sello", text, theme.TitleFont, size, UITheme.WithAlpha(theme.AccentRed, 0.6f), TextAlignmentOptions.Center);
             stamp.characterSpacing = 6f;
             stamp.raycastTarget = false;
             stamp.rectTransform.localRotation = Quaternion.Euler(0, 0, angle);
-            var border = stamp.gameObject.AddComponent<Outline>();
-            border.effectColor = UITheme.WithAlpha(theme.AccentRed, 0.3f);
-            var ignore = stamp.gameObject.AddComponent<LayoutElement>();
-            ignore.ignoreLayout = true;
+            var frame = Frame(stamp.transform, theme, UITheme.WithAlpha(theme.AccentRed, 0.55f));
+            frame.rectTransform.offsetMin = new Vector2(-6, -2);
+            frame.rectTransform.offsetMax = new Vector2(6, 2);
+            Ignore(stamp.gameObject);
             return stamp;
         }
 
@@ -115,6 +208,8 @@ namespace Caso404.UI
         {
             var rt = Rect(name, parent);
             var t = rt.gameObject.AddComponent<TextMeshProUGUI>();
+            // Registra la fuente para que las etiquetas <font="..."> la encuentren aunque no esté en Resources.
+            if (font != null) MaterialReferenceManager.AddFontAsset(font);
             t.font = font;
             t.fontSize = size;
             t.color = color;
@@ -125,25 +220,76 @@ namespace Caso404.UI
             return t;
         }
 
-        /// <summary>Botón con fondo de color y etiqueta.</summary>
+        /// <summary>
+        /// Botón redondeado con fondo de color y etiqueta en seminegrita. Si el fondo es casi transparente
+        /// se dibuja un borde del color del texto (botón "fantasma"). Crece un poco al pasar el mouse.
+        /// </summary>
         public static Button Button(Transform parent, string label, UITheme theme, Color background, Color foreground, Action onClick,
             float height = 48f, float fontSize = -1f)
         {
-            var img = Panel(parent, $"Btn_{label}", background);
+            var img = Round(Panel(parent, $"Btn_{label}", background), theme);
             var btn = img.gameObject.AddComponent<Button>();
             var colors = btn.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(1.15f, 1.15f, 1.15f);
-            colors.selectedColor = new Color(1.15f, 1.15f, 1.15f);
-            colors.pressedColor = new Color(0.8f, 0.8f, 0.8f);
-            colors.disabledColor = new Color(0.45f, 0.45f, 0.45f, 0.7f);
+            // Reposo un poco apagado; al pasar el mouse toma su color pleno (el tinte no puede pasar de 1).
+            colors.normalColor = new Color(0.86f, 0.86f, 0.86f, 1f);
+            colors.highlightedColor = Color.white;
+            colors.selectedColor = new Color(0.95f, 0.95f, 0.95f, 1f);
+            colors.pressedColor = new Color(0.7f, 0.7f, 0.7f, 1f);
+            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+            colors.colorMultiplier = 1f;
             colors.fadeDuration = 0.08f;
             btn.colors = colors;
             if (onClick != null) btn.onClick.AddListener(() => onClick());
             var txt = Text(img.transform, "Label", label, theme.BodyFont, fontSize > 0 ? fontSize : theme.SizeBody, foreground, TextAlignmentOptions.Center);
-            Stretch(txt.rectTransform, 12, 4, 12, 4);
+            txt.fontStyle = FontStyles.Bold;
+            Stretch(txt.rectTransform, 16, 4, 16, 4);
+            if (background.a < 0.5f) Frame(img.transform, theme, UITheme.WithAlpha(foreground, 0.45f));
+            img.gameObject.AddComponent<ButtonFx>();
             Layout(img.gameObject, minHeight: height, preferredHeight: height);
             return btn;
+        }
+
+        /// <summary>Botón secundario: fondo translúcido del color de acento, borde y texto claro.</summary>
+        public static Button Ghost(Transform parent, string label, UITheme theme, Color accent, Action onClick, float height = 48f, float fontSize = -1f)
+        {
+            var b = Button(parent, label, theme, UITheme.WithAlpha(accent, 0.12f), Color.Lerp(accent, Color.white, 0.35f), onClick, height, fontSize);
+            return b;
+        }
+
+        /// <summary>
+        /// Fila con casilla (✓) para elegir opciones: hipótesis, pruebas de la acusación, opciones del menú.
+        /// onPaper: estilo para fondo de papel (tinta oscura) o para fondo oscuro (texto claro).
+        /// </summary>
+        public static Button CheckRow(Transform parent, string label, UITheme theme, bool on, bool enabled, Action onClick, bool onPaper,
+            float height = 52f, float fontSize = -1f)
+        {
+            Color text = onPaper ? theme.Ink : theme.TextLight;
+            Color bg = on ? UITheme.WithAlpha(theme.WarningAmber, onPaper ? 0.55f : 0.22f)
+                     : onPaper ? UITheme.WithAlpha(theme.Ink, 0.06f) : UITheme.WithAlpha(theme.TextLight, 0.05f);
+            var b = Button(parent, label, theme, bg, enabled ? text : UITheme.WithAlpha(text, 0.45f), onClick, height, fontSize);
+            b.interactable = enabled;
+            var label_ = b.GetComponentInChildren<TextMeshProUGUI>();
+            label_.alignment = TextAlignmentOptions.MidlineLeft;
+            label_.fontStyle = FontStyles.Normal;
+            label_.rectTransform.offsetMin = new Vector2(60, 4);
+            label_.richText = true;
+            var marco = b.transform.Find("Marco");
+            if (marco != null) UnityEngine.Object.Destroy(marco.gameObject);
+            if (on) Frame(b.transform, theme, UITheme.WithAlpha(theme.WarningAmber, 0.9f));
+
+            var box = Round(Panel(b.transform, "Casilla", on ? theme.WarningAmber : UITheme.WithAlpha(text, 0.08f)), theme, 0.6f);
+            Place(box.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(18, 0), new Vector2(28, 28));
+            box.raycastTarget = false;
+            Ignore(box.gameObject);
+            if (!on) Frame(box.transform, theme, UITheme.WithAlpha(text, enabled ? 0.55f : 0.25f));
+            if (on && theme.CheckSprite != null)
+            {
+                var check = Panel(box.transform, "Check", theme.Ink);
+                check.sprite = theme.CheckSprite;
+                Stretch(check.rectTransform, 4, 4, 4, 4);
+                check.raycastTarget = false;
+            }
+            return b;
         }
 
         /// <summary>Cambia el texto de un botón creado con <see cref="Button"/>.</summary>
@@ -189,6 +335,13 @@ namespace Caso404.UI
             return le;
         }
 
+        /// <summary>Saca un elemento del layout del padre (decoraciones superpuestas).</summary>
+        public static void Ignore(GameObject go)
+        {
+            if (!go.TryGetComponent<LayoutElement>(out var le)) le = go.AddComponent<LayoutElement>();
+            le.ignoreLayout = true;
+        }
+
         /// <summary>Lista con scroll vertical (rueda del mouse). Devuelve el contenedor donde agregar filas.</summary>
         public static RectTransform ScrollList(Transform parent, string name, float spacing = 8f, int padding = 8)
         {
@@ -215,18 +368,49 @@ namespace Caso404.UI
             return content;
         }
 
-        /// <summary>Campo de texto TextMeshPro.</summary>
-        public static TMP_InputField Input(Transform parent, UITheme theme, string placeholder, int charLimit)
+        /// <summary>
+        /// Campo de texto oscuro con borde del color de acento (cian para ALEX, ámbar para los interrogatorios),
+        /// cursor del mismo color y marcador en cursiva.
+        /// </summary>
+        public static TMP_InputField Input(Transform parent, UITheme theme, string placeholder, int charLimit, Color? accent = null)
         {
+            var color = accent ?? theme.WarningAmber;
             var go = TMP_DefaultControls.CreateInputField(new TMP_DefaultControls.Resources());
+            go.name = "Campo";
             go.transform.SetParent(parent, false);
             var field = go.GetComponent<TMP_InputField>();
             field.characterLimit = charLimit;
             var bg = go.GetComponent<Image>();
-            if (bg != null) bg.color = theme.Paper;
-            if (field.textComponent is TextMeshProUGUI t) { t.font = theme.BodyFont; t.fontSize = theme.SizeBody; t.color = theme.Ink; }
-            if (field.placeholder is TextMeshProUGUI p) { p.font = theme.BodyFont; p.fontSize = theme.SizeBody; p.text = placeholder; p.color = theme.Muted; }
+            if (bg != null)
+            {
+                bg.color = new Color(0.03f, 0.035f, 0.045f, 0.92f);
+                Round(bg, theme);
+                var colors = field.colors;
+                colors.normalColor = new Color(0.8f, 0.8f, 0.8f, 1f);
+                colors.highlightedColor = new Color(0.92f, 0.92f, 0.92f, 1f);
+                colors.selectedColor = Color.white;
+                colors.colorMultiplier = 1f;
+                field.colors = colors;
+            }
+            Frame(go.transform, theme, UITheme.WithAlpha(color, 0.6f));
+            var area = go.transform.Find("Text Area") as RectTransform;
+            if (area != null) { area.offsetMin = new Vector2(18, 4); area.offsetMax = new Vector2(-18, -4); }
+            if (field.textComponent is TextMeshProUGUI t)
+            {
+                t.font = theme.BodyFont; t.fontSize = theme.SizeBody; t.color = theme.TextLight;
+                t.alignment = TextAlignmentOptions.MidlineLeft;
+            }
+            if (field.placeholder is TextMeshProUGUI p)
+            {
+                p.font = theme.BodyFont; p.fontSize = theme.SizeBody; p.text = placeholder;
+                p.color = UITheme.WithAlpha(theme.TextLight, 0.4f); p.fontStyle = FontStyles.Italic;
+                p.alignment = TextAlignmentOptions.MidlineLeft;
+            }
             field.pointSize = theme.SizeBody;
+            field.customCaretColor = true;
+            field.caretColor = color;
+            field.caretWidth = 2;
+            field.selectionColor = UITheme.WithAlpha(color, 0.35f);
             Layout(go, minHeight: 48, preferredHeight: 48, flexibleWidth: 1);
             return field;
         }
@@ -237,5 +421,13 @@ namespace Caso404.UI
             for (int i = t.childCount - 1; i >= 0; i--) UnityEngine.Object.Destroy(t.GetChild(i).gameObject);
         }
 
+        /// <summary>Cuadrado redondeado sin borde (puntos de estado, retícula).</summary>
+        public static Image Dot(Transform parent, string name, Color color, UITheme theme, float size)
+        {
+            var img = Round(Panel(parent, name, color), theme, size / 20f);
+            img.raycastTarget = false;
+            Layout(img.gameObject, minHeight: size, preferredHeight: size, preferredWidth: size);
+            return img;
+        }
     }
 }
