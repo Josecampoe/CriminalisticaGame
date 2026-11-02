@@ -57,6 +57,13 @@ namespace Caso404.UI
             return img;
         }
 
+        /// <summary>True si el jugador está escribiendo en un campo de texto (los atajos de teclado no deben actuar).</summary>
+        public static bool IsTyping()
+        {
+            var selected = UnityEngine.EventSystems.EventSystem.current != null ? UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject : null;
+            return selected != null && selected.TryGetComponent<TMP_InputField>(out var field) && field.isFocused;
+        }
+
         /// <summary>Convierte un panel en una hoja de papel: textura envejecida y sombra (parece un objeto sobre la mesa).</summary>
         public static Image AsPaper(Image img, UITheme theme)
         {

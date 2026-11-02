@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Linq;
+using System.Threading;
 using Caso404.AI;
 using Caso404.Core;
 using Caso404.Data;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Caso404.UI
 {
@@ -12,6 +14,7 @@ namespace Caso404.UI
     /// Panel de ALEX (estilo terminal cian, lateral derecho). Muestra lo último que dijo ALEX y sus afirmaciones
     /// como tarjetas con "Aceptar" o "Cuestionar". Cuestionar pide una evidencia analizada; la lógica la decide AlexService.
     /// Con confianza baja, o al descubrir una mentira, el panel hace glitch.
+    /// También se le puede escribir una pregunta libre: responde la IA (con su agenda oculta) o, sin conexión, el guion.
     /// </summary>
     public class AlexPanelView : UIPanel
     {
@@ -29,6 +32,11 @@ namespace Caso404.UI
         bool _greeted;
         float _nextAmbientGlitch;
         Coroutine _glitch;
+        TMP_InputField _input;
+        Button _askButton;
+        TextMeshProUGUI _thinking;
+        CancellationTokenSource _cts;
+        bool _busy;
 
         protected override void Build()
         {
@@ -65,6 +73,20 @@ namespace Caso404.UI
             UIFactory.Button(ask, "¿Quién crees que fue?", _theme, UITheme.WithAlpha(_theme.AlexCyan, 0.18f), _theme.TextLight, () => Say(_game.Case.AlexLines.Crime.Text), 40, _theme.SizeS);
             UIFactory.Button(ask, "Pero la ventana se rompió desde adentro.", _theme, UITheme.WithAlpha(_theme.AlexCyan, 0.18f), _theme.TextLight, () => Say(_game.Case.AlexLines.Evidence.Text), 40, _theme.SizeS);
             UIFactory.Button(ask, "¿Por qué tu archivo dio error justo en esos 15 minutos?", _theme, UITheme.WithAlpha(_theme.AlexCyan, 0.18f), _theme.TextLight, () => Say(_game.Case.AlexLines.Press.Text), 40, _theme.SizeS);
+
+            // Pregunta libre a ALEX (Enter o botón).
+            var inputRow = UIFactory.Rect("InputRow", content);
+            UIFactory.HLayout(inputRow.gameObject, 8, 0, false);
+            UIFactory.Layout(inputRow.gameObject, minHeight: 44, preferredHeight: 44);
+            _input = UIFactory.Input(inputRow, _theme, "Pregúntale algo a ALEX…", AlexService.MaxQuestionLength);
+            _input.onSubmit.AddListener(_ => AskTyped());
+            _askButton = UIFactory.Button(inputRow, "Preguntar", _theme, UITheme.WithAlpha(_theme.AlexCyan, 0.32f), _theme.TextLight, AskTyped, 44, _theme.SizeS);
+            UIFactory.Layout(_askButton.gameObject, minHeight: 44, preferredHeight: 44, preferredWidth: 140);
+            _thinking = UIFactory.Text(content, "Thinking", "", _theme.MonoFont, _theme.SizeS, _theme.Muted);
+            UIFactory.Layout(_thinking.gameObject, preferredHeight: 20);
+            _speech.enableAutoSizing = true;
+            _speech.fontSizeMin = 14f;
+            _speech.fontSizeMax = _theme.SizeBody;
 
             var claimsTitle = UIFactory.Text(content, "ClaimsTitle", "OBSERVACIONES DE ALEX", _theme.MonoFont, _theme.SizeS, _theme.Muted);
             UIFactory.Layout(claimsTitle.gameObject, preferredHeight: 22);
@@ -119,7 +141,51 @@ namespace Caso404.UI
             Refresh();
         }
 
-        protected override void OnHidden() => CloseChooser();
+        protected override void OnHidden()
+        {
+            CloseChooser();
+            CancelPending();
+        }
+
+        void OnDestroy() => CancelPending();
+
+        /// <summary>Envía la pregunta escrita a ALEX. Mientras responde, el campo queda bloqueado y se ve "procesando…".</summary>
+        async void AskTyped()
+        {
+            var q = _input.text?.Trim();
+            if (_busy || string.IsNullOrEmpty(q)) return;
+            _input.text = "";
+            SetBusy(true);
+            _speech.text = $"Rivera: {q}";
+            CancelPending();
+            _cts = new CancellationTokenSource();
+            try
+            {
+                var answer = await _game.Alex.AskAsync(q, _cts.Token);
+                if (this != null && IsOpen) _speech.text = $"Rivera: {q}\n> {answer}";
+            }
+            catch (System.OperationCanceledException) { }
+            finally
+            {
+                if (this != null) SetBusy(false);
+            }
+        }
+
+        void SetBusy(bool busy)
+        {
+            _busy = busy;
+            _input.interactable = !busy;
+            _askButton.interactable = !busy;
+            _thinking.text = busy ? "ALEX está procesando…" : "";
+        }
+
+        void CancelPending()
+        {
+            if (_cts == null) return;
+            _cts.Cancel();
+            _cts.Dispose();
+            _cts = null;
+        }
 
         void OnClaimRaised(LieData claim) => Say(claim.Statement);
 
