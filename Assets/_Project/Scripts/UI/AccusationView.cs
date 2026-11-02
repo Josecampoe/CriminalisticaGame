@@ -37,41 +37,51 @@ namespace Caso404.UI
         protected override void Build()
         {
             var rt = UIFactory.Stretch((RectTransform)transform);
-            var dim = UIFactory.Panel(rt, "Dim", UITheme.WithAlpha(_theme.BgDark, 0.96f));
-            UIFactory.Stretch(dim.rectTransform);
-            var title = UIFactory.Text(rt, "Title", "ACUSACIÓN", _theme.TitleFont, _theme.SizeXL, _theme.TextLight);
-            UIFactory.Place(title.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(60, -30), new Vector2(1200, 64));
-            var close = UIFactory.Button(rt, "Cerrar (Esc)", _theme, _theme.Muted, _theme.TextLight, Close);
-            UIFactory.Place((RectTransform)close.transform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-60, -36), new Vector2(200, 48));
+            UIFactory.Backdrop(rt, _theme, 0.92f);
+            TextMeshProUGUI title;
+            var head = UIFactory.Rect("Encabezado", rt);
+            UIFactory.Place(head, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(60, -30), new Vector2(1300, 84));
+            UIFactory.VLayout(head.gameObject, 2);
+            UIFactory.Kicker(head, "Expediente para la Fiscalía", _theme, _theme.WarningAmber);
+            title = UIFactory.Text(head, "Titulo", "Acusación", _theme.TitleFont, 40, _theme.TextLight);
+            var close = UIFactory.Ghost(rt, "Cerrar   Esc", _theme, _theme.Muted, Close, 48);
+            UIFactory.Place((RectTransform)close.transform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-60, -40), new Vector2(200, 48));
 
-            var q1 = UIFactory.Text(rt, "Q1", "1. ¿Quién es el culpable?", _theme.TitleFont, _theme.SizeM, _theme.WarningAmber);
-            UIFactory.Place(q1.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(60, -120), new Vector2(900, 40));
+            title.color = _theme.TextLight;
+
+            var q1 = UIFactory.Text(rt, "Q1", $"<color={UITheme.Hex(_theme.AccentRed)}>1</color>   ¿Quién es el culpable?", _theme.TitleFont, 30, _theme.TextLight);
+            UIFactory.Place(q1.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(60, -140), new Vector2(900, 44));
             _suspects = UIFactory.Rect("Suspects", rt);
-            UIFactory.Place(_suspects, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -170), new Vector2(1800, 64));
+            UIFactory.Place(_suspects, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -196), new Vector2(1800, 96));
             UIFactory.HLayout(_suspects.gameObject, 16);
 
-            var q2 = UIFactory.Text(rt, "Q2", "2. Elige 3 pruebas (solo evidencias analizadas)", _theme.TitleFont, _theme.SizeM, _theme.WarningAmber);
-            UIFactory.Place(q2.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(60, -260), new Vector2(1200, 40));
-            var proofsBg = UIFactory.Panel(rt, "ProofsBg", UITheme.WithAlpha(_theme.Paper, 0.06f));
-            UIFactory.Region(proofsBg.rectTransform, new Vector2(0.03f, 0.14f), new Vector2(0.97f, 0.7f));
-            _proofs = UIFactory.ScrollList(proofsBg.transform, "Proofs", 8, 12);
+            var q2 = UIFactory.Text(rt, "Q2", $"<color={UITheme.Hex(_theme.AccentRed)}>2</color>   Elige 3 pruebas <size=60%><font=\"{_theme.BodyFont.name}\"><color={UITheme.Hex(UITheme.WithAlpha(_theme.TextLight, 0.5f))}>solo evidencias analizadas</color></font></size>",
+                _theme.TitleFont, 30, _theme.TextLight);
+            UIFactory.Place(q2.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(60, -320), new Vector2(1200, 44));
+            var proofsBg = UIFactory.Round(UIFactory.Panel(rt, "ProofsBg", UITheme.WithAlpha(_theme.TextLight, 0.03f)), _theme);
+            UIFactory.Region(proofsBg.rectTransform, new Vector2(0.03f, 0.14f), new Vector2(0.97f, 0.665f));
+            UIFactory.Frame(proofsBg.transform, _theme, UITheme.WithAlpha(_theme.TextLight, 0.08f));
+            _proofs = UIFactory.ScrollList(proofsBg.transform, "Proofs", 8, 14);
             UIFactory.Stretch((RectTransform)_proofs.parent.parent);
 
             _status = UIFactory.Text(rt, "Status", "", _theme.BodyFont, _theme.SizeBody, _theme.TextLight, TextAlignmentOptions.MidlineLeft);
             UIFactory.Place(_status.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(60, 40), new Vector2(1200, 50));
-            _present = UIFactory.Button(rt, "Presentar la acusación", _theme, _theme.AccentRed, _theme.TextLight, AskConfirm);
+            _present = UIFactory.Button(rt, "Presentar la acusación", _theme, _theme.AccentRed, _theme.TextLight, AskConfirm, 60, _theme.SizeM - 2);
             UIFactory.Place((RectTransform)_present.transform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-60, 40), new Vector2(420, 60));
 
-            var confirmBg = UIFactory.Panel(rt, "Confirm", UITheme.WithAlpha(_theme.BgDark, 0.98f));
+            var confirmBg = UIFactory.Backdrop(rt, _theme, 0.9f);
+            confirmBg.gameObject.name = "Confirm";
             _confirm = confirmBg.rectTransform;
-            UIFactory.Stretch(_confirm);
-            var box = UIFactory.Rect("Box", _confirm);
-            UIFactory.Place(box, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000, 340));
-            UIFactory.VLayout(box.gameObject, 18);
+            var boxBg = UIFactory.Card(_confirm, "Caja", new Color(0.06f, 0.065f, 0.08f, 0.98f), _theme);
+            UIFactory.Frame(boxBg.transform, _theme, UITheme.WithAlpha(_theme.AccentRed, 0.6f));
+            var box = boxBg.rectTransform;
+            UIFactory.Place(box, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000, 460));
+            var bv = UIFactory.VLayout(box.gameObject, 16, 40);
+            UIFactory.Kicker(box, "Confirmar acusación", _theme, _theme.AccentRed, TextAlignmentOptions.Center);
             _confirmText = UIFactory.Text(box, "Text", "", _theme.BodyFont, _theme.SizeM, _theme.TextLight, TextAlignmentOptions.Center);
-            UIFactory.Layout(_confirmText.gameObject, preferredHeight: 180);
+            UIFactory.Layout(_confirmText.gameObject, preferredHeight: 200);
             UIFactory.Button(box, "Confirmar la acusación", _theme, _theme.AccentRed, _theme.TextLight, Confirm, 64, _theme.SizeM);
-            UIFactory.Button(box, "Volver", _theme, _theme.Muted, _theme.TextLight, CancelConfirm, 52);
+            UIFactory.Ghost(box, "Volver", _theme, _theme.Muted, CancelConfirm, 52);
             _confirm.gameObject.SetActive(false);
         }
 
@@ -90,8 +100,13 @@ namespace Caso404.UI
             {
                 var id = s.Id;
                 bool chosen = id == _suspectId;
-                UIFactory.Button(_suspects, s.DisplayName, _theme, chosen ? _theme.AccentRed : _theme.Paper, chosen ? _theme.TextLight : _theme.Ink,
-                    () => { _suspectId = id; Rebuild(); }, 60, _theme.SizeM);
+                var mutedColor = chosen ? UITheme.WithAlpha(_theme.TextLight, 0.8f) : UITheme.WithAlpha(_theme.Ink, 0.6f);
+                var label = $"<font=\"{_theme.TitleFont.name}\"><size=120%>{s.DisplayName}</size></font>\n<size=70%><color={UITheme.Hex(mutedColor)}>{(chosen ? "ACUSADO(A)" : s.Role)}</color></size>";
+                var b = UIFactory.Button(_suspects, label, _theme, chosen ? _theme.AccentRed : _theme.Paper, chosen ? _theme.TextLight : _theme.Ink,
+                    () => { _suspectId = id; Rebuild(); }, 92, _theme.SizeBody);
+                var t = b.GetComponentInChildren<TextMeshProUGUI>();
+                t.fontStyle = FontStyles.Normal;
+                t.overflowMode = TextOverflowModes.Ellipsis;
             }
 
             UIFactory.Clear(_proofs);
@@ -102,15 +117,17 @@ namespace Caso404.UI
             {
                 var id = ev.Id;
                 bool on = _selected.Contains(id);
-                var label = $"{(on ? "[x]" : "[  ]")}  {ev.DisplayName}   <size=85%>{ev.AnalysisResult}</size>";
-                var b = UIFactory.Button(_proofs, label, _theme, on ? _theme.WarningAmber : _theme.Paper, _theme.Ink, () => ToggleProof(id), 64, _theme.SizeS);
-                var t = b.GetComponentInChildren<TextMeshProUGUI>();
-                t.alignment = TextAlignmentOptions.MidlineLeft;
+                var label = $"<b>{ev.DisplayName}</b>\n<size=80%><color={UITheme.Hex(UITheme.WithAlpha(_theme.TextLight, 0.6f))}>{ev.AnalysisResult}</color></size>";
+                bool full = !on && _selected.Count >= _game.Case.ProofsToChoose;
+                var b = UIFactory.CheckRow(_proofs, label, _theme, on, !full, () => ToggleProof(id), false, 70, _theme.SizeBody);
+                b.GetComponentInChildren<TextMeshProUGUI>().overflowMode = TextOverflowModes.Ellipsis;
             }
 
             int need = _game.Case.ProofsToChoose;
             var suspect = _game.Case.FindSuspect(_suspectId);
-            _status.text = $"Culpable: {(suspect != null ? suspect.DisplayName : "—")}     Pruebas: {_selected.Count}/{need}";
+            string Ok(bool ok) => UITheme.Hex(ok ? _theme.AlexCyan : _theme.WarningAmber);
+            _status.text = $"<color={UITheme.Hex(UITheme.WithAlpha(_theme.TextLight, 0.55f))}>CULPABLE</color>  <color={Ok(suspect != null)}>{(suspect != null ? suspect.DisplayName : "sin elegir")}</color>" +
+                           $"        <color={UITheme.Hex(UITheme.WithAlpha(_theme.TextLight, 0.55f))}>PRUEBAS</color>  <color={Ok(_selected.Count == need)}>{_selected.Count} de {need}</color>";
             _present.interactable = suspect != null && _selected.Count == need;
         }
 
@@ -125,7 +142,7 @@ namespace Caso404.UI
             var suspect = _game.Case.FindSuspect(_suspectId);
             if (suspect == null) return;
             var names = _selected.Select(id => _game.Case.FindEvidence(id)?.DisplayName);
-            _confirmText.text = $"Acusas a <b>{suspect.DisplayName}</b> con:\n{string.Join("\n", names)}\n\n¿Seguro? La acusación no se puede deshacer.";
+            _confirmText.text = $"Acusas a <b><color={UITheme.Hex(_theme.AccentRed)}>{suspect.DisplayName}</color></b> con:\n<size=85%>{string.Join("\n", names.Select(n => "· " + n))}</size>\n\n<size=80%><color={UITheme.Hex(UITheme.WithAlpha(_theme.TextLight, 0.6f))}>La acusación no se puede deshacer.</color></size>";
             _confirming = true;
             _confirm.gameObject.SetActive(true);
         }

@@ -38,23 +38,39 @@ namespace Caso404.UI
             UIFactory.Stretch(bg.rectTransform);
 
             _page1 = UIFactory.Stretch(UIFactory.Rect("Page1", rt));
+            if (_theme.VignetteSprite != null)
+            {
+                var vignette = UIFactory.Panel(rt, "Vineta", new Color(0f, 0f, 0f, 0.9f));
+                vignette.sprite = _theme.VignetteSprite;
+                UIFactory.Stretch(vignette.rectTransform);
+                vignette.transform.SetSiblingIndex(1);
+            }
             var card = UIFactory.Rect("Card", _page1);
-            UIFactory.Place(card, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1300, 860));
-            UIFactory.VLayout(card.gameObject, 22);
-            var label = UIFactory.Text(card, "Label", "FINAL", _theme.MonoFont, _theme.SizeS, _theme.AccentRed, TextAlignmentOptions.Center);
-            UIFactory.Layout(label.gameObject, preferredHeight: 24);
-            _title = UIFactory.Text(card, "Title", "", _theme.TitleFont, _theme.SizeXL, _theme.TextLight, TextAlignmentOptions.Center);
-            UIFactory.Layout(_title.gameObject, preferredHeight: 70);
-            _text = UIFactory.Text(card, "Text", "", _theme.BodyFont, _theme.SizeM, _theme.TextLight, TextAlignmentOptions.Top);
-            UIFactory.Layout(_text.gameObject, flexibleHeight: 1, minHeight: 260);
-            _summary = UIFactory.Text(card, "Summary", "", _theme.BodyFont, _theme.SizeBody, _theme.Muted);
-            UIFactory.Layout(_summary.gameObject, preferredHeight: 180);
-            UIFactory.Button(card, "Continuar", _theme, _theme.Paper, _theme.Ink, ShowClosing, 56);
+            UIFactory.Place(card, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1240, 0));
+            var cv = UIFactory.VLayout(card.gameObject, 26);
+            card.gameObject.AddComponent<UnityEngine.UI.ContentSizeFitter>().verticalFit = UnityEngine.UI.ContentSizeFitter.FitMode.PreferredSize;
+            cv.childAlignment = TextAnchor.MiddleCenter;
+            UIFactory.Kicker(card, "Final", _theme, _theme.AccentRed, TextAlignmentOptions.Center);
+            _title = UIFactory.Text(card, "Title", "", _theme.TitleFont, 66, _theme.TextLight, TextAlignmentOptions.Center);
+            UIFactory.Layout(_title.gameObject, preferredHeight: 84);
+            var line = UIFactory.Divider(card, UITheme.WithAlpha(_theme.AccentRed, 0.5f));
+            UIFactory.Layout(line.gameObject, minHeight: 2, preferredHeight: 2);
+            _text = UIFactory.Text(card, "Text", "", _theme.BodyFont, _theme.SizeM + 2, UITheme.WithAlpha(_theme.TextLight, 0.92f), TextAlignmentOptions.Top);
+            _text.lineSpacing = 10f;
+            UIFactory.Layout(_text.gameObject, minHeight: 120);
+            var sumBg = UIFactory.Round(UIFactory.Panel(card, "Resumen", UITheme.WithAlpha(_theme.TextLight, 0.04f)), _theme);
+            UIFactory.Frame(sumBg.transform, _theme, UITheme.WithAlpha(_theme.TextLight, 0.1f));
+            var sv = UIFactory.VLayout(sumBg.gameObject, 6, 0);
+            sv.padding = new RectOffset(36, 36, 22, 24);
+            UIFactory.Kicker(sumBg.transform, "Informe de la investigación", _theme, UITheme.WithAlpha(_theme.TextLight, 0.5f));
+            _summary = UIFactory.Text(sumBg.transform, "Summary", "", _theme.BodyFont, _theme.SizeBody, _theme.TextLight);
+            _summary.lineSpacing = 12f;
+            UIFactory.Button(card, "Continuar", _theme, _theme.Paper, _theme.Ink, ShowClosing, 58);
 
             _page2 = UIFactory.Stretch(UIFactory.Rect("Page2", rt));
             _closing = UIFactory.Text(_page2, "Closing", "", _theme.TitleFont, _theme.SizeXL, _theme.TextLight, TextAlignmentOptions.Center);
             UIFactory.Stretch(_closing.rectTransform, 100, 200, 100, 200);
-            var next = UIFactory.Button(_page2, "Continuar", _theme, _theme.Paper, _theme.Ink, Finish, 56);
+            var next = UIFactory.Ghost(_page2, "Continuar", _theme, _theme.TextLight, Finish, 56);
             UIFactory.Place((RectTransform)next.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 80), new Vector2(300, 56));
         }
 
@@ -82,11 +98,14 @@ namespace Caso404.UI
             int available = c.Evidence.Count(e => e.SpawnCondition.Evaluate(_game.State));
             int claims = c.AlexClaims.Count();
             var missedSolid = c.SolidProofs.Where(e => e.SpawnCondition.Evaluate(_game.State) && !_game.State.IsEvidenceAnalyzed(e.Id)).Select(e => e.DisplayName).ToList();
-            var lines = $"Acusaste a: {(accused != null ? accused.DisplayName : "—")}\n" +
-                        $"Pruebas sólidas presentadas: {result.SolidProofs}\n" +
-                        $"Contradicciones de ALEX detectadas: {result.AlexContradictions} de {claims}\n" +
-                        $"Evidencias encontradas: {found} de {available}";
-            if (missedSolid.Count > 0) lines += $"\nSe te escapó: {string.Join(", ", missedSolid)}";
+            string Row(string label, string value) =>
+                $"<color={UITheme.Hex(UITheme.WithAlpha(_theme.TextLight, 0.55f))}>{label}</color><pos=48%><b>{value}</b>";
+            var lines = Row("Acusaste a", accused != null ? accused.DisplayName : "—") + "\n" +
+                        Row("Pruebas sólidas presentadas", result.SolidProofs.ToString()) + "\n" +
+                        Row("Contradicciones de ALEX detectadas", $"{result.AlexContradictions} de {claims}") + "\n" +
+                        Row("Evidencias encontradas", $"{found} de {available}");
+            if (missedSolid.Count > 0)
+                lines += "\n" + Row("Se te escapó", $"<color={UITheme.Hex(_theme.WarningAmber)}>{string.Join(", ", missedSolid)}</color>");
             return lines;
         }
 
