@@ -4,12 +4,19 @@
 
 **En resumen:** la IA real quedó conectada para los sospechosos y para ALEX. ALEX ahora acepta preguntas escritas: parece ayudar, pero empuja con sutileza hacia su sospechoso falso, sin inventar pruebas ni contradecir análisis. Sin proxy, el juego sigue funcionando con las frases del guion. Pruebas: **45 EditMode (4 nuevas para ALEX) y 6 PlayMode en verde**, más las 2 pruebas de conexión con el proxy en modo de prueba.
 
-**Lo que no se pudo probar:** la llamada al modelo real, porque en este equipo no hay clave de API.
+**IA gratuita:** el proveedor por defecto es **Google Gemini con su plan gratuito**, sin tarjeta. Claude de Anthropic queda como opción de pago.
 
-**Para usarla:** consigue una clave en https://console.anthropic.com, ejecuta `Server/iniciar-proxy.ps1` (te la pide oculta y no la guarda), deja esa ventana abierta y juega. Detalle en `Server/README.md` y decisiones IA1–IA8 en `Docs/DECISIONES.md`.
+**Lo que no se pudo probar:** una respuesta real del modelo, porque en este equipo no hay clave. Con una clave falsa, el servidor llega a Google y explica el error.
+
+**Para usarla:**
+1. Crea una clave gratuita en https://aistudio.google.com/apikey.
+2. Ejecuta `Server/iniciar-proxy.ps1`: te la pide oculta y no la guarda.
+3. Deja esa ventana abierta y juega.
+
+Detalle en `Server/README.md` y en las decisiones IA1–IA9 de `Docs/DECISIONES.md`.
 
 **Qué probar:**
-1. Con el proxy encendido, pregúntale a ALEX "¿quién crees que fue?", "¿qué opinas de la huella?" y "¿por qué falló tu archivo?". Debe sonar natural y empujar hacia Carlos (caso 1).
+1. Con el proxy encendido, pregúntale a ALEX "¿quién crees que fue?", "¿qué opinas de la huella?" y "¿por qué falló tu archivo?". Debe sonar natural y empujar hacia Carlos (caso 1). Si la consola dice "límite gratuito", espera un minuto.
 2. Refuta una afirmación de ALEX (Cuestionar) y vuelve a preguntarle: ya no debe sostenerla.
 3. Hazle preguntas libres a los sospechosos.
 4. Apaga el proxy y comprueba que todo sigue funcionando con el guion.
