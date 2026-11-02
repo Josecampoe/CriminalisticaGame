@@ -12,19 +12,22 @@ namespace Caso404.AI
     /// <summary>
     /// IA por HTTP a través de un servidor proxy propio (carpeta Server/, fuera de Assets).
     /// El juego nunca conoce la clave de API: el proxy la lee de una variable de entorno.
-    /// Preparado pero no usado en esta versión (AiSettings.UseOffline = true).
+    /// Antes de preguntar comprueba que el proxy esté encendido (GET /health, 2 s); si no lo está, devuelve null al
+    /// instante durante 30 s y quien llama usa la frase de respaldo del guion, así el juego nunca se queda esperando.
     /// </summary>
     public class HttpAiClient : IAiClient
     {
         [Serializable]
         class Payload
         {
+            public string mode;
             public string characterId;
             public string characterName;
             public string role;
             public string personality;
             public List<string> facts;
             public List<string> lies;
+            public List<string> exposedLies;
             public List<string> styleExamples;
             public string topic;
             public string question;
@@ -34,43 +37,35 @@ namespace Caso404.AI
             public List<string> analyzedEvidence;
             public List<string> knownFacts;
             public List<string> history;
+            // ALEX
+            public List<string> alexClaims;
+            public string alexTone;
+            public string targetSuspect;
+            public List<string> suspects;
+            public string caseTitle;
         }
 
+        const float HealthCacheSeconds = 30f;
         readonly AiSettings _settings;
+        bool? _proxyUp;
+        float _checkedAt = -999f;
 
         public HttpAiClient(AiSettings settings) => _settings = settings;
 
         public bool IsOffline => false;
 
+        /// <summary>True si la última comprobación encontró el proxy encendido (null si aún no se comprobó).</summary>
+        public bool? ProxyAvailable => _proxyUp;
+
         public async Task<AiReply> AskAsync(AiRequest request, CancellationToken ct)
         {
-            var payload = new Payload
-            {
-                characterId = request.Character.Id,
-                characterName = request.Character.DisplayName,
-                role = request.Character.Role,
-                personality = request.Character.Personality,
-                // Solo lo que el personaje sabe; sus secretos únicamente si el jugador ya los descubrió.
-                facts = request.Character.KnownFacts
-                    .Where(f => request.Character.Secrets.All(s => s.FactId != f.Id) || request.KnownFacts.Contains(f.Id))
-                    .Select(f => $"{f.Id}: {f.Text}").ToList(),
-                lies = request.Character.Lies.Where(l => l != null).Select(l => $"{l.Id}: {l.Statement}").ToList(),
-                styleExamples = new List<string> { request.Character.Fallback.Crime.Text, request.Character.Fallback.OtherPerson.Text, request.Character.Fallback.Evidence.Text },
-                topic = request.Topic.ToString(),
-                question = Truncate(request.Question, _settings.MaxQuestionLength),
-                sceneId = request.SceneId,
-                alexTrust = request.AlexTrust,
-                model = _settings.Model,
-                analyzedEvidence = request.AnalyzedEvidence,
-                knownFacts = request.KnownFacts,
-                history = request.History
-            };
-            var json = JsonUtility.ToJson(payload);
+            if (!await IsProxyUpAsync(ct)) return null;
+            var json = JsonUtility.ToJson(BuildPayload(request));
             // Un reintento si falla la red.
             for (int attempt = 0; attempt < 2; attempt++)
             {
                 ct.ThrowIfCancellationRequested();
-                var text = await PostAsync(json, ct);
+                var text = await SendAsync(UnityWebRequest.kHttpVerbPOST, _settings.ProxyUrl, json, Mathf.Max(1, _settings.TimeoutSeconds), ct);
                 if (text == null) continue;
                 try { return JsonUtility.FromJson<AiReply>(text); }
                 catch (Exception) { return null; }
@@ -78,15 +73,70 @@ namespace Caso404.AI
             return null;
         }
 
-        async Task<string> PostAsync(string json, CancellationToken ct)
+        Payload BuildPayload(AiRequest request)
         {
-            using var req = new UnityWebRequest(_settings.ProxyUrl, UnityWebRequest.kHttpVerbPOST)
+            var c = request.Character;
+            var payload = new Payload
             {
-                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json)),
-                downloadHandler = new DownloadHandlerBuffer(),
-                timeout = Mathf.Max(1, _settings.TimeoutSeconds)
+                mode = request.IsAlex ? "alex" : "character",
+                characterId = c.Id,
+                characterName = c.DisplayName,
+                role = c.Role,
+                personality = c.Personality,
+                styleExamples = request.StyleExamples.Count > 0 ? request.StyleExamples
+                    : new List<string> { c.Fallback.Crime.Text, c.Fallback.OtherPerson.Text, c.Fallback.Evidence.Text }
+                        .Where(t => !string.IsNullOrEmpty(t)).ToList(),
+                topic = request.Topic.ToString(),
+                question = Truncate(request.Question, _settings.MaxQuestionLength),
+                sceneId = request.SceneId,
+                alexTrust = request.AlexTrust,
+                model = _settings.Model,
+                analyzedEvidence = request.AnalyzedEvidence,
+                knownFacts = request.KnownFacts,
+                history = request.History,
             };
-            req.SetRequestHeader("Content-Type", "application/json");
+            if (request.IsAlex)
+            {
+                // ALEX no recibe la verdad del caso: solo sus afirmaciones, lo ya analizado y a quién debe empujar.
+                payload.facts = new List<string>();
+                payload.lies = new List<string>();
+                payload.exposedLies = new List<string>();
+                payload.alexClaims = request.AlexClaims;
+                payload.alexTone = request.AlexTone;
+                payload.targetSuspect = request.AlexTarget;
+                payload.suspects = request.Suspects;
+                payload.caseTitle = request.CaseTitle;
+                return payload;
+            }
+            // Solo lo que el personaje sabe; sus secretos únicamente si el jugador ya los descubrió.
+            payload.facts = c.KnownFacts
+                .Where(f => c.Secrets.All(s => s.FactId != f.Id) || request.KnownFacts.Contains(f.Id))
+                .Select(f => $"{f.Id}: {f.Text}").ToList();
+            payload.lies = c.Lies.Where(l => l != null && !request.ExposedLieIds.Contains(l.Id)).Select(l => $"{l.Id}: {l.Statement}").ToList();
+            payload.exposedLies = c.Lies.Where(l => l != null && request.ExposedLieIds.Contains(l.Id)).Select(l => $"{l.Id}: {l.Statement}").ToList();
+            return payload;
+        }
+
+        /// <summary>Comprueba (con caché de 30 s) que el proxy responda en /health.</summary>
+        async Task<bool> IsProxyUpAsync(CancellationToken ct)
+        {
+            if (_proxyUp.HasValue && Time.realtimeSinceStartup - _checkedAt < HealthCacheSeconds) return _proxyUp.Value;
+            var url = _settings.ProxyUrl.EndsWith("/dialogue") ? _settings.ProxyUrl.Substring(0, _settings.ProxyUrl.Length - "/dialogue".Length) + "/health" : _settings.ProxyUrl;
+            var text = await SendAsync(UnityWebRequest.kHttpVerbGET, url, null, 2, ct);
+            _proxyUp = text != null && text.Contains("\"ok\":true");
+            _checkedAt = Time.realtimeSinceStartup;
+            if (!_proxyUp.Value) Core.GameLog.Warn("Proxy de IA apagado o inalcanzable: se usan las frases del guion.");
+            return _proxyUp.Value;
+        }
+
+        static async Task<string> SendAsync(string method, string url, string json, int timeoutSeconds, CancellationToken ct)
+        {
+            using var req = new UnityWebRequest(url, method) { downloadHandler = new DownloadHandlerBuffer(), timeout = timeoutSeconds };
+            if (json != null)
+            {
+                req.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
+                req.SetRequestHeader("Content-Type", "application/json");
+            }
             var op = req.SendWebRequest();
             var tcs = new TaskCompletionSource<bool>();
             op.completed += _ => tcs.TrySetResult(true);
