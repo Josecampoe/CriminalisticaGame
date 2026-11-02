@@ -1,5 +1,21 @@
 # Reporte de sesiones — El Caso 404
 
+## Sesión IA (2 de noviembre de 2026)
+
+**En resumen:** la IA real quedó conectada para los sospechosos y para ALEX. ALEX ahora acepta preguntas escritas: parece ayudar, pero empuja con sutileza hacia su sospechoso falso, sin inventar pruebas ni contradecir análisis. Sin proxy, el juego sigue funcionando con las frases del guion. Pruebas: **45 EditMode (4 nuevas para ALEX) y 6 PlayMode en verde**, más las 2 pruebas de conexión con el proxy en modo de prueba.
+
+**Lo que no se pudo probar:** la llamada al modelo real, porque en este equipo no hay clave de API.
+
+**Para usarla:** consigue una clave en https://console.anthropic.com, ejecuta `Server/iniciar-proxy.ps1` (te la pide oculta y no la guarda), deja esa ventana abierta y juega. Detalle en `Server/README.md` y decisiones IA1–IA8 en `Docs/DECISIONES.md`.
+
+**Qué probar:**
+1. Con el proxy encendido, pregúntale a ALEX "¿quién crees que fue?", "¿qué opinas de la huella?" y "¿por qué falló tu archivo?". Debe sonar natural y empujar hacia Carlos (caso 1).
+2. Refuta una afirmación de ALEX (Cuestionar) y vuelve a preguntarle: ya no debe sostenerla.
+3. Hazle preguntas libres a los sospechosos.
+4. Apaga el proxy y comprueba que todo sigue funcionando con el guion.
+
+---
+
 ## Sesión visual (29 de octubre de 2026)
 
 **En resumen:** las 7 escenas tienen ahora un aspecto noir: post-procesado por ambiente, lámparas con fuente visible, texturas en pisos y paredes, reflejos, utilería, ciudad con semáforos, cables y avisos, lluvia de noche y sonido ambiente. La jugabilidad no cambió: las mismas evidencias, personajes y colliders. **Todas las pruebas en verde** antes y después de cada cambio (41 EditMode, una de ellas nueva, y 6 PlayMode).
