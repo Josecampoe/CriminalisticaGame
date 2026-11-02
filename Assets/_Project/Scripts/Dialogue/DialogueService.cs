@@ -226,7 +226,8 @@ namespace Caso404.Dialogue
             AlexTrust = _state.AlexTrust,
             AnalyzedEvidence = _evidence.AnalyzedEvidence.Select(e => $"{e.Id}: {e.AnalysisResult}").ToList(),
             KnownFacts = _state.State.knownFactIds.ToList(),
-            History = _history.TakeLast(8).ToList()
+            History = _history.TakeLast(8).ToList(),
+            ExposedLieIds = c.Lies.Where(l => l != null && _state.IsLieExposed(l.Id)).Select(l => l.Id).ToList()
         };
 
         DialogueLine Remember(DialogueLine line, string playerSaid)
