@@ -35,7 +35,10 @@ namespace Caso404.EditorTools
             EditorUtility.SetDirty(theme);
 
             var ai = GetOrCreate<AiSettings>(AiSettingsPath);
-            ai.UseOffline = true; // en esta versión no hay servidor proxy ni clave de API
+            // IA activada: si el proxy (Server/proxy.mjs) no está corriendo, el juego lo detecta en 2 s y usa las
+            // frases del guion. Para jugar siempre sin IA, marca Use Offline en el Inspector.
+            ai.UseOffline = false;
+            ai.ProxyUrl = "http://127.0.0.1:8790/dialogue"; // 8787 lo usa wrangler (Cloudflare) en este equipo
             EditorUtility.SetDirty(ai);
 
             GetOrCreate<BoolEventChannel>(ModalChannelPath);
