@@ -91,12 +91,26 @@ namespace Caso404.Tests
             alex.Close();
 
             var laura = Object.FindAnyObjectByType<CharacterNpc>();
-            player.RequestTalk(laura.Profile, laura.Head);
-            yield return new WaitForSecondsRealtime(0.3f);
+            // Como en el juego: el jugador se acerca y pulsa E (el personaje gira hacia él y la cámara mira su rostro).
+            var cc = player.GetComponent<CharacterController>();
+            if (cc != null) cc.enabled = false;
+            var front = laura.transform.position + laura.transform.forward * 1.5f;
+            player.transform.position = new Vector3(front.x, player.transform.position.y, front.z);
+            player.transform.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(laura.transform.position - front, Vector3.up));
+            if (cc != null) cc.enabled = true;
+            yield return null;
+            laura.Interact(player);
+            yield return new WaitForSecondsRealtime(1.2f);
             game.Evidence.Analyze(game.Case.FindEvidence("ev_c1_telefono"));
-            var line = game.Dialogue.Present(laura.Profile, game.Dialogue.GetPresentableItems().First(i => i.Evidence != null && i.Evidence.Id == "ev_c1_telefono"));
-            yield return new WaitForSecondsRealtime(3f);
+            var dialogue = Object.FindAnyObjectByType<DialogueView>();
+            UnityEngine.UI.Button Btn(string n) => dialogue.GetComponentsInChildren<UnityEngine.UI.Button>(true).First(b => b.name == n);
+            Btn("Btn_Sobre el crimen").onClick.Invoke();
+            yield return new WaitForSecondsRealtime(4.5f); // sin proxy: 2 s de espera y luego la frase del guion
             yield return Shot("06_dialogo");
+            Btn("Btn_Presentar evidencia").onClick.Invoke();
+            yield return new WaitForSecondsRealtime(0.3f);
+            yield return Shot("06b_presentar");
+            Btn("Btn_Volver").onClick.Invoke();
             ui.Top.Close();
             yield return new WaitForSecondsRealtime(0.3f);
 
