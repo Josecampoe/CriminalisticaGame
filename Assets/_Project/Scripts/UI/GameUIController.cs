@@ -130,7 +130,7 @@ namespace Caso404.UI
 
         void Toggle(UIPanel panel)
         {
-            if (panel == null) return;
+            if (panel == null || UIFactory.IsTyping()) return; // escribiendo una pregunta: la Q o la H son letras
             if (_ui.Top == panel) { panel.Close(); return; }
             if (_ui.Top != null) return;
             panel.Open();
