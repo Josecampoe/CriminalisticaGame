@@ -34,22 +34,24 @@ namespace Caso404.UI
         protected override void Build()
         {
             var rt = UIFactory.Stretch((RectTransform)transform);
-            var dim = UIFactory.Panel(rt, "Dim", UITheme.WithAlpha(_theme.BgDark, 0.94f));
-            UIFactory.Stretch(dim.rectTransform);
-            _title = UIFactory.Text(rt, "Title", "TABLERO — Hipótesis", _theme.TitleFont, _theme.SizeL, _theme.TextLight);
-            UIFactory.Place(_title.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(60, -36), new Vector2(1300, 50));
-            var close = UIFactory.Button(rt, "Cerrar (Esc)", _theme, _theme.Muted, _theme.TextLight, Close);
-            UIFactory.Place((RectTransform)close.transform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-60, -36), new Vector2(200, 48));
+            UIFactory.Backdrop(rt, _theme, 0.9f);
+            var head = UIFactory.Rect("Encabezado", rt);
+            UIFactory.Place(head, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(60, -30), new Vector2(1300, 84));
+            UIFactory.VLayout(head.gameObject, 2);
+            UIFactory.Kicker(head, "Tablero de hipótesis", _theme, _theme.WarningAmber);
+            _title = UIFactory.Text(head, "Titulo", "", _theme.TitleFont, 40, _theme.TextLight);
+            var close = UIFactory.Ghost(rt, "Cerrar   Esc", _theme, _theme.Muted, Close, 48);
+            UIFactory.Place((RectTransform)close.transform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-60, -40), new Vector2(200, 48));
 
-            var board = UIFactory.Panel(rt, "Board", _theme.Paper);
-            UIFactory.Region(board.rectTransform, new Vector2(0.05f, 0.14f), new Vector2(0.95f, 0.86f));
-            _content = UIFactory.ScrollList(board.transform, "Questions", 18, 28);
+            var board = UIFactory.AsPaper(UIFactory.Panel(rt, "Board", _theme.Paper), _theme);
+            UIFactory.Region(board.rectTransform, new Vector2(0.06f, 0.15f), new Vector2(0.94f, 0.86f));
+            _content = UIFactory.ScrollList(board.transform, "Questions", 12, 44);
             UIFactory.Stretch((RectTransform)_content.parent.parent);
 
             _footer = UIFactory.Text(rt, "Footer", "", _theme.BodyFont, _theme.SizeBody, _theme.TextLight, TextAlignmentOptions.MidlineLeft);
             UIFactory.Place(_footer.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(60, 40), new Vector2(1100, 50));
-            _main = UIFactory.Button(rt, "Tomar la decisión", _theme, _theme.AccentRed, _theme.TextLight, OnMain);
-            UIFactory.Place((RectTransform)_main.transform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-60, 40), new Vector2(380, 56));
+            _main = UIFactory.Button(rt, "Tomar la decisión", _theme, _theme.AccentRed, _theme.TextLight, OnMain, 60, _theme.SizeM - 2);
+            UIFactory.Place((RectTransform)_main.transform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-60, 40), new Vector2(400, 60));
         }
 
         protected override void OnShown() => Rebuild();
@@ -65,15 +67,14 @@ namespace Caso404.UI
         {
             UIFactory.Clear(_content);
             bool all = _game.Scene.Hypothesis == null;
-            _title.text = all ? "TABLERO — Hipótesis del caso" : "TABLERO — Hipótesis de la escena";
+            _title.text = all ? "Hipótesis del caso" : $"Hipótesis · {_game.Scene.DisplayName}";
             foreach (var hyp in Shown())
             {
                 if (all)
                 {
                     var scene = _game.Case.FindScene(hyp.SceneId);
-                    var header = UIFactory.Text(_content, $"H_{hyp.Id}", scene != null ? scene.DisplayName.ToUpperInvariant() : hyp.Id,
-                        _theme.TitleFont, _theme.SizeS, _theme.AccentRed);
-                    UIFactory.Layout(header.gameObject, preferredHeight: 26);
+                    var header = UIFactory.Kicker(_content, scene != null ? scene.DisplayName : hyp.Id, _theme, _theme.AccentRed);
+                    header.gameObject.name = $"H_{hyp.Id}";
                 }
                 foreach (var q in hyp.Questions) BuildQuestion(q);
             }
@@ -88,9 +89,10 @@ namespace Caso404.UI
                 selected = new HashSet<string>(_game.State.GetHypothesisAnswer(q.Id)?.optionIds ?? new List<string>());
                 _selection[q.Id] = selected;
             }
-            var qText = UIFactory.Text(_content, $"Q_{q.Id}", q.Text + (q.MultiSelect ? "  <size=70%>(elige todas las que correspondan)</size>" : ""),
-                _theme.TitleFont, _theme.SizeM, _theme.Ink);
-            UIFactory.Layout(qText.gameObject, preferredHeight: 40);
+            var qText = UIFactory.Text(_content, $"Q_{q.Id}", q.Text + (q.MultiSelect
+                    ? $"  <size=60%><font=\"{_theme.BodyFont.name}\"><color={UITheme.Hex(UITheme.WithAlpha(_theme.Ink, 0.55f))}>elige todas las que correspondan</color></font></size>" : ""),
+                _theme.TitleFont, 30, _theme.Ink);
+            UIFactory.Layout(qText.gameObject, preferredHeight: 44);
 
             foreach (var option in q.Options)
             {
@@ -98,22 +100,22 @@ namespace Caso404.UI
                 bool unlocked = svc.IsUnlocked(opt);
                 bool isSelected = selected.Contains(opt.Id);
                 string label = unlocked
-                    ? (isSelected ? "[x]  " : "[  ]  ") + opt.Text
-                    : $"[Bloqueada] {opt.Text}  <size=75%>— {svc.LockReason(opt)}</size>";
-                var bg = !unlocked ? UITheme.WithAlpha(_theme.Muted, 0.35f) : isSelected ? _theme.WarningAmber : UITheme.WithAlpha(_theme.BgDark, 0.08f);
-                var b = UIFactory.Button(_content, label, _theme, bg, unlocked ? _theme.Ink : _theme.Muted, () => Toggle(q, opt), 50, _theme.SizeBody);
-                b.GetComponentInChildren<TextMeshProUGUI>().alignment = TextAlignmentOptions.MidlineLeft;
-                b.interactable = unlocked;
+                    ? opt.Text
+                    : $"<color={UITheme.Hex(_theme.AccentRed)}><font=\"{_theme.MonoFont.name}\"><size=75%>BLOQUEADA</size></font></color>   {opt.Text}" +
+                      $"\n<size=75%><i>Falta analizar: {svc.LockReason(opt).Replace("Analiza: ", "")}</i></size>";
+                UIFactory.CheckRow(_content, label, _theme, isSelected, unlocked, () => Toggle(q, opt), true, unlocked ? 52 : 64, _theme.SizeBody + 1);
             }
 
             var row = UIFactory.Rect($"Row_{q.Id}", _content);
-            UIFactory.HLayout(row.gameObject, 12, 0, false);
-            UIFactory.Layout(row.gameObject, preferredHeight: 48);
-            var answer = UIFactory.Button(row, "Responder", _theme, _theme.BgDark, _theme.TextLight, () => Submit(q), 48);
-            UIFactory.Layout(answer.gameObject, minHeight: 48, preferredHeight: 48, preferredWidth: 220);
+            UIFactory.HLayout(row.gameObject, 16, 0, false);
+            UIFactory.Layout(row.gameObject, preferredHeight: 50);
+            var answer = UIFactory.Button(row, svc.IsAnswered(q) ? "Actualizar respuesta" : "Responder", _theme, _theme.Ink, _theme.Paper, () => Submit(q), 48);
+            UIFactory.Layout(answer.gameObject, minHeight: 48, preferredHeight: 48, preferredWidth: 260);
             answer.interactable = selected.Count > 0;
-            var state = UIFactory.Text(row, "State", svc.IsAnswered(q) ? "Respuesta registrada" : "", _theme.BodyFont, _theme.SizeS, _theme.Muted, TextAlignmentOptions.MidlineLeft);
+            var state = UIFactory.Text(row, "State", svc.IsAnswered(q) ? "RESPUESTA REGISTRADA" : "", _theme.MonoFont, _theme.SizeS, Color.Lerp(_theme.AlexCyan, Color.black, 0.5f), TextAlignmentOptions.MidlineLeft);
             UIFactory.Layout(state.gameObject, flexibleWidth: 1);
+            var gap = UIFactory.Divider(_content, UITheme.WithAlpha(_theme.Ink, 0.12f));
+            UIFactory.Layout(gap.gameObject, minHeight: 1, preferredHeight: 1);
         }
 
         void Toggle(HypothesisQuestion q, HypothesisOption opt)

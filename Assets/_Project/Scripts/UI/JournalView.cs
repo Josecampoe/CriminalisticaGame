@@ -33,17 +33,19 @@ namespace Caso404.UI
         protected override void Build()
         {
             var rt = UIFactory.Stretch((RectTransform)transform);
-            var dim = UIFactory.Panel(rt, "Dim", UITheme.WithAlpha(_theme.BgDark, 0.94f));
-            UIFactory.Stretch(dim.rectTransform);
+            UIFactory.Backdrop(rt, _theme, 0.9f);
+            var head = UIFactory.Rect("Encabezado", rt);
+            UIFactory.Place(head, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(60, -30), new Vector2(1300, 84));
+            UIFactory.VLayout(head.gameObject, 2);
+            UIFactory.Kicker(head, "Expediente", _theme, _theme.WarningAmber);
+            _header = UIFactory.Text(head, "Titulo", "", _theme.TitleFont, 40, _theme.TextLight);
+            var close = UIFactory.Ghost(rt, "Cerrar   Esc", _theme, _theme.Muted, Close, 48);
+            UIFactory.Place((RectTransform)close.transform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-60, -40), new Vector2(200, 48));
 
-            _header = UIFactory.Text(rt, "Header", "EXPEDIENTE", _theme.TitleFont, _theme.SizeL, _theme.TextLight);
-            UIFactory.Place(_header.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(60, -36), new Vector2(1200, 50));
-            var close = UIFactory.Button(rt, "Cerrar (Esc)", _theme, _theme.Muted, _theme.TextLight, Close);
-            UIFactory.Place((RectTransform)close.transform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-60, -36), new Vector2(200, 48));
-
-            var listBg = UIFactory.Panel(rt, "ListBg", UITheme.WithAlpha(_theme.Paper, 0.06f));
-            UIFactory.Region(listBg.rectTransform, new Vector2(0.03f, 0.06f), new Vector2(0.38f, 0.86f));
-            _list = UIFactory.ScrollList(listBg.transform, "Cards", 10, 12);
+            var listBg = UIFactory.Round(UIFactory.Panel(rt, "Fichas", UITheme.WithAlpha(_theme.TextLight, 0.03f)), _theme);
+            UIFactory.Region(listBg.rectTransform, new Vector2(0.03f, 0.06f), new Vector2(0.37f, 0.86f));
+            UIFactory.Frame(listBg.transform, _theme, UITheme.WithAlpha(_theme.TextLight, 0.08f));
+            _list = UIFactory.ScrollList(listBg.transform, "Cards", 8, 12);
             UIFactory.Stretch((RectTransform)_list.parent.parent);
 
             var card = UIFactory.AsPaper(UIFactory.Panel(rt, "Detail", _theme.Paper), _theme);
@@ -51,15 +53,20 @@ namespace Caso404.UI
             var stamp = UIFactory.Stamp(card.transform, "EVIDENCIA", _theme, _theme.SizeM, 8f);
             UIFactory.Place(stamp.rectTransform, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-24, -18), new Vector2(260, 50));
             UIFactory.VLayout(card.gameObject, 12, 36);
-            _name = UIFactory.Text(card.transform, "Name", "", _theme.TitleFont, _theme.SizeL, _theme.Ink);
+            var v = card.GetComponent<VerticalLayoutGroup>();
+            v.padding = new RectOffset(56, 56, 48, 40);
+            _name = UIFactory.Text(card.transform, "Name", "", _theme.TitleFont, 38, _theme.Ink);
+            UIFactory.Divider(card.transform, UITheme.WithAlpha(_theme.Ink, 0.2f));
             _description = UIFactory.Text(card.transform, "Description", "", _theme.BodyFont, _theme.SizeBody, _theme.Ink);
             _detail = UIFactory.Text(card.transform, "Detail", "", _theme.BodyFont, _theme.SizeBody, _theme.AccentRed);
-            _reportTitle = UIFactory.Text(card.transform, "ReportTitle", "", _theme.TitleFont, _theme.SizeM, _theme.AccentRed);
+            _reportTitle = UIFactory.Text(card.transform, "ReportTitle", "", _theme.MonoFont, _theme.SizeS + 1, _theme.AccentRed);
+            _reportTitle.characterSpacing = 8f;
+            _reportTitle.fontStyle = FontStyles.Bold;
             _report = UIFactory.Text(card.transform, "Report", "", _theme.BodyFont, _theme.SizeM, _theme.Ink);
             _reason = UIFactory.Text(card.transform, "Reason", "", _theme.BodyFont, _theme.SizeS, _theme.Muted);
-            _analyze = UIFactory.Button(card.transform, "Analizar", _theme, _theme.WarningAmber, _theme.Ink, OnAnalyze, 52);
+            _analyze = UIFactory.Button(card.transform, "Analizar evidencia", _theme, _theme.Ink, _theme.Paper, OnAnalyze, 56);
             _password = UIFactory.Input(card.transform, _theme, "Contraseña", 40);
-            _extra = UIFactory.Button(card.transform, "Análisis adicional", _theme, _theme.BgDark, _theme.TextLight, OnExtra, 52);
+            _extra = UIFactory.Button(card.transform, "Análisis adicional", _theme, _theme.Ink, _theme.Paper, OnExtra, 56);
             _extraResult = UIFactory.Text(card.transform, "ExtraResult", "", _theme.BodyFont, _theme.SizeBody, _theme.Ink);
             UIFactory.Layout(UIFactory.Rect("Spacer", card.transform).gameObject, flexibleHeight: 1);
 
@@ -80,7 +87,10 @@ namespace Caso404.UI
 
         protected override void OnShown()
         {
-            _header.text = $"EXPEDIENTE — Caso: {_game.Case.Title}";
+            int found = _game.Evidence.FoundEvidence.Count();
+            int pending = _game.Evidence.UnanalyzedCount;
+            _header.text = $"{_game.Case.Title}   <size=50%><color={UITheme.Hex(UITheme.WithAlpha(_theme.TextLight, 0.55f))}>{found} ficha{(found == 1 ? "" : "s")}" +
+                           (pending > 0 ? $" · <color={UITheme.Hex(_theme.WarningAmber)}>{pending} sin analizar</color>" : "") + "</color></size>";
             if (_selected == null || !_game.Evidence.IsFound(_selected)) _selected = _game.Evidence.FoundEvidence.FirstOrDefault();
             Refresh();
         }
@@ -110,10 +120,17 @@ namespace Caso404.UI
             {
                 var captured = ev;
                 bool analyzed = _game.Evidence.IsAnalyzed(ev);
-                string status = !ev.CanBeAnalyzed ? "Sin valor como prueba" : analyzed ? "ANALIZADA" : "NUEVA — sin analizar";
-                var bg = ev == _selected ? _theme.WarningAmber : _theme.Paper;
-                var btn = UIFactory.Button(_list, $"{ev.DisplayName}\n<size=70%>{status}</size>", _theme, bg, _theme.Ink, () => { _selected = captured; Refresh(); }, 74);
-                btn.GetComponentInChildren<TextMeshProUGUI>().alignment = TextAlignmentOptions.MidlineLeft;
+                var (status, color) = !ev.CanBeAnalyzed ? ("SIN VALOR COMO PRUEBA", _theme.Muted)
+                    : analyzed ? ("ANALIZADA", _theme.AlexCyan) : ("NUEVA · SIN ANALIZAR", _theme.WarningAmber);
+                bool selected = ev == _selected;
+                var bg = selected ? UITheme.WithAlpha(_theme.Paper, 0.95f) : UITheme.WithAlpha(_theme.TextLight, 0.05f);
+                var fg = selected ? _theme.Ink : _theme.TextLight;
+                var statusColor = selected ? Color.Lerp(color, Color.black, 0.45f) : color;
+                var btn = UIFactory.Button(_list, $"{ev.DisplayName}\n<size=68%><font=\"{_theme.MonoFont.name}\"><color={UITheme.Hex(statusColor)}>● {status}</color></font></size>",
+                    _theme, bg, fg, () => { _selected = captured; Refresh(); }, 72);
+                var label = btn.GetComponentInChildren<TextMeshProUGUI>();
+                label.alignment = TextAlignmentOptions.MidlineLeft;
+                label.rectTransform.offsetMin = new Vector2(22, 4);
             }
         }
 
