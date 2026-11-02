@@ -30,6 +30,10 @@ MonoBehaviour:
     _press:
       _text: "Las fallas de almacenamiento son comunes en equipos antiguos. No le dar\xEDa importancia."
       _revealsFactIds: []
+  _alexQuestions:
+  - "\xBFQui\xE9n crees que fue?"
+  - "Pero la ventana se rompi\xF3 desde adentro."
+  - "\xBFPor qu\xE9 tu archivo dio error justo en esos 15 minutos?"
   _scenes:
   - {fileID: 11400000, guid: 18fae2a6829794e4f9db9055f4c48bad, type: 2}
   - {fileID: 11400000, guid: f56582f5dff9b0e4db4e28dd840675a2, type: 2}
