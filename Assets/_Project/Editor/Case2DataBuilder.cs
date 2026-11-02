@@ -343,6 +343,7 @@ namespace Caso404.EditorTools
                 Evidence = new FallbackLine("La tarjeta de Valeria pudo ser clonada. Sebastián tiene los conocimientos."),
                 Press = new FallbackLine("Las placas no son legibles. No podemos identificar ese vehículo."),
             };
+            c2.AlexQuestions = new[] { "¿Quién crees que fue?", "¿Y la tarjeta de Valeria?", "¿Se puede leer la placa de ese carro?" }; // responden a AlexLines del caso 2
             c2.Scenes = new[] { s1, s2, s3, s4 };
             c2.Suspects = new[] { sebastian, valeria, ines };
             c2.Allies = new[] { elena };
