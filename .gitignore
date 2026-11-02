@@ -51,3 +51,6 @@ Assets/_Project/Art/ThirdParty/**/*.bin
 Assets/_Project/Art/ThirdParty/**/*.bin.meta
 Assets/_Project/Art/ThirdParty/**/*.url
 Assets/_Project/Art/ThirdParty/**/*.url.meta
+
+# Dependencias del proxy de IA
+Server/node_modules/
