@@ -9,13 +9,16 @@ using Caso404.Dialogue;
 using Caso404.Player;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace Caso404.UI
 {
     /// <summary>
-    /// Diálogo: nombre del personaje, texto con efecto de escritura, botones rápidos (crimen, otra persona,
-    /// presentar evidencia, presionar, hablar con calma) y campo para escribir. Muestra "pensando…" mientras responde.
+    /// Diálogo en formato de cine: franjas negras arriba, degradado abajo y el texto sobre la escena (la cámara mira
+    /// al rostro del personaje). Nombre, rol, emoción, texto con efecto de escritura, botones rápidos con atajos 1–6
+    /// (crimen, otra persona, presentar evidencia, presionar, despedirse, hablar con calma) y campo para escribir.
+    /// Muestra "X está pensando…" mientras responde la IA.
     /// </summary>
     public class DialogueView : UIPanel
     {
@@ -29,12 +32,13 @@ namespace Caso404.UI
         TextMeshProUGUI _name;
         TextMeshProUGUI _role;
         TextMeshProUGUI _line;
-        TextMeshProUGUI _tag;
         TextMeshProUGUI _thinking;
+        RectTransform _tagHolder;
         RectTransform _quick;
         RectTransform _extraRow;
         RectTransform _chooser;
         RectTransform _chooserList;
+        TextMeshProUGUI _chooserTitle;
         TMP_InputField _input;
         Button _ask, _calm;
         Button[] _quickButtons;
@@ -46,61 +50,112 @@ namespace Caso404.UI
         protected override void Build()
         {
             var rt = UIFactory.Stretch((RectTransform)transform);
-            var panel = UIFactory.Panel(rt, "Panel", UITheme.WithAlpha(_theme.BgDark, 0.95f));
-            UIFactory.Region(panel.rectTransform, new Vector2(0.08f, 0.03f), new Vector2(0.92f, 0.42f));
-            UIFactory.VLayout(panel.gameObject, 10, 28);
 
-            var header = UIFactory.Rect("Header", panel.transform);
-            UIFactory.HLayout(header.gameObject, 16, 0, false);
-            UIFactory.Layout(header.gameObject, preferredHeight: 40);
-            _name = UIFactory.Text(header, "Name", "", _theme.TitleFont, _theme.SizeL, _theme.WarningAmber);
-            UIFactory.Layout(_name.gameObject, preferredWidth: 520);
-            _role = UIFactory.Text(header, "Role", "", _theme.BodyFont, _theme.SizeS, _theme.Muted, TextAlignmentOptions.BottomLeft);
-            UIFactory.Layout(_role.gameObject, flexibleWidth: 1);
-            _tag = UIFactory.Text(header, "Tag", "", _theme.BodyFont, _theme.SizeBody, _theme.AccentRed, TextAlignmentOptions.Right);
-            UIFactory.Layout(_tag.gameObject, preferredWidth: 360);
+            // Franja negra superior (formato cine) y degradado inferior para leer el texto sobre la escena.
+            var bar = UIFactory.Panel(rt, "FranjaCine", Color.black);
+            UIFactory.Place(bar.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0, 64));
+            bar.rectTransform.anchorMin = new Vector2(0f, 1f);
+            bar.rectTransform.anchorMax = new Vector2(1f, 1f);
+            var shade = UIFactory.Panel(rt, "Degradado", new Color(0.02f, 0.02f, 0.03f, 0.96f));
+            if (_theme.GradientSprite != null) shade.sprite = _theme.GradientSprite;
+            UIFactory.Region(shade.rectTransform, Vector2.zero, new Vector2(1f, 0.66f));
+            shade.raycastTarget = true;
 
-            _line = UIFactory.Text(panel.transform, "Line", "", _theme.BodyFont, 22, _theme.TextLight);
-            UIFactory.Layout(_line.gameObject, flexibleHeight: 1, minHeight: 90);
-            _thinking = UIFactory.Text(panel.transform, "Thinking", "pensando…", _theme.BodyFont, _theme.SizeS, _theme.Muted);
-            UIFactory.Layout(_thinking.gameObject, preferredHeight: 20);
+            var column = UIFactory.Rect("Columna", rt);
+            UIFactory.Place(column, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 34), new Vector2(1560, 520));
+            var v = UIFactory.VLayout(column.gameObject, 12);
+            v.childAlignment = TextAnchor.LowerLeft;
 
-            _quick = UIFactory.Rect("Quick", panel.transform);
+            // Encabezado: nombre y rol a la izquierda, emoción a la derecha.
+            var header = UIFactory.Rect("Encabezado", column);
+            var h = UIFactory.HLayout(header.gameObject, 16, 0, false);
+            h.childAlignment = TextAnchor.LowerLeft;
+            UIFactory.Layout(header.gameObject, preferredHeight: 74);
+            var names = UIFactory.Rect("Nombres", header);
+            UIFactory.VLayout(names.gameObject, 0);
+            UIFactory.Layout(names.gameObject, flexibleWidth: 1, preferredHeight: 74);
+            _name = UIFactory.Text(names, "Nombre", "", _theme.TitleFont, 42, _theme.WarningAmber);
+            UIFactory.Layout(_name.gameObject, preferredHeight: 46);
+            _role = UIFactory.Text(names, "Rol", "", _theme.BodyFont, _theme.SizeBody, UITheme.WithAlpha(_theme.TextLight, 0.6f));
+            _role.fontStyle = FontStyles.Italic;
+            UIFactory.Layout(_role.gameObject, preferredHeight: 26);
+            _tagHolder = UIFactory.Rect("Emocion", header);
+            var th = UIFactory.HLayout(_tagHolder.gameObject, 0, 0, false);
+            th.childAlignment = TextAnchor.LowerRight;
+            th.childControlWidth = false;
+            UIFactory.Layout(_tagHolder.gameObject, preferredWidth: 420, preferredHeight: 40);
+
+            UIFactory.Divider(column, UITheme.WithAlpha(_theme.WarningAmber, 0.35f));
+
+            _line = UIFactory.Text(column, "Linea", "", _theme.BodyFont, 27, _theme.TextLight);
+            _line.lineSpacing = 8f;
+            _line.enableAutoSizing = true;
+            _line.fontSizeMin = 20f;
+            _line.fontSizeMax = 27f;
+            UIFactory.Layout(_line.gameObject, minHeight: 112, preferredHeight: 112);
+            _thinking = UIFactory.Text(column, "Pensando", "", _theme.MonoFont, _theme.SizeS + 1, UITheme.WithAlpha(_theme.WarningAmber, 0.85f));
+            UIFactory.Layout(_thinking.gameObject, preferredHeight: 22);
+
+            _quick = UIFactory.Rect("Rapidas", column);
             UIFactory.HLayout(_quick.gameObject, 10);
             UIFactory.Layout(_quick.gameObject, preferredHeight: 48);
             _quickButtons = new[]
             {
-                UIFactory.Button(_quick, "Sobre el crimen", _theme, _theme.Paper, _theme.Ink, () => Ask(DialogueTopic.Crime, null), 46, _theme.SizeS),
-                UIFactory.Button(_quick, "Sobre otra persona", _theme, _theme.Paper, _theme.Ink, () => Ask(DialogueTopic.OtherPerson, null), 46, _theme.SizeS),
-                UIFactory.Button(_quick, "Presentar evidencia", _theme, _theme.WarningAmber, _theme.Ink, OpenChooser, 46, _theme.SizeS),
-                UIFactory.Button(_quick, "Presionar", _theme, _theme.AccentRed, _theme.TextLight, () => Ask(DialogueTopic.Press, null), 46, _theme.SizeS),
-                UIFactory.Button(_quick, "Despedirse", _theme, _theme.Muted, _theme.TextLight, Close, 46, _theme.SizeS),
+                QuickButton(1, "Sobre el crimen", _theme.Paper, () => Ask(DialogueTopic.Crime, null)),
+                QuickButton(2, "Sobre otra persona", _theme.Paper, () => Ask(DialogueTopic.OtherPerson, null)),
+                QuickButton(3, "Presentar evidencia", _theme.WarningAmber, OpenChooser),
+                QuickButton(4, "Presionar", _theme.AccentRed, () => Ask(DialogueTopic.Press, null)),
+                QuickButton(5, "Despedirse", _theme.Muted, Close),
             };
-            _calm = UIFactory.Button(_quick, "Hablarle con calma", _theme, _theme.AlexCyan, _theme.Ink, () => Ask(DialogueTopic.Calm, null), 46, _theme.SizeS);
+            _calm = QuickButton(6, "Hablarle con calma", _theme.AlexCyan, () => Ask(DialogueTopic.Calm, null));
 
-            _extraRow = UIFactory.Rect("ExtraTopics", panel.transform);
+            _extraRow = UIFactory.Rect("TemasExtra", column);
             UIFactory.HLayout(_extraRow.gameObject, 10, 0, false);
             UIFactory.Layout(_extraRow.gameObject, preferredHeight: 44);
 
-            var inputRow = UIFactory.Rect("InputRow", panel.transform);
+            var inputRow = UIFactory.Rect("Escribir", column);
             UIFactory.HLayout(inputRow.gameObject, 10, 0, false);
-            UIFactory.Layout(inputRow.gameObject, preferredHeight: 48);
-            _input = UIFactory.Input(inputRow, _theme, "Escribe tu pregunta (máx. 200 caracteres)", 200);
-            _ask = UIFactory.Button(inputRow, "Preguntar", _theme, _theme.Paper, _theme.Ink, AskTyped, 48);
-            UIFactory.Layout(_ask.gameObject, minHeight: 48, preferredHeight: 48, preferredWidth: 180);
+            UIFactory.Layout(inputRow.gameObject, preferredHeight: 52);
+            _input = UIFactory.Input(inputRow, _theme, "Escribe tu pregunta y pulsa Enter (máx. 200 caracteres)", 200);
+            UIFactory.Layout(_input.gameObject, minHeight: 52, preferredHeight: 52, flexibleWidth: 1);
+            _input.onSubmit.AddListener(_ => AskTyped());
+            _ask = UIFactory.Button(inputRow, "Preguntar", _theme, _theme.Paper, _theme.Ink, AskTyped, 52);
+            UIFactory.Layout(_ask.gameObject, minHeight: 52, preferredHeight: 52, preferredWidth: 200);
 
-            // Selector de evidencias / testimonios (encima del diálogo).
-            var chooserBg = UIFactory.Panel(rt, "Chooser", UITheme.WithAlpha(_theme.BgDark, 0.97f));
-            _chooser = chooserBg.rectTransform;
-            UIFactory.Region(_chooser, new Vector2(0.2f, 0.45f), new Vector2(0.8f, 0.92f));
-            var chooserTitle = UIFactory.Text(_chooser, "Title", "¿Qué le presentas?", _theme.TitleFont, _theme.SizeM, _theme.TextLight);
-            UIFactory.Place(chooserTitle.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(24, -16), new Vector2(800, 40));
-            var listHolder = UIFactory.Rect("ListHolder", _chooser);
-            UIFactory.Stretch(listHolder, 16, 76, 16, 64);
-            _chooserList = UIFactory.ScrollList(listHolder, "List", 8, 4);
+            BuildChooser(rt);
+        }
+
+        /// <summary>Botón rápido con su número de atajo a la izquierda.</summary>
+        Button QuickButton(int key, string label, Color accent, Action action)
+        {
+            var text = $"<color={UITheme.Hex(UITheme.WithAlpha(accent, 0.75f))}>{key}</color>   {label}";
+            var b = UIFactory.Ghost(_quick, text, _theme, accent, action, 48, _theme.SizeS + 2);
+            b.gameObject.name = $"Btn_{label}";
+            return b;
+        }
+
+        /// <summary>Selector de evidencias y testimonios: tarjeta centrada sobre la escena.</summary>
+        void BuildChooser(RectTransform rt)
+        {
+            var dim = UIFactory.Backdrop(rt, _theme, 0.7f);
+            dim.gameObject.name = "Selector";
+            _chooser = dim.rectTransform;
+            var card = UIFactory.Card(_chooser, "Tarjeta", UITheme.WithAlpha(_theme.BgDark, 0.98f), _theme);
+            UIFactory.Place(card.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 40), new Vector2(1000, 720));
+            UIFactory.Frame(card.transform, _theme, UITheme.WithAlpha(_theme.WarningAmber, 0.4f));
+            var inner = UIFactory.Rect("Contenido", card.transform);
+            UIFactory.Stretch(inner, 36, 28, 36, 30);
+            UIFactory.VLayout(inner.gameObject, 12);
+            UIFactory.Kicker(inner, "Presentar", _theme, _theme.WarningAmber);
+            _chooserTitle = UIFactory.Text(inner, "Titulo", "", _theme.TitleFont, _theme.SizeL, _theme.TextLight);
+            UIFactory.Layout(_chooserTitle.gameObject, preferredHeight: 44);
+            UIFactory.Divider(inner, UITheme.WithAlpha(_theme.TextLight, 0.12f));
+            var listHolder = UIFactory.Rect("Lista", inner);
+            UIFactory.Layout(listHolder.gameObject, flexibleHeight: 1);
+            _chooserList = UIFactory.ScrollList(listHolder, "Items", 8, 2);
             UIFactory.Stretch((RectTransform)_chooserList.parent.parent);
-            var back = UIFactory.Button(_chooser, "Volver", _theme, _theme.Muted, _theme.TextLight, CloseChooser);
-            UIFactory.Place((RectTransform)back.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 14), new Vector2(240, 48));
+            var back = UIFactory.Ghost(inner, "Volver", _theme, _theme.Muted, CloseChooser, 48);
+            UIFactory.Layout(back.gameObject, minHeight: 48, preferredHeight: 48);
             _chooser.gameObject.SetActive(false);
         }
 
@@ -123,13 +178,13 @@ namespace Caso404.UI
             _game.Dialogue.Begin(character);
             _name.text = character.DisplayName;
             _role.text = character.Role;
-            _tag.text = "";
+            SetTag("", _theme.Muted);
             _input.text = "";
             _chooser.gameObject.SetActive(false);
             var greeting = _game.Dialogue.Greeting(character);
             SetLine(string.IsNullOrEmpty(greeting)
-                ? $"<color=#{ColorUtility.ToHtmlStringRGB(_theme.Muted)}>¿Qué le preguntas a {character.DisplayName}?</color>"
-                : greeting, instant: string.IsNullOrEmpty(greeting));
+                ? $"<color={UITheme.Hex(UITheme.WithAlpha(_theme.TextLight, 0.55f))}><i>¿Qué le preguntas a {character.DisplayName}?</i></color>"
+                : $"“{greeting}”", instant: string.IsNullOrEmpty(greeting));
             if (_player.Controller != null) _player.Controller.FocusOn(head);
             Open();
             RefreshButtons();
@@ -143,48 +198,72 @@ namespace Caso404.UI
             Closed?.Invoke();
         }
 
+        void Update()
+        {
+            if (!IsOpen) return;
+            if (_busy && _current != null)
+                _thinking.text = $"{_current.DisplayName} está pensando" + new string('.', 1 + (int)(Time.unscaledTime * 3f) % 3);
+
+            var kb = Keyboard.current;
+            if (kb == null || _busy || _chooser.gameObject.activeSelf || UIFactory.IsTyping()) return;
+            for (int i = 0; i < 6; i++)
+            {
+                if (!kb[Key.Digit1 + i].wasPressedThisFrame && !kb[Key.Numpad1 + i].wasPressedThisFrame) continue;
+                var b = i < _quickButtons.Length ? _quickButtons[i] : _calm;
+                if (b.gameObject.activeInHierarchy && b.interactable) b.onClick.Invoke();
+                return;
+            }
+            if (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame) _input.ActivateInputField();
+        }
+
         async void Ask(DialogueTopic topic, string question)
         {
             if (_busy || _current == null) return;
             _busy = true;
-            _thinking.gameObject.SetActive(true);
             RefreshButtons();
             CancelPending();
             _cts = new CancellationTokenSource();
             try
             {
                 var line = await _game.Dialogue.AskAsync(_current, topic, question, _cts.Token);
-                ShowLine(line);
+                if (this != null && IsOpen) ShowLine(line);
             }
             catch (OperationCanceledException) { }
             finally
             {
                 _busy = false;
-                if (_thinking != null) _thinking.gameObject.SetActive(false);
-                RefreshButtons();
+                if (this != null) RefreshButtons();
             }
         }
 
         void AskTyped()
         {
             var q = _input.text?.Trim();
-            if (string.IsNullOrEmpty(q)) return;
+            if (string.IsNullOrEmpty(q) || _busy) return;
             _input.text = "";
+            SetLine($"<color={UITheme.Hex(UITheme.WithAlpha(_theme.TextLight, 0.55f))}><i>Tú: {q}</i></color>", instant: true);
             Ask(DialogueTopic.FreeText, q);
         }
 
         void OpenChooser()
         {
+            if (_current == null) return;
+            _chooserTitle.text = $"¿Qué le presentas a {_current.DisplayName}?";
             UIFactory.Clear(_chooserList);
             var items = _game.Dialogue.GetPresentableItems().ToList();
             if (items.Count == 0)
-                UIFactory.Text(_chooserList, "Empty", "No tienes evidencias analizadas ni testimonios todavía.", _theme.BodyFont, _theme.SizeBody, _theme.TextLight);
+                UIFactory.Text(_chooserList, "Vacio", "No tienes evidencias analizadas ni testimonios todavía.", _theme.BodyFont, _theme.SizeBody, _theme.Muted);
             foreach (var item in items)
             {
                 var captured = item;
-                var color = item.Evidence != null ? _theme.Paper : UITheme.WithAlpha(_theme.Paper, 0.75f);
-                var b = UIFactory.Button(_chooserList, item.Label, _theme, color, _theme.Ink, () => Present(captured), 56, _theme.SizeS);
-                b.GetComponentInChildren<TextMeshProUGUI>().alignment = TextAlignmentOptions.MidlineLeft;
+                bool evidence = item.Evidence != null;
+                string kind = evidence ? "EVIDENCIA ANALIZADA" : "TESTIMONIO";
+                var color = evidence ? _theme.WarningAmber : _theme.AlexCyan;
+                var label = $"{item.Label}\n<size=70%><color={UITheme.Hex(UITheme.WithAlpha(color, 0.85f))}>{kind}</color></size>";
+                var b = UIFactory.Button(_chooserList, label, _theme, UITheme.WithAlpha(_theme.TextLight, 0.06f), _theme.TextLight, () => Present(captured), 66, _theme.SizeBody);
+                var t = b.GetComponentInChildren<TextMeshProUGUI>();
+                t.alignment = TextAlignmentOptions.MidlineLeft;
+                t.rectTransform.offsetMin = new Vector2(24, 4);
             }
             _chooser.gameObject.SetActive(true);
         }
@@ -200,9 +279,16 @@ namespace Caso404.UI
 
         void ShowLine(DialogueLine line)
         {
-            _tag.text = line.ExposedLie ? "¡Mentira descubierta!" : $"[{line.Emotion}]";
-            _tag.color = line.ExposedLie ? _theme.AccentRed : _theme.Muted;
-            SetLine(line.Text, instant: false);
+            if (line.ExposedLie) SetTag("¡MENTIRA DESCUBIERTA!", _theme.AccentRed);
+            else SetTag(string.IsNullOrEmpty(line.Emotion) ? "" : line.Emotion.ToUpperInvariant(), _theme.Muted);
+            SetLine($"“{line.Text}”", instant: false);
+        }
+
+        /// <summary>Etiqueta de emoción (o de mentira descubierta) a la derecha del nombre.</summary>
+        void SetTag(string text, Color color)
+        {
+            UIFactory.Clear(_tagHolder);
+            if (!string.IsNullOrEmpty(text)) UIFactory.Chip(_tagHolder, text, _theme, color);
         }
 
         void SetLine(string text, bool instant)
@@ -233,25 +319,30 @@ namespace Caso404.UI
             if (_quickButtons == null) return;
             foreach (var b in _quickButtons) b.interactable = !_busy;
             _ask.interactable = !_busy;
+            _input.interactable = !_busy;
             bool calm = _current != null && _game.Dialogue.CanUseCalmApproach(_current);
             _calm.gameObject.SetActive(calm);
             _calm.interactable = !_busy;
             RebuildExtraTopics();
-            if (!_busy) _thinking.gameObject.SetActive(false);
+            _thinking.text = "";
         }
 
         void RebuildExtraTopics()
         {
             UIFactory.Clear(_extraRow);
+            _extraRow.gameObject.SetActive(false);
             if (_current == null) return;
             var c = _current;
+            int count = 0;
             foreach (var topic in _game.Dialogue.AvailableExtraTopics(c))
             {
                 var t = topic;
-                var b = UIFactory.Button(_extraRow, t.Label, _theme, _theme.WarningAmber, _theme.Ink, () => ShowLine(_game.Dialogue.AskExtra(c, t)), 42, _theme.SizeS);
-                UIFactory.Layout(b.gameObject, minHeight: 42, preferredHeight: 42, preferredWidth: 360);
+                var b = UIFactory.Ghost(_extraRow, $"▲  {t.Label}", _theme, _theme.WarningAmber, () => ShowLine(_game.Dialogue.AskExtra(c, t)), 44, _theme.SizeS + 1);
+                UIFactory.Layout(b.gameObject, minHeight: 44, preferredHeight: 44, preferredWidth: 420);
                 b.interactable = !_busy;
+                count++;
             }
+            _extraRow.gameObject.SetActive(count > 0);
         }
 
         void CancelPending()
