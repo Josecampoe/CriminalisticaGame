@@ -1,0 +1,17 @@
+{
+  "name": "caso404-proxy",
+  "private": true,
+  "type": "module",
+  "description": "Proxy de IA de El Caso 404: guarda la clave de API fuera del juego y llama a la Messages API de Anthropic.",
+  "scripts": {
+    "start": "node proxy.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.3.0",
+    "@google/genai": "^2.32.0",
+    "zod": "^4.6.7"
+  }
+}

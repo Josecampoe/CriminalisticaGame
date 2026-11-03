@@ -62,12 +62,12 @@ namespace Caso404.Core
 
             State = new GameStateService(state);
             Evidence = new EvidenceService(State, Case);
-            Alex = new AlexService(State, Case, _database.Alex, Evidence);
+            AiClient = AiClientFactory.Create(_aiSettings);
+            Alex = new AlexService(State, Case, _database.Alex, Evidence, AiClient);
             Decisions = new DecisionService(State);
             Hypotheses = new HypothesisService(State);
             Accusation = new AccusationService(State, Case);
             SceneFlow = new SceneFlowService(State, Case);
-            AiClient = AiClientFactory.Create(_aiSettings);
             Dialogue = new DialogueService(State, Evidence, AiClient, Case);
 
             State.SetCurrentScene(Case.Id, Scene.Id);

@@ -1,29 +1,41 @@
 # Proxy de IA — El Caso 404
 
-Servidor mínimo (Node 18 o superior, sin dependencias) que conecta los diálogos del juego con la IA. Su razón de ser es que **la clave de API nunca va dentro del juego**, porque cualquier build se puede descompilar.
+Servidor pequeño (Node 18 o superior) que conecta el juego con la IA. Usa **Google Gemini con su plan gratuito** (SDK oficial `@google/genai`) y, como opción de pago, Claude de Anthropic (`@anthropic-ai/sdk`). Existe porque **la clave de API nunca va dentro del juego**: cualquier build se puede descompilar.
+
+Da voz a dos tipos de personaje:
+- **Sospechosos y testigos**: responden tus preguntas escritas usando solo sus hechos y sus mentiras permitidas del guion. Las mentiras que ya descubriste no las sostienen.
+- **ALEX**: parece un asistente útil y a veces ayuda de verdad con lo ya confirmado. Pero empuja con sutileza hacia su sospechoso objetivo (`CaseData.AlexTarget`) usando solo sus afirmaciones del guion. No puede inventar pruebas, negar un análisis que ya tienes ni sostener una afirmación que ya refutaste. Su tono cambia con la confianza (cálido, formal o frío).
+
+La IA **nunca decide nada**: el juego valida cada respuesta, y la confianza, las contradicciones y los finales se calculan con la lógica del juego.
 
 ## Cómo usarlo
 
-1. Define la clave como variable de entorno. Hazlo solo en tu máquina o en el servidor, nunca en archivos del repositorio.
-   - PowerShell: `$env:ANTHROPIC_API_KEY = "tu-clave"`
-2. Arranca el proxy: `node Server/proxy.mjs`. Escucha en `http://localhost:8787/dialogue`.
-3. En Unity, abre `Assets/_Project/Data/AiSettings` y **desmarca *Use Offline***. La URL por defecto ya apunta a `http://localhost:8787/dialogue`.
+1. Consigue una clave **gratuita** de Gemini: entra a https://aistudio.google.com/apikey con tu cuenta de Google y pulsa *Create API key*. No pide tarjeta.
+2. Arranca el proxy (deja la ventana abierta mientras juegas):
+   - **Fácil:** clic derecho en `Server/iniciar-proxy.ps1` → *Ejecutar con PowerShell*. Te pide la clave (oculta, no la guarda) e instala lo necesario la primera vez. Si Windows bloquea el script: `powershell -ExecutionPolicy Bypass -File Server\iniciar-proxy.ps1`.
+   - **A mano:** en PowerShell, `cd Server`, `npm install` (solo la primera vez), `$env:GEMINI_API_KEY = "tu-clave"`, `node proxy.mjs`.
+3. Juega normal (Editor o `ElCaso404.exe`). `AiSettings` ya apunta a `http://127.0.0.1:8790/dialogue` con *Use Offline* desmarcado.
 
-**Sin clave**, el proxy arranca en **modo de prueba**: responde con un texto fijo y no llama a la IA. Sirve para comprobar la conexión desde el juego.
+Si el proxy está apagado, el juego lo detecta en 2 segundos y usa las frases del guion: se puede jugar completo sin IA.
 
 ## Variables de entorno
 
 | Variable | Qué hace |
 |---|---|
-| `ANTHROPIC_API_KEY` | Clave de API. Si falta, arranca en modo de prueba. |
-| `ANTHROPIC_MODEL` | Modelo (por defecto `claude-haiku-5-5`, rápido y económico para diálogos). |
-| `PORT` | Puerto (por defecto `8787`). |
-| `CASO404_MOCK=1` | Fuerza el modo de prueba aunque haya clave. |
+| `GEMINI_API_KEY` | Clave gratuita de Google AI Studio (proveedor por defecto). |
+| `GEMINI_MODEL` | Modelo de Gemini (por defecto `gemini-3.5-flash-lite`, el más rápido; `gemini-3.8-flash` responde mejor pero gasta antes el límite gratuito). |
+| `ANTHROPIC_API_KEY` / `ANTHROPIC_MODEL` | Opción de pago con Claude (por defecto `claude-haiku-5-5`). |
+| `AI_PROVIDER` | `gemini` o `anthropic`. Si no se indica: Gemini, o Anthropic si solo hay clave de Anthropic. |
+| `PORT` | Puerto (por defecto `8790`; el 8787 lo usa `wrangler dev` en este equipo). |
+| `CASO404_MOCK=1` | Modo de prueba: responde un texto fijo sin llamar a la IA (para probar la conexión). |
 
-## Qué hace
+## Comprobar que funciona
 
-1. Recibe del juego el perfil del personaje: personalidad, hechos que conoce, mentiras permitidas y ejemplos de cómo habla. También recibe la escena, las evidencias analizadas y las últimas líneas de la conversación.
-2. Pide a la Messages API una respuesta en **JSON con esquema fijo** (structured outputs): `reply`, `emotion`, `usedFactIds`, `usedLieIds` y `revealedSecretIds`.
-3. Si la IA falla, se niega o la respuesta llega cortada, devuelve un error. El juego entonces usa la frase de respaldo del guion.
+- `http://127.0.0.1:8790/health` en el navegador debe mostrar `{"ok":true,...}`. `keyInEnv: true` indica que ve la clave.
+- Si algo falla, la consola del proxy dice por qué en español (clave inválida, sin saldo o límite, sin conexión…). El juego, mientras tanto, usa el guion.
 
-El juego también **valida** cada respuesta (`AiReplyValidator`): los IDs tienen que existir y los secretos tienen que estar desbloqueados. La IA solo pone la voz; la verdad del caso y los finales siguen saliendo de los datos.
+## Plan gratuito de Gemini: qué tener en cuenta
+
+- **Es gratis, pero tiene límites de preguntas por minuto y por día.** Google los cambia seguido; los actuales se ven en Google AI Studio. Si se acaban, la consola dice "se alcanzó el límite gratuito" y el juego usa las frases del guion hasta que se renueven (los límites diarios se reinician a medianoche, hora del Pacífico).
+- En el plan gratuito, **Google puede usar los textos enviados para mejorar sus productos**. Aquí solo viajan las preguntas y los datos del caso ficticio, nada personal.
+- Necesita internet. Sin conexión, el juego usa el guion.

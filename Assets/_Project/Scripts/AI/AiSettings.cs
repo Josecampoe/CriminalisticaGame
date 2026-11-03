@@ -10,7 +10,7 @@ namespace Caso404.AI
     public class AiSettings : ScriptableObject
     {
         [SerializeField] private bool _useOffline = true;
-        [SerializeField] private string _proxyUrl = "http://localhost:8787/dialogue";
+        [SerializeField] private string _proxyUrl = "http://127.0.0.1:8790/dialogue";
         [SerializeField] private string _model = "";
         [SerializeField] private int _timeoutSeconds = 15;
         [SerializeField] private int _maxQuestionLength = 200;

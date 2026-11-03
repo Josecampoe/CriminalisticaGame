@@ -11,9 +11,9 @@ namespace Caso404.Tests
 {
     /// <summary>
     /// Prueba de integración con el proxy (Server/proxy.mjs) en modo de prueba. Se corre a mano con el proxy encendido:
-    /// node Server/proxy.mjs  (sin ANTHROPIC_API_KEY)  y luego -testFilter Caso404.Tests.HttpProxyTests.
+    /// CASO404_MOCK=1 node Server/proxy.mjs  y luego -testFilter Caso404.Tests.HttpProxyTests.
     /// </summary>
-    [Explicit("Necesita el proxy encendido en localhost:8787")]
+    [Explicit("Necesita el proxy encendido en 127.0.0.1:8790 (CASO404_MOCK=1)")]
     public class HttpProxyTests
     {
         [UnityTest]
@@ -21,7 +21,7 @@ namespace Caso404.Tests
         {
             var settings = ScriptableObject.CreateInstance<AiSettings>();
             settings.UseOffline = false;
-            settings.ProxyUrl = "http://localhost:8787/dialogue";
+            settings.ProxyUrl = "http://127.0.0.1:8790/dialogue";
             var client = AiClientFactory.Create(settings);
             Assert.IsInstanceOf<HttpAiClient>(client);
 
@@ -41,6 +41,26 @@ namespace Caso404.Tests
             Assert.IsNotNull(reply, "Respuesta nula: ¿está encendido el proxy?");
             StringAssert.Contains("modo de prueba", reply.reply);
             Assert.IsTrue(AiReplyValidator.IsValid(reply, laura, new Core.GameStateService()), "La respuesta del proxy debe pasar la validación del juego");
+        }
+
+        [UnityTest]
+        public IEnumerator HttpClient_SendsAlexMode()
+        {
+            var settings = ScriptableObject.CreateInstance<AiSettings>();
+            settings.UseOffline = false;
+            settings.ProxyUrl = "http://127.0.0.1:8790/dialogue";
+            var client = AiClientFactory.Create(settings);
+#if UNITY_EDITOR
+            var db = UnityEditor.AssetDatabase.LoadAssetAtPath<GameDatabase>("Assets/_Project/Data/GameDatabase.asset");
+#else
+            GameDatabase db = null;
+            Assert.Ignore("Solo en el Editor");
+#endif
+            var request = new AiRequest { Character = db.Alex, Topic = DialogueTopic.FreeText, Question = "¿Quién fue?", SceneId = "c1_s1", IsAlex = true, AlexTarget = "Carlos" };
+            var task = client.AskAsync(request, CancellationToken.None);
+            for (float t = 0; t < 20f && !task.IsCompleted; t += Time.unscaledDeltaTime) yield return null;
+            Assert.IsNotNull(task.Result, "Respuesta nula: ¿está encendido el proxy?");
+            StringAssert.Contains("ALEX", task.Result.reply, "El proxy debe recibir el modo alex");
         }
     }
 }

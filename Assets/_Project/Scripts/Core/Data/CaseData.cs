@@ -14,6 +14,8 @@ namespace Caso404.Data
         [SerializeField, TextArea(8, 30)] private string _introLetter;
         [SerializeField, TextArea] private string _alexIntroLine;
         [SerializeField] private FallbackLines _alexLines = new();
+        [Tooltip("Textos de los 3 botones de pregunta rápida a ALEX (crimen, evidencia, presionar), del GUION.")]
+        [SerializeField] private string[] _alexQuestions = new string[0];
         [SerializeField] private List<SceneData> _scenes = new();
         [SerializeField] private List<CharacterProfile> _suspects = new();
         [SerializeField] private CharacterProfile _culprit;
@@ -39,6 +41,8 @@ namespace Caso404.Data
         public string AlexIntroLine { get => _alexIntroLine; internal set => _alexIntroLine = value; }
         /// <summary>Frases de respaldo de ALEX en este caso (diálogo libre sin conexión).</summary>
         public FallbackLines AlexLines { get => _alexLines; internal set => _alexLines = value; }
+        /// <summary>Preguntas rápidas a ALEX en el orden crimen, evidencia, presionar (sus respuestas son AlexLines).</summary>
+        public string[] AlexQuestions { get => _alexQuestions; internal set => _alexQuestions = value; }
         public IReadOnlyList<SceneData> Scenes { get => _scenes; internal set => _scenes = new(value); }
         /// <summary>Personajes que se pueden acusar.</summary>
         public IReadOnlyList<CharacterProfile> Suspects { get => _suspects; internal set => _suspects = new(value); }
