@@ -411,6 +411,28 @@ namespace Caso404.UI
             field.caretColor = color;
             field.caretWidth = 2;
             field.selectionColor = UITheme.WithAlpha(color, 0.35f);
+
+            // Contador "12/200" a la derecha: se vuelve ámbar cerca del límite.
+            var counter = Text(go.transform, "Contador", "", theme.MonoFont, theme.SizeS - 1, UITheme.WithAlpha(theme.TextLight, 0.35f), TextAlignmentOptions.MidlineRight);
+            var crt = counter.rectTransform;
+            crt.anchorMin = new Vector2(1, 0); crt.anchorMax = new Vector2(1, 1); crt.pivot = new Vector2(1, 0.5f);
+            crt.sizeDelta = new Vector2(80, 0); crt.anchoredPosition = new Vector2(-14, 0);
+            Ignore(counter.gameObject);
+            if (area != null) area.offsetMax = new Vector2(-96, -4);
+            void UpdateCounter(string value)
+            {
+                int n = value?.Length ?? 0;
+                counter.text = n == 0 ? "" : $"{n}/{charLimit}";
+                counter.color = n > charLimit * 0.9f ? theme.WarningAmber : UITheme.WithAlpha(theme.TextLight, 0.35f);
+            }
+            field.onValueChanged.AddListener(UpdateCounter);
+            // El borde se ilumina mientras se escribe.
+            var frame = go.transform.Find("Marco")?.GetComponent<Image>();
+            if (frame != null)
+            {
+                field.onSelect.AddListener(_ => frame.color = UITheme.WithAlpha(color, 1f));
+                field.onDeselect.AddListener(_ => frame.color = UITheme.WithAlpha(color, 0.6f));
+            }
             Layout(go, minHeight: 48, preferredHeight: 48, flexibleWidth: 1);
             return field;
         }
