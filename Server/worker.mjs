@@ -5,7 +5,7 @@
 // - Usa las mismas instrucciones que el proxy local (prompts.mjs).
 // - Protecciones para que nadie gaste el cupo usándolo como chatbot: solo acepta pedidos con la forma de los del
 //   juego, con topes de tamaño, y limita las preguntas por jugador y por minuto.
-// - Si un modelo agotó su cupo gratuito, prueba el siguiente de GEMINI_MODELS. Si todos fallan, responde error y el
+// - Pregunta a la vez al mejor modelo y a uno de respaldo (GEMINI_MODELS); usa el mejor si llega a tiempo. Si los dos fallan, responde error y el
 //   juego usa las frases del guion: nunca se queda sin poder jugar.
 //
 // Publicar:  cd Server && npx wrangler deploy
@@ -15,6 +15,10 @@ import { ReplySchema, REPLY_JSON_SCHEMA, RequestSchema, systemPrompt, userMessag
 
 const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models";
 const MAX_BODY = 64_000;
+// Tiempo máximo por modelo (el juego espera como mucho 15 s).
+const MODEL_TIMEOUT_MS = 10_000;
+// Cuánto se espera al mejor modelo antes de usar la respuesta del de respaldo.
+const PREFERRED_WAIT_MS = 6_000;
 // Respaldo por si el límite de Cloudflare no está disponible: cuenta por instancia del servidor.
 const LOCAL_LIMIT = 20;
 const localHits = new Map();
@@ -23,7 +27,7 @@ const json = (status, obj) =>
   new Response(JSON.stringify(obj), { status, headers: { "content-type": "application/json; charset=utf-8" } });
 
 const modelsOf = (env) =>
-  (env.GEMINI_MODELS ?? "gemini-3.5-flash-lite,gemini-3.8-flash").split(",").map((m) => m.trim()).filter(Boolean);
+  (env.GEMINI_MODELS ?? "gemini-3.8-flash,gemini-3.5-flash-lite").split(",").map((m) => m.trim()).filter(Boolean);
 
 /** True si este jugador (por IP) todavía puede preguntar este minuto. */
 async function allowed(request, env) {
@@ -38,21 +42,34 @@ async function allowed(request, env) {
 }
 
 /** Una llamada a Gemini con salida JSON según el esquema. Devuelve la respuesta validada o lanza un error con status. */
-async function askGemini(model, payload, env) {
+async function askGemini(model, payload, env, withThinkingLevel = true) {
+  const generationConfig = {
+    responseMimeType: "application/json",
+    responseJsonSchema: REPLY_JSON_SCHEMA,
+    maxOutputTokens: 2048,
+    temperature: 0.8,
+  };
+  // Diálogo corto: que piense poco para responder rápido (el juego espera como mucho 15 s).
+  if (withThinkingLevel) generationConfig.thinkingConfig = { thinkingLevel: "low" };
   const response = await fetch(`${GEMINI_URL}/${encodeURIComponent(model)}:generateContent`, {
     method: "POST",
     headers: { "content-type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: systemPrompt(payload) }] },
       contents: [{ role: "user", parts: [{ text: userMessage(payload) }] }],
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseJsonSchema: REPLY_JSON_SCHEMA,
-        maxOutputTokens: 1024,
-        temperature: 0.8,
-      },
+      generationConfig,
     }),
+    // Si un modelo tarda, se corta y se prueba el siguiente a tiempo.
+    signal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
   });
+  // Un modelo que no acepta el nivel de razonamiento se reintenta sin él.
+  if (response.status === 400 && withThinkingLevel) {
+    const detail = await response.text();
+    if (/thinking/i.test(detail)) return askGemini(model, payload, env, false);
+    const error = new Error(`Gemini ${model}: 400 ${detail.slice(0, 300)}`);
+    error.status = 400;
+    throw error;
+  }
   if (!response.ok) {
     const error = new Error(`Gemini ${model}: ${response.status} ${(await response.text()).slice(0, 300)}`);
     error.status = response.status;
@@ -65,21 +82,29 @@ async function askGemini(model, payload, env) {
   return ReplySchema.parse(JSON.parse(text));
 }
 
-/** Prueba los modelos en orden; pasa al siguiente si uno agotó el cupo, no existe o falló. */
+/**
+ * Pregunta al mejor modelo y, a la vez, al de respaldo. Si el mejor responde en PREFERRED_WAIT_MS se usa su
+ * respuesta; si no (saturado, sin cupo o lento), la del respaldo, que para entonces ya suele estar lista.
+ * Así la espera del jugador no pasa de unos segundos aunque el mejor modelo esté saturado.
+ */
 async function answer(payload, env) {
-  let last;
-  for (const model of modelsOf(env)) {
-    try {
-      return await askGemini(model, payload, env);
-    } catch (e) {
-      last = e;
-      console.error(e.message);
-      // Clave inválida o sin permiso: ningún modelo va a funcionar.
-      if (e.status === 400 && /api key/i.test(e.message)) break;
-      if (e.status === 403) break;
-    }
+  const [best, backup] = modelsOf(env);
+  if (!best) throw new Error("sin modelos configurados");
+  const settle = (model) => askGemini(model, payload, env).then(
+    (reply) => ({ ok: true, reply }),
+    (error) => { console.error(error.message); return { ok: false, error }; });
+  const bestTry = settle(best);
+  const backupTry = backup ? settle(backup) : null;
+  const first = await Promise.race([bestTry, new Promise((r) => setTimeout(() => r(null), PREFERRED_WAIT_MS))]);
+  if (first?.ok) return first.reply;
+  if (backupTry) {
+    const b = await backupTry;
+    if (b.ok) return b.reply;
   }
-  throw last ?? new Error("sin modelos configurados");
+  // El respaldo falló: se espera al mejor hasta su tiempo máximo.
+  const late = await bestTry;
+  if (late.ok) return late.reply;
+  throw late.error;
 }
 
 export default {
