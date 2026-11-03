@@ -31,6 +31,14 @@ namespace Caso404.Core
         public string variantId;
     }
 
+    /// <summary>Últimas líneas habladas con un personaje (o con ALEX), para que la IA recuerde lo ya conversado.</summary>
+    [Serializable]
+    public class ConversationMemory
+    {
+        public string characterId;
+        public List<string> lines = new();
+    }
+
     /// <summary>
     /// Estado único y serializable de la partida. Solo IDs (nunca referencias a assets),
     /// y solo listas porque JsonUtility no serializa diccionarios.
@@ -64,5 +72,6 @@ namespace Caso404.Core
         public List<HypothesisAnswer> hypothesisAnswers = new();
         public List<string> decisionsTaken = new();   // "dec_c1_s1:A"
         public List<AccusationRecord> accusations = new();
+        public List<ConversationMemory> conversations = new();
     }
 }
