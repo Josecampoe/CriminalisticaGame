@@ -8,13 +8,30 @@ Da voz a dos tipos de personaje:
 
 La IA **nunca decide nada**: el juego valida cada respuesta, y la confianza, las contradicciones y los finales se calculan con la lógica del juego.
 
-## Cómo usarlo
+## Servidor público (lo que usan los jugadores)
+
+El juego viene configurado para hablar con **https://caso404-ia.tallerpro-ai-proxy.workers.dev**, que es `worker.mjs` publicado en Cloudflare Workers (plan gratuito, sin tarjeta). Así cualquier persona que descargue el juego tiene IA sin instalar Node ni conseguir una clave.
+
+- **La clave vive solo en Cloudflare**, como secreto. Se pone una vez: `cd Server` y `npx wrangler secret put GEMINI_API_KEY` (pega la clave cuando la pida). Nunca va en git ni en el juego.
+- **Usa una clave de un proyecto de Google sin facturación**: así es imposible que haya cobros; como mucho se acaba el cupo gratuito del día y el juego usa el guion hasta que se renueve.
+- **Protecciones**: solo acepta pedidos con la forma de los del juego (topes de tamaño, 400 caracteres por pregunta), exige la cabecera `X-Caso404-Client` y limita a 20 preguntas por minuto por jugador.
+- **Varios modelos**: si el primero de `GEMINI_MODELS` (en `wrangler.toml`) agota su cupo, prueba el siguiente.
+- **Publicar cambios**: `cd Server` y `npx wrangler deploy`. **Ver errores en vivo**: `npx wrangler tail`.
+- `/health` responde `"ok": true` solo si el servidor tiene la clave. El menú del juego muestra "IA conectada" o "Sin conexión con la IA".
+
+Las instrucciones de los personajes y de ALEX están en `prompts.mjs` y las comparten los dos servidores.
+
+## Probar con el proxy en tu equipo (desarrollo)
+
+Crea un archivo `ia.json` en la raíz del proyecto (o junto a `ElCaso404.exe`) con `{ "proxyUrl": "http://127.0.0.1:8790/dialogue" }` y arranca el proxy local como se explica abajo. Con `{ "offline": true }` el juego no usa IA. Ese archivo está ignorado en git.
+
+## Cómo usar el proxy local
 
 1. Consigue una clave **gratuita** de Gemini: entra a https://aistudio.google.com/apikey con tu cuenta de Google y pulsa *Create API key*. No pide tarjeta.
 2. Arranca el proxy (deja la ventana abierta mientras juegas):
    - **Fácil:** clic derecho en `Server/iniciar-proxy.ps1` → *Ejecutar con PowerShell*. Te pide la clave (oculta, no la guarda) e instala lo necesario la primera vez. Si Windows bloquea el script: `powershell -ExecutionPolicy Bypass -File Server\iniciar-proxy.ps1`.
    - **A mano:** en PowerShell, `cd Server`, `npm install` (solo la primera vez), `$env:GEMINI_API_KEY = "tu-clave"`, `node proxy.mjs`.
-3. Juega normal (Editor o `ElCaso404.exe`). `AiSettings` ya apunta a `http://127.0.0.1:8790/dialogue` con *Use Offline* desmarcado.
+3. Crea el `ia.json` de arriba para que el juego use este proxy en vez del servidor público, y juega normal.
 
 Si el proxy está apagado, el juego lo detecta en 2 segundos y usa las frases del guion: se puede jugar completo sin IA.
 
