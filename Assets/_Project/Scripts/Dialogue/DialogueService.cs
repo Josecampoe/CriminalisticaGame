@@ -45,7 +45,6 @@ namespace Caso404.Dialogue
         readonly EvidenceService _evidence;
         readonly IAiClient _ai;
         readonly CaseData _case;
-        readonly List<string> _history = new();
         bool _pressedThisConversation;
 
         public CharacterProfile Current { get; private set; }
@@ -63,7 +62,10 @@ namespace Caso404.Dialogue
         {
             Current = character;
             _pressedThisConversation = false;
-            _history.Clear();
+            // La memoria sigue entre conversaciones y escenas; se marca el corte para que la IA lo sepa.
+            var past = character != null ? _state.GetConversation(character.Id) : null;
+            if (past != null && past.Count > 0 && past[past.Count - 1] != NewConversationMark)
+                _state.RememberConversation(character.Id, NewConversationMark);
         }
 
         /// <summary>Termina la conversación actual.</summary>
@@ -106,7 +108,7 @@ namespace Caso404.Dialogue
         /// <summary>Pregunta por un tema (o con texto libre). Nunca falla: si la IA no responde, usa el respaldo.</summary>
         public async Task<DialogueLine> AskAsync(CharacterProfile c, DialogueTopic topic, string question, CancellationToken ct)
         {
-            if (IsRefusing(c)) return Remember(new DialogueLine { Speaker = c.DisplayName, Text = c.RefusalLine, Emotion = "enojado" }, question ?? topic.ToString());
+            if (IsRefusing(c)) return Remember(c, new DialogueLine { Speaker = c.DisplayName, Text = c.RefusalLine, Emotion = "enojado" }, question ?? topic.ToString());
             if (topic == DialogueTopic.Calm) return Calm(c);
             if (topic == DialogueTopic.Press) return Press(c);
 
@@ -117,7 +119,7 @@ namespace Caso404.Dialogue
 
             if (!AiReplyValidator.IsValid(reply, c, _state)) reply = OfflineAiClient.BuildReply(c, topic, question);
             _state.LearnFacts(reply.usedFactIds.Where(f => c.Secrets.All(s => s.FactId != f)));
-            return Remember(new DialogueLine { Speaker = c.DisplayName, Text = reply.reply, Emotion = reply.emotion }, question);
+            return Remember(c, new DialogueLine { Speaker = c.DisplayName, Text = reply.reply, Emotion = reply.emotion }, question);
         }
 
         /// <summary>Evidencias analizadas y testimonios que se le pueden presentar a un personaje.</summary>
@@ -137,7 +139,7 @@ namespace Caso404.Dialogue
             if (c.CooperatesAfterSeeing != null && item.Evidence != null && item.Evidence.Id == c.CooperatesAfterSeeing.Id && IsRefusing(c))
             {
                 _state.AddFlag($"coop_{c.Id}");
-                return Remember(new DialogueLine { Speaker = c.DisplayName, Text = c.Fallback.Evidence.Text, Emotion = "triste" }, item.Label);
+                return Remember(c, new DialogueLine { Speaker = c.DisplayName, Text = c.Fallback.Evidence.Text, Emotion = "triste" }, item.Label);
             }
             var lie = c.Lies.FirstOrDefault(l => l != null && !_state.IsLieExposed(l.Id) &&
                 ((item.Evidence != null && l.IsRefutedBy(item.Evidence, _state)) || (item.FactId != null && l.IsRefutedByFact(item.FactId))));
@@ -151,7 +153,7 @@ namespace Caso404.Dialogue
             if (lie == null)
             {
                 var reply = granted ? c.Lies.First(l => l != null && l.IsRefutedBy(item.Evidence)).ExposedResponse : c.Fallback.Evidence.Text;
-                return Remember(new DialogueLine { Speaker = c.DisplayName, Text = reply, Emotion = granted ? "nervioso" : "defensivo" }, item.Label);
+                return Remember(c, new DialogueLine { Speaker = c.DisplayName, Text = reply, Emotion = granted ? "nervioso" : "defensivo" }, item.Label);
             }
 
             _state.ExposeLie(lie.Id);
@@ -160,7 +162,7 @@ namespace Caso404.Dialogue
             LieExposed?.Invoke(c, lie);
             if (lie.TriggersDecision != null) DecisionTriggered?.Invoke(lie.TriggersDecision);
             var text = $"«{lie.Statement}»... {lie.ExposedResponse}";
-            return Remember(new DialogueLine { Speaker = c.DisplayName, Text = text, Emotion = "nervioso", ExposedLie = true }, item.Label);
+            return Remember(c, new DialogueLine { Speaker = c.DisplayName, Text = text, Emotion = "nervioso", ExposedLie = true }, item.Label);
         }
 
         /// <summary>
@@ -185,7 +187,7 @@ namespace Caso404.Dialogue
         public DialogueLine AskExtra(CharacterProfile c, ExtraTopic topic)
         {
             _state.LearnFacts(topic.Line.RevealsFactIds);
-            return Remember(new DialogueLine { Speaker = c.DisplayName, Text = topic.Line.Text, Emotion = "neutral" }, topic.Label);
+            return Remember(c, new DialogueLine { Speaker = c.DisplayName, Text = topic.Line.Text, Emotion = "neutral" }, topic.Label);
         }
 
         DialogueLine Press(CharacterProfile c)
@@ -193,14 +195,14 @@ namespace Caso404.Dialogue
             _pressedThisConversation = true;
             bool anyExposed = c.Lies.Any(l => l != null && _state.IsLieExposed(l.Id));
             var text = anyExposed ? c.Fallback.Press.Text : c.Fallback.Crime.Text;
-            return Remember(new DialogueLine { Speaker = c.DisplayName, Text = text, Emotion = anyExposed ? "nervioso" : "enojado" }, "Presionar");
+            return Remember(c, new DialogueLine { Speaker = c.DisplayName, Text = text, Emotion = anyExposed ? "nervioso" : "enojado" }, "Presionar");
         }
 
         DialogueLine Calm(CharacterProfile c)
         {
             var secret = _pressedThisConversation ? null : FindCalmSecret(c);
             if (secret == null)
-                return Remember(new DialogueLine { Speaker = c.DisplayName, Text = c.Fallback.Crime.Text, Emotion = "triste" }, "Hablar con calma");
+                return Remember(c, new DialogueLine { Speaker = c.DisplayName, Text = c.Fallback.Crime.Text, Emotion = "triste" }, "Hablar con calma");
             return RevealSecret(c, secret, "Hablar con calma");
         }
 
@@ -211,7 +213,7 @@ namespace Caso404.Dialogue
             _state.AddFlags(secret.SetsFlags);
             SecretRevealed?.Invoke(c, secret);
             if (secret.TriggersDecision != null) DecisionTriggered?.Invoke(secret.TriggersDecision);
-            return Remember(new DialogueLine { Speaker = c.DisplayName, Text = secret.RevealText, Emotion = "triste" }, playerSaid);
+            return Remember(c, new DialogueLine { Speaker = c.DisplayName, Text = secret.RevealText, Emotion = "triste" }, playerSaid);
         }
 
         SecretEntry FindCalmSecret(CharacterProfile c) => c?.Secrets.FirstOrDefault(s =>
@@ -226,14 +228,17 @@ namespace Caso404.Dialogue
             AlexTrust = _state.AlexTrust,
             AnalyzedEvidence = _evidence.AnalyzedEvidence.Select(e => $"{e.Id}: {e.AnalysisResult}").ToList(),
             KnownFacts = _state.State.knownFactIds.ToList(),
-            History = _history.TakeLast(8).ToList(),
+            History = _state.GetConversation(c.Id).TakeLast(10).ToList(),
             ExposedLieIds = c.Lies.Where(l => l != null && _state.IsLieExposed(l.Id)).Select(l => l.Id).ToList()
         };
 
-        DialogueLine Remember(DialogueLine line, string playerSaid)
+        /// <summary>Marca en la memoria donde empieza una conversación nueva con el mismo personaje.</summary>
+        public const string NewConversationMark = "(— otra conversación, más tarde —)";
+
+        DialogueLine Remember(CharacterProfile c, DialogueLine line, string playerSaid)
         {
-            if (!string.IsNullOrEmpty(playerSaid)) _history.Add($"Rivera: {playerSaid}");
-            _history.Add($"{line.Speaker}: {line.Text}");
+            if (!string.IsNullOrEmpty(playerSaid)) _state.RememberConversation(c.Id, $"Rivera: {playerSaid}");
+            _state.RememberConversation(c.Id, $"{line.Speaker}: {line.Text}");
             return line;
         }
     }
