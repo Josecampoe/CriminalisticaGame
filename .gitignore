@@ -54,3 +54,7 @@ Assets/_Project/Art/ThirdParty/**/*.url.meta
 
 # Dependencias del proxy de IA
 Server/node_modules/
+
+# Cloudflare (wrangler) y configuración local de la IA
+Server/.wrangler/
+/ia.json
