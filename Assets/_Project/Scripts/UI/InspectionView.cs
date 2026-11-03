@@ -26,11 +26,12 @@ namespace Caso404.UI
         protected override void Build()
         {
             var rt = UIFactory.Stretch((RectTransform)transform);
-            var dim = UIFactory.Panel(rt, "Dim", UITheme.WithAlpha(_theme.BgDark, 0.9f));
-            UIFactory.Stretch(dim.rectTransform);
+            UIFactory.Backdrop(rt, _theme, 0.86f);
 
-            _title = UIFactory.Text(rt, "Title", "", _theme.TitleFont, _theme.SizeL, _theme.TextLight, TextAlignmentOptions.Center);
-            UIFactory.Place(_title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -40), new Vector2(1400, 56));
+            var kicker = UIFactory.Kicker(rt, "Inspección", _theme, _theme.WarningAmber, TextAlignmentOptions.Center);
+            UIFactory.Place(kicker.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -44), new Vector2(800, 24));
+            _title = UIFactory.Text(rt, "Title", "", _theme.TitleFont, 44, _theme.TextLight, TextAlignmentOptions.Center);
+            UIFactory.Place(_title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -70), new Vector2(1400, 60));
 
             _image = UIFactory.Rect("View", rt).gameObject.AddComponent<RawImage>();
             UIFactory.Place(_image.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 30), new Vector2(620, 620));
@@ -41,15 +42,15 @@ namespace Caso404.UI
             _detail = UIFactory.Text(rt, "Detail", "", _theme.BodyFont, _theme.SizeBody, _theme.WarningAmber, TextAlignmentOptions.Center);
             UIFactory.Place(_detail.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 160), new Vector2(1200, 40));
 
-            var hint = UIFactory.Text(rt, "Hint", "Mantén clic izquierdo y mueve el mouse para girar el objeto", _theme.BodyFont, _theme.SizeS,
-                _theme.Muted, TextAlignmentOptions.Center);
+            var hint = UIFactory.Text(rt, "Hint", "<mark=#EDEDED26 padding=\"10,10,4,4\"><b>Clic izquierdo</b></mark>  mantén y mueve el mouse para girar el objeto", _theme.BodyFont, _theme.SizeS,
+                UITheme.WithAlpha(_theme.TextLight, 0.6f), TextAlignmentOptions.Center);
             UIFactory.Place(hint.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 128), new Vector2(1200, 28));
 
             var buttons = UIFactory.Rect("Buttons", rt);
             UIFactory.Place(buttons, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 48), new Vector2(640, 56));
             UIFactory.HLayout(buttons.gameObject, 16);
-            _keep = UIFactory.Button(buttons, "Guardar en expediente", _theme, _theme.WarningAmber, _theme.Ink, OnKeep);
-            _drop = UIFactory.Button(buttons, "Soltar", _theme, _theme.Muted, _theme.TextLight, OnDrop);
+            _keep = UIFactory.Button(buttons, "Guardar en expediente", _theme, _theme.WarningAmber, _theme.Ink, OnKeep, 56);
+            _drop = UIFactory.Ghost(buttons, "Soltar", _theme, _theme.TextLight, OnDrop);
         }
 
         void OnEnable()

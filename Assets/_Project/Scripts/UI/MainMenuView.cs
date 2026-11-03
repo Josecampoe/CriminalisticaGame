@@ -24,9 +24,7 @@ namespace Caso404.UI
         Button _continue;
         RectTransform _options;
         TextMeshProUGUI _sensValue;
-        Button _invert;
-        Button _fullscreen;
-        Button _headBob;
+        RectTransform _toggles;
 
         void Awake()
         {
@@ -45,18 +43,33 @@ namespace Caso404.UI
             var bg = UIFactory.Panel(rt, "Bg", UITheme.WithAlpha(_theme.BgDark, 0.62f));
             UIFactory.Stretch(bg.rectTransform);
 
-            _title = UIFactory.Text(rt, "Title", "EL CASO 404", _theme.TitleFont, 96, _theme.TextLight, TextAlignmentOptions.Center);
-            UIFactory.Place(_title.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 260), new Vector2(1400, 130));
-            var sub = UIFactory.Text(rt, "Subtitle", "Valdora, 2031 — Unidad de Criminalística", _theme.MonoFont, _theme.SizeM, _theme.AlexCyan, TextAlignmentOptions.Center);
-            UIFactory.Place(sub.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 170), new Vector2(1400, 40));
+            if (_theme.VignetteSprite != null)
+            {
+                var vignette = UIFactory.Panel(rt, "Vineta", new Color(0f, 0f, 0f, 0.95f));
+                vignette.sprite = _theme.VignetteSprite;
+                UIFactory.Stretch(vignette.rectTransform);
+                vignette.raycastTarget = false;
+            }
+
+            var kicker = UIFactory.Kicker(rt, "Expediente reservado", _theme, UITheme.WithAlpha(_theme.AccentRed, 0.9f), TextAlignmentOptions.Center);
+            UIFactory.Place(kicker.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 345), new Vector2(800, 24));
+            _title = UIFactory.Text(rt, "Title", $"EL CASO <color={UITheme.Hex(_theme.AccentRed)}>404</color>", _theme.TitleFont, 132, _theme.TextLight, TextAlignmentOptions.Center);
+            _title.characterSpacing = 6f;
+            UIFactory.Place(_title.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 250), new Vector2(1500, 160));
+            var tshadow = _title.gameObject.AddComponent<Shadow>();
+            tshadow.effectColor = new Color(0f, 0f, 0f, 0.8f);
+            tshadow.effectDistance = new Vector2(3f, -4f);
+            var sub = UIFactory.Text(rt, "Subtitle", "Valdora, 2031  ·  Unidad de Criminalística", _theme.MonoFont, _theme.SizeM - 2, _theme.AlexCyan, TextAlignmentOptions.Center);
+            sub.characterSpacing = 4f;
+            UIFactory.Place(sub.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 150), new Vector2(1400, 40));
 
             var buttons = UIFactory.Rect("Buttons", rt);
-            UIFactory.Place(buttons, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -90), new Vector2(460, 340));
-            UIFactory.VLayout(buttons.gameObject, 16);
+            UIFactory.Place(buttons, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -110), new Vector2(440, 330));
+            UIFactory.VLayout(buttons.gameObject, 14);
             UIFactory.Button(buttons, "Nueva partida", _theme, _theme.Paper, _theme.Ink, StartNewGame, 64, _theme.SizeM);
-            _continue = UIFactory.Button(buttons, "Continuar", _theme, _theme.Paper, _theme.Ink, ContinueGame, 64, _theme.SizeM);
-            UIFactory.Button(buttons, "Opciones", _theme, _theme.Paper, _theme.Ink, () => _options.gameObject.SetActive(true), 56);
-            UIFactory.Button(buttons, "Salir", _theme, _theme.Muted, _theme.TextLight, Quit, 56);
+            _continue = UIFactory.Ghost(buttons, "Continuar", _theme, _theme.TextLight, ContinueGame, 60, _theme.SizeM - 2);
+            UIFactory.Ghost(buttons, "Opciones", _theme, _theme.TextLight, () => _options.gameObject.SetActive(true), 56);
+            UIFactory.Ghost(buttons, "Salir", _theme, _theme.Muted, Quit, 56);
             _continue.interactable = _saves.TryLoad(out _);
 
             BuildOptions(rt);
@@ -67,32 +80,39 @@ namespace Caso404.UI
 
         void BuildOptions(RectTransform root)
         {
-            var bg = UIFactory.Panel(root, "Options", _theme.BgDark);
-            _options = UIFactory.Stretch(bg.rectTransform);
-            var box = UIFactory.Rect("Box", _options);
-            UIFactory.Place(box, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(760, 590));
-            UIFactory.VLayout(box.gameObject, 18);
-            var title = UIFactory.Text(box, "Title", "OPCIONES", _theme.TitleFont, _theme.SizeL, _theme.TextLight, TextAlignmentOptions.Center);
-            UIFactory.Layout(title.gameObject, preferredHeight: 60);
+            var bg = UIFactory.Backdrop(root, _theme, 0.92f);
+            bg.gameObject.name = "Options";
+            _options = bg.rectTransform;
+            var boxBg = UIFactory.Card(_options, "Caja", new Color(0.06f, 0.065f, 0.08f, 0.98f), _theme);
+            UIFactory.Frame(boxBg.transform, _theme, UITheme.WithAlpha(_theme.TextLight, 0.12f));
+            var box = boxBg.rectTransform;
+            UIFactory.Place(box, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(800, 548));
+            var bv = UIFactory.VLayout(box.gameObject, 16, 0);
+            bv.padding = new RectOffset(48, 48, 40, 40);
+            UIFactory.Kicker(box, "Configuración", _theme, _theme.AlexCyan);
+            var title = UIFactory.Text(box, "Title", "Opciones", _theme.TitleFont, _theme.SizeL + 4, _theme.TextLight);
+            UIFactory.Layout(title.gameObject, preferredHeight: 50);
 
             _sensValue = UIFactory.Text(box, "SensLabel", "", _theme.BodyFont, _theme.SizeBody, _theme.TextLight);
             UIFactory.Layout(_sensValue.gameObject, preferredHeight: 30);
             var sliderGo = DefaultControls.CreateSlider(new DefaultControls.Resources());
             sliderGo.transform.SetParent(box, false);
             UIFactory.Layout(sliderGo, minHeight: 30, preferredHeight: 30);
-            foreach (var img in sliderGo.GetComponentsInChildren<Image>()) img.color = _theme.Paper;
+            foreach (var img in sliderGo.GetComponentsInChildren<Image>()) { img.color = UITheme.WithAlpha(_theme.TextLight, 0.15f); UIFactory.Round(img, _theme, 0.5f); }
             var fill = sliderGo.transform.Find("Fill Area/Fill");
             if (fill != null) fill.GetComponent<Image>().color = _theme.AlexCyan;
+            var handle = sliderGo.transform.Find("Handle Slide Area/Handle");
+            if (handle != null) handle.GetComponent<Image>().color = _theme.TextLight;
             var slider = sliderGo.GetComponent<Slider>();
             slider.minValue = GameSettings.MinSensitivity;
             slider.maxValue = GameSettings.MaxSensitivity;
             slider.value = GameSettings.Sensitivity;
             slider.onValueChanged.AddListener(v => { GameSettings.Sensitivity = v; RefreshOptions(); });
 
-            _invert = UIFactory.Button(box, "", _theme, _theme.Paper, _theme.Ink, () => { GameSettings.InvertY = !GameSettings.InvertY; RefreshOptions(); }, 52);
-            _headBob = UIFactory.Button(box, "", _theme, _theme.Paper, _theme.Ink, () => { GameSettings.HeadBob = !GameSettings.HeadBob; RefreshOptions(); }, 52);
-            _fullscreen = UIFactory.Button(box, "", _theme, _theme.Paper, _theme.Ink, () => { GameSettings.Fullscreen = !GameSettings.Fullscreen; RefreshOptions(); }, 52);
-            UIFactory.Button(box, "Volver", _theme, _theme.Muted, _theme.TextLight, () => _options.gameObject.SetActive(false), 52);
+            _toggles = UIFactory.Rect("Casillas", box);
+            UIFactory.VLayout(_toggles.gameObject, 10);
+            UIFactory.Layout(_toggles.gameObject, preferredHeight: 3 * 52 + 20);
+            UIFactory.Ghost(box, "Volver", _theme, _theme.TextLight, () => _options.gameObject.SetActive(false), 52);
             RefreshOptions();
             _options.gameObject.SetActive(false);
         }
@@ -100,9 +120,11 @@ namespace Caso404.UI
         void RefreshOptions()
         {
             _sensValue.text = $"Sensibilidad del mouse: {GameSettings.Sensitivity / GameSettings.DefaultSensitivity:0.0}x";
-            UIFactory.SetLabel(_invert, (GameSettings.InvertY ? "[x]" : "[  ]") + "  Invertir eje Y");
-            UIFactory.SetLabel(_headBob, (GameSettings.HeadBob ? "[x]" : "[  ]") + "  Balanceo de cámara al caminar");
-            UIFactory.SetLabel(_fullscreen, (GameSettings.Fullscreen ? "[x]" : "[  ]") + "  Pantalla completa");
+            // Las casillas se rehacen para mostrar la marca (✓) del estado actual.
+            for (int i = _toggles.childCount - 1; i >= 0; i--) DestroyImmediate(_toggles.GetChild(i).gameObject);
+            UIFactory.CheckRow(_toggles, "Invertir eje Y", _theme, GameSettings.InvertY, true, () => { GameSettings.InvertY = !GameSettings.InvertY; RefreshOptions(); }, false);
+            UIFactory.CheckRow(_toggles, "Balanceo de cámara al caminar", _theme, GameSettings.HeadBob, true, () => { GameSettings.HeadBob = !GameSettings.HeadBob; RefreshOptions(); }, false);
+            UIFactory.CheckRow(_toggles, "Pantalla completa", _theme, GameSettings.Fullscreen, true, () => { GameSettings.Fullscreen = !GameSettings.Fullscreen; RefreshOptions(); }, false);
         }
 
         /// <summary>Empieza una partida nueva en la primera escena del caso 1.</summary>

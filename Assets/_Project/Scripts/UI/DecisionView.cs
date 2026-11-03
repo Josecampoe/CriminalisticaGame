@@ -4,6 +4,7 @@ using Caso404.Data;
 using Caso404.Decisions;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Caso404.UI
 {
@@ -20,6 +21,7 @@ namespace Caso404.UI
 
         TextMeshProUGUI _prompt;
         TextMeshProUGUI _alex;
+        RectTransform _alexBox;
         TextMeshProUGUI _confirmText;
         RectTransform _options;
         RectTransform _confirm;
@@ -31,25 +33,32 @@ namespace Caso404.UI
         protected override void Build()
         {
             var rt = UIFactory.Stretch((RectTransform)transform);
-            var dim = UIFactory.Panel(rt, "Dim", UITheme.WithAlpha(_theme.BgDark, 0.97f));
-            UIFactory.Stretch(dim.rectTransform);
+            UIFactory.Backdrop(rt, _theme, 0.94f);
 
-            _prompt = UIFactory.Text(rt, "Prompt", "", _theme.TitleFont, _theme.SizeXL, _theme.TextLight, TextAlignmentOptions.Center);
-            UIFactory.Place(_prompt.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -120), new Vector2(1500, 80));
-            _alex = UIFactory.Text(rt, "Alex", "", _theme.MonoFont, _theme.SizeBody, _theme.AlexCyan, TextAlignmentOptions.Center);
-            UIFactory.Place(_alex.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -220), new Vector2(1300, 90));
+            var kicker = UIFactory.Kicker(rt, "Decisión", _theme, _theme.AccentRed, TextAlignmentOptions.Center);
+            UIFactory.Place(kicker.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -110), new Vector2(800, 24));
+            _prompt = UIFactory.Text(rt, "Prompt", "", _theme.TitleFont, 54, _theme.TextLight, TextAlignmentOptions.Center);
+            UIFactory.Place(_prompt.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -140), new Vector2(1500, 80));
+
+            // Recomendación de ALEX como una franja de terminal.
+            var alexBg = UIFactory.Round(UIFactory.Panel(rt, "Alex", new Color(0.04f, 0.08f, 0.09f, 0.92f)), _theme);
+            _alexBox = alexBg.rectTransform;
+            UIFactory.Place(_alexBox, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -250), new Vector2(1100, 110));
+            UIFactory.Frame(alexBg.transform, _theme, UITheme.WithAlpha(_theme.AlexCyan, 0.35f));
+            _alex = UIFactory.Text(alexBg.transform, "Texto", "", _theme.MonoFont, _theme.SizeBody, _theme.AlexCyan, TextAlignmentOptions.MidlineLeft);
+            UIFactory.Stretch(_alex.rectTransform, 28, 10, 28, 10);
 
             _options = UIFactory.Rect("Options", rt);
-            UIFactory.Place(_options, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -60), new Vector2(980, 300));
-            UIFactory.VLayout(_options.gameObject, 18);
+            UIFactory.Place(_options, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -400), new Vector2(1100, 360));
+            UIFactory.VLayout(_options.gameObject, 16);
 
             _confirm = UIFactory.Rect("Confirm", rt);
-            UIFactory.Place(_confirm, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -60), new Vector2(980, 260));
+            UIFactory.Place(_confirm, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -400), new Vector2(1000, 300));
             UIFactory.VLayout(_confirm.gameObject, 18);
             _confirmText = UIFactory.Text(_confirm, "Text", "", _theme.BodyFont, _theme.SizeM, _theme.TextLight, TextAlignmentOptions.Center);
             UIFactory.Layout(_confirmText.gameObject, preferredHeight: 110);
             UIFactory.Button(_confirm, "Confirmar", _theme, _theme.AccentRed, _theme.TextLight, ConfirmPending, 64, _theme.SizeM);
-            UIFactory.Button(_confirm, "Volver", _theme, _theme.Muted, _theme.TextLight, CancelPending, 56);
+            UIFactory.Ghost(_confirm, "Volver", _theme, _theme.Muted, CancelPending, 56);
             _confirm.gameObject.SetActive(false);
         }
 
@@ -61,14 +70,23 @@ namespace Caso404.UI
             _pending = null;
             _prompt.text = decision.Prompt;
             var recommended = decision.FindOption(decision.AlexRecommendedOptionId);
-            _alex.text = recommended != null ? $"ALEX recomienda: {recommended.Text}\n\"{decision.AlexRecommendationText}\"" : "";
+            _alex.text = recommended != null ? $"<b>ALEX</b>  <color={UITheme.Hex(UITheme.WithAlpha(_theme.AlexCyan, 0.6f))}>recomienda: {recommended.Text}</color>\n“{decision.AlexRecommendationText}”" : "";
+            _alexBox.gameObject.SetActive(recommended != null);
             UIFactory.Clear(_options);
+            char letter = 'A';
             foreach (var option in decision.Options)
             {
                 var opt = option;
-                string label = (opt == recommended) ? $"{opt.Text}   <size=70%>(recomendado por ALEX)</size>" : opt.Text;
-                var b = UIFactory.Button(_options, label, _theme, _theme.Paper, _theme.Ink, () => Pick(opt), 72, _theme.SizeM);
-                b.interactable = _game.Decisions.IsAvailable(opt);
+                bool available = _game.Decisions.IsAvailable(opt);
+                string tag = opt == recommended ? $"   <color={UITheme.Hex(_theme.AlexCyan)}>· RECOMENDADA POR ALEX</color>" : "";
+                string label = $"<size=60%><font=\"{_theme.MonoFont.name}\"><color={UITheme.Hex(UITheme.WithAlpha(_theme.TextLight, 0.5f))}>OPCIÓN {letter}</color>{tag}</font></size>\n{opt.Text}";
+                letter++;
+                var b = UIFactory.Button(_options, label, _theme, UITheme.WithAlpha(_theme.TextLight, 0.07f), _theme.TextLight, () => Pick(opt), 96, _theme.SizeM);
+                var t = b.GetComponentInChildren<TextMeshProUGUI>();
+                t.alignment = TextAlignmentOptions.MidlineLeft;
+                t.fontStyle = FontStyles.Normal;
+                t.rectTransform.offsetMin = new Vector2(36, 6);
+                b.interactable = available;
             }
             _options.gameObject.SetActive(true);
             _confirm.gameObject.SetActive(false);
@@ -79,7 +97,7 @@ namespace Caso404.UI
         {
             if (!_decision.Irreversible) { Apply(option); return; }
             _pending = option;
-            _confirmText.text = $"«{option.Text}»\n¿Seguro? Esta decisión no se puede deshacer.";
+            _confirmText.text = $"«{option.Text}»\n<size=75%><color={UITheme.Hex(UITheme.WithAlpha(_theme.TextLight, 0.6f))}>¿Seguro? Esta decisión no se puede deshacer.</color></size>";
             _options.gameObject.SetActive(false);
             _confirm.gameObject.SetActive(true);
         }

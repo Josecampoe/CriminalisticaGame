@@ -30,6 +30,10 @@ MonoBehaviour:
     _press:
       _text: "Las placas no son legibles. No podemos identificar ese veh\xEDculo."
       _revealsFactIds: []
+  _alexQuestions:
+  - "\xBFQui\xE9n crees que fue?"
+  - "\xBFY la tarjeta de Valeria?"
+  - "\xBFSe puede leer la placa de ese carro?"
   _scenes:
   - {fileID: 11400000, guid: f975dfb2e4cdacd4c8ee08b0d60ff136, type: 2}
   - {fileID: 11400000, guid: 84474c94da8e85c4d9fbc2ddba6cdb95, type: 2}

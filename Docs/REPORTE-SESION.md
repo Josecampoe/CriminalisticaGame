@@ -1,5 +1,31 @@
 # Reporte de sesiones — El Caso 404
 
+## Sesión de interfaz (2 de noviembre de 2026)
+
+**En resumen:** se rediseñó toda la interfaz con un mismo estilo noir: menú, carta, intros, HUD, inspección, expediente, ALEX, diálogos, tablero, decisión, acusación y final. También se mejoró cómo se ven los personajes: postura natural y bordes de ropa limpios. **Pruebas en verde: 45 EditMode y 6 PlayMode.** Capturas en `Docs/capturas/despues/ui_*.png`.
+
+**Revisión de Git al empezar:** el PR de Majo (#16) y el de José (#15) están fusionados; el de Daniel (`daniel/ia`) nunca se abrió. Por eso `main` **no compila ahora mismo**: el panel de ALEX de Majo usa `AlexService.AskAsync`, que viene en la parte de Daniel. Probé la fusión de `daniel/ia` sobre el `main` actual y entra sin conflictos. Daniel debe abrir y fusionar su PR antes que los de esta sesión. Sus commits anteriores (101) sí están en `main`.
+
+**Qué cambió:**
+- **Fuentes:** máquina de escribir en títulos y papel, sans moderna en la interfaz y monoespaciada para ALEX. Antes todo usaba la misma fuente de sistema.
+- **Diálogos:** formato de cine con el personaje de frente, emoción como etiqueta, atajos 1–6, Enter para escribir y "pensando…" animado.
+- **ALEX:** historial de chat, preguntas rápidas correctas en cada caso, tarjetas con estado y campo de texto propio.
+- **Cartas:** papel con clip y membrete; las intros se ajustan al texto.
+- **Tablero y acusación:** casillas reales con ✓, opciones bloqueadas que dicen qué falta analizar y tarjetas de sospechosos.
+- **Personajes:** brazos relajados en reposo y mangas y cuello sin dientes.
+
+**Qué probar:**
+1. Habla con Laura: prueba las teclas 1–6, escribe una pregunta y pulsa Enter.
+2. Abre ALEX (Q): usa las preguntas rápidas, escríbele y cuestiona una observación.
+3. Recorre el expediente (Tab), el tablero (H) y una decisión.
+4. En el caso 2, revisa que las preguntas rápidas a ALEX hablen de Valeria y de la placa.
+
+**Segunda pasada:** los personajes llevan ahora prendas que se leen como ropa: zapatos con volumen, costuras, puños y cinturilla, brazos y piernas menos musculosos y manos relajadas. El resumen de cada caso es una hoja con clip, sello y texto a máquina. Los campos de texto muestran un contador de caracteres.
+
+Decisiones U1–U10 en `Docs/DECISIONES.md`.
+
+---
+
 ## Sesión IA (2 de noviembre de 2026)
 
 **En resumen:** la IA real quedó conectada para los sospechosos y para ALEX. ALEX ahora acepta preguntas escritas: parece ayudar, pero empuja con sutileza hacia su sospechoso falso, sin inventar pruebas ni contradecir análisis. Sin proxy, el juego sigue funcionando con las frases del guion. Pruebas: **45 EditMode (4 nuevas para ALEX) y 6 PlayMode en verde**, más las 2 pruebas de conexión con el proxy en modo de prueba.

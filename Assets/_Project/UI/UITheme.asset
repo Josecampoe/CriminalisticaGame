@@ -20,11 +20,16 @@ MonoBehaviour:
   _alexCyan: {r: 0.30980393, g: 0.81960785, b: 0.77254903, a: 1}
   _warningAmber: {r: 0.8784314, g: 0.64705884, b: 0.14901961, a: 1}
   _muted: {r: 0.41960785, g: 0.44705883, b: 0.5019608, a: 1}
-  _titleFont: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  _paperSprite: {fileID: 5905042795047357967, guid: 5ff8f2c23d7787f4b80f04d67127c5a0, type: 3}
-  _screenSprite: {fileID: 8733379182513533629, guid: 6c1ac79d603f4b6448d1d41d21a3a54b, type: 3}
-  _bodyFont: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  _monoFont: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  _titleFont: {fileID: 11400000, guid: ebbee7f715086e94db3e908654f17894, type: 2}
+  _paperSprite: {fileID: 21300000, guid: 5ff8f2c23d7787f4b80f04d67127c5a0, type: 3}
+  _screenSprite: {fileID: 21300000, guid: 6c1ac79d603f4b6448d1d41d21a3a54b, type: 3}
+  _bodyFont: {fileID: 11400000, guid: ce7bbaf0edead67479ae2911fb09476d, type: 2}
+  _monoFont: {fileID: 11400000, guid: 88ce0018d947e2f459ea4ee1ec349dcd, type: 2}
+  _roundSprite: {fileID: 21300000, guid: 034ca6fae745aec4792d7b2bc6c43466, type: 3}
+  _frameSprite: {fileID: 21300000, guid: 7cda3d9f3f3408247af796722700ac10, type: 3}
+  _gradientSprite: {fileID: 21300000, guid: 371518644cdbe7f46b0daa7c3d7fd626, type: 3}
+  _vignetteSprite: {fileID: 21300000, guid: 6b65b84497b130045887bb39821e024c, type: 3}
+  _checkSprite: {fileID: 21300000, guid: f2356cb54a3269e4abbfb72a15bbf441, type: 3}
   _sizeXL: 48
   _sizeL: 32
   _sizeM: 24
