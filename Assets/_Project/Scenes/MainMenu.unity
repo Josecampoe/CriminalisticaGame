@@ -3329,6 +3329,7 @@ MonoBehaviour:
   _database: {fileID: 11400000, guid: 1a5ebc7a3337ac7489ac3658e285ac4d, type: 2}
   _fader: {fileID: 1964998637}
   _firstCaseId: c1
+  _aiSettings: {fileID: 11400000, guid: 72efefea7cf81224f8e7599dfcffdaa9, type: 2}
 --- !u!43 &352415767
 Mesh:
   m_ObjectHideFlags: 0
