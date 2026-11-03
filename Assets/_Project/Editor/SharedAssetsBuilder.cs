@@ -48,10 +48,12 @@ namespace Caso404.EditorTools
             EditorUtility.SetDirty(theme);
 
             var ai = GetOrCreate<AiSettings>(AiSettingsPath);
-            // IA activada: si el proxy (Server/proxy.mjs) no está corriendo, el juego lo detecta en 2 s y usa las
-            // frases del guion. Para jugar siempre sin IA, marca Use Offline en el Inspector.
+            // IA activada con el servidor público (Server/worker.mjs en Cloudflare). Si no responde, el juego lo detecta
+            // en unos segundos y usa las frases del guion. Para probar con el proxy local, crea un ia.json en la raíz
+            // del proyecto con {"proxyUrl": "http://127.0.0.1:8790/dialogue"}. Para jugar sin IA, marca Use Offline.
             ai.UseOffline = false;
-            ai.ProxyUrl = "http://127.0.0.1:8790/dialogue"; // 8787 lo usa wrangler (Cloudflare) en este equipo
+            ai.ProxyUrl = AiSettings.PublicProxyUrl;
+            ai.HealthTimeoutSeconds = 4;
             EditorUtility.SetDirty(ai);
 
             GetOrCreate<BoolEventChannel>(ModalChannelPath);
