@@ -34,7 +34,8 @@ namespace Caso404.AI
         readonly AlexProfile _alex;
         readonly EvidenceService _evidence;
         readonly IAiClient _ai;
-        readonly List<string> _history = new();
+        /// <summary>Clave de ALEX en la memoria de conversaciones del GameState.</summary>
+        public const string MemoryId = "alex";
 
         /// <summary>Longitud máxima de una pregunta escrita a ALEX (skill dialogo-ia).</summary>
         public const int MaxQuestionLength = 200;
@@ -120,8 +121,8 @@ namespace Caso404.AI
                 catch (Exception e) { GameLog.Warn($"ALEX sin respuesta de la IA, se usa el guion: {e.Message}"); }
             }
             var text = IsValidReply(reply) ? reply.reply.Trim() : FallbackAnswer(question);
-            _history.Add($"Rivera: {question}");
-            _history.Add($"ALEX: {text}");
+            _state.RememberConversation(MemoryId, $"Rivera: {question}");
+            _state.RememberConversation(MemoryId, $"ALEX: {text}");
             return text;
         }
 
@@ -162,7 +163,7 @@ namespace Caso404.AI
                 SceneId = _state.State.currentSceneId,
                 AlexTrust = _state.AlexTrust,
                 AnalyzedEvidence = _evidence.AnalyzedEvidence.Select(e => $"{e.Id}: {e.AnalysisResult}").ToList(),
-                History = _history.Skip(Math.Max(0, _history.Count - 8)).ToList(),
+                History = _state.GetConversation(MemoryId).TakeLast(8).ToList(),
                 IsAlex = true,
                 AlexClaims = RaisedClaims.Select(c => $"{c.Id}: {c.Statement} [{Status(c)}]").ToList(),
                 AlexTone = Tone.ToString(),
