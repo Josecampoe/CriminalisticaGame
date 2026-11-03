@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -15,7 +16,9 @@ namespace Caso404.UI
         TextMeshProUGUI _title;
         TextMeshProUGUI _body;
         TextMeshProUGUI _alexLine;
+        TextMeshProUGUI _stamp;
         RectTransform _alexBox;
+        Coroutine _typing;
         RectTransform _card;
         RectTransform _buttons;
         bool _escapable = true;
@@ -44,6 +47,15 @@ namespace Caso404.UI
             margin.rectTransform.offsetMin = new Vector2(40, 0);
             margin.rectTransform.offsetMax = new Vector2(42, 0);
             UIFactory.Ignore(margin.gameObject);
+
+            // Clip metálico y sello rojo (solo en los resúmenes de caso) para que parezca una hoja del expediente.
+            var clip = UIFactory.Round(UIFactory.Panel(card.transform, "Clip", new Color(0.62f, 0.64f, 0.66f, 0.95f)), _theme, 1.6f);
+            UIFactory.Frame(clip.transform, _theme, new Color(0.35f, 0.36f, 0.38f, 0.9f));
+            UIFactory.Place(clip.rectTransform, new Vector2(0, 1), new Vector2(0.5f, 0.5f), new Vector2(140, -2), new Vector2(30, 84));
+            clip.rectTransform.localRotation = Quaternion.Euler(0, 0, 4f);
+            UIFactory.Ignore(clip.gameObject);
+            _stamp = UIFactory.Stamp(card.transform, "EXPEDIENTE ABIERTO", _theme, 26, 9f);
+            UIFactory.Place(_stamp.rectTransform, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-46, -40), new Vector2(330, 46));
 
             UIFactory.Kicker(card.transform, "Unidad de Criminalística · Valdora", _theme, UITheme.WithAlpha(_theme.Ink, 0.5f));
             _title = UIFactory.Text(card.transform, "Titulo", "", _theme.TitleFont, 40, _theme.Ink);
@@ -91,6 +103,9 @@ namespace Caso404.UI
         {
             _title.text = title;
             _body.text = body;
+            // Los resúmenes de caso ("Caso 1 — ...") llevan sello y se escriben a máquina; el resto sale de una vez.
+            bool caseFile = title != null && title.StartsWith("Caso", StringComparison.Ordinal);
+            _stamp.gameObject.SetActive(caseFile);
             _body.gameObject.SetActive(!string.IsNullOrEmpty(body));
             _alexLine.text = string.IsNullOrEmpty(alexLine) ? "" : $"“{alexLine}”";
             _alexBox.gameObject.SetActive(!string.IsNullOrEmpty(alexLine));
@@ -108,6 +123,26 @@ namespace Caso404.UI
             }
             LayoutRebuilder.ForceRebuildLayoutImmediate(_card);
             Open();
+            if (_typing != null) StopCoroutine(_typing);
+            _body.maxVisibleCharacters = int.MaxValue;
+            if (caseFile && isActiveAndEnabled) _typing = StartCoroutine(Typewriter());
+        }
+
+        /// <summary>Escribe el texto a máquina (90 caracteres por segundo); un clic o una tecla lo completa.</summary>
+        IEnumerator Typewriter()
+        {
+            _body.ForceMeshUpdate();
+            int total = _body.textInfo.characterCount;
+            for (float shown = 0; shown < total; shown += 90f * Time.unscaledDeltaTime)
+            {
+                _body.maxVisibleCharacters = Mathf.CeilToInt(shown);
+                var kb = UnityEngine.InputSystem.Keyboard.current;
+                var mouse = UnityEngine.InputSystem.Mouse.current;
+                if ((kb != null && kb.anyKey.wasPressedThisFrame) || (mouse != null && mouse.leftButton.wasPressedThisFrame)) break;
+                yield return null;
+            }
+            _body.maxVisibleCharacters = int.MaxValue;
+            _typing = null;
         }
     }
 }
