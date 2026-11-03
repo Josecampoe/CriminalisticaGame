@@ -10,10 +10,10 @@ using UnityEngine.Networking;
 namespace Caso404.AI
 {
     /// <summary>
-    /// IA por HTTP a través de un servidor proxy propio (carpeta Server/, fuera de Assets).
-    /// El juego nunca conoce la clave de API: el proxy la lee de una variable de entorno.
-    /// Antes de preguntar comprueba que el proxy esté encendido (GET /health, 2 s); si no lo está, devuelve null al
-    /// instante durante 30 s y quien llama usa la frase de respaldo del guion, así el juego nunca se queda esperando.
+    /// IA por HTTP a través de un servidor propio (carpeta Server/: worker.mjs publicado en Cloudflare, o proxy.mjs
+    /// en este equipo). El juego nunca conoce la clave de API: vive solo en el servidor.
+    /// Antes de preguntar comprueba que el servidor responda (GET /health); si no, devuelve null al instante durante
+    /// 30 s y quien llama usa la frase de respaldo del guion, así el juego nunca se queda esperando.
     /// </summary>
     public class HttpAiClient : IAiClient
     {
@@ -117,12 +117,15 @@ namespace Caso404.AI
             return payload;
         }
 
+        /// <summary>True si el servidor responde y tiene la IA lista (GET /health, con caché de 30 s).</summary>
+        public Task<bool> CheckAsync(CancellationToken ct) => IsProxyUpAsync(ct);
+
         /// <summary>Comprueba (con caché de 30 s) que el proxy responda en /health.</summary>
         async Task<bool> IsProxyUpAsync(CancellationToken ct)
         {
             if (_proxyUp.HasValue && Time.realtimeSinceStartup - _checkedAt < HealthCacheSeconds) return _proxyUp.Value;
             var url = _settings.ProxyUrl.EndsWith("/dialogue") ? _settings.ProxyUrl.Substring(0, _settings.ProxyUrl.Length - "/dialogue".Length) + "/health" : _settings.ProxyUrl;
-            var text = await SendAsync(UnityWebRequest.kHttpVerbGET, url, null, 2, ct);
+            var text = await SendAsync(UnityWebRequest.kHttpVerbGET, url, null, Mathf.Max(1, _settings.HealthTimeoutSeconds), ct);
             _proxyUp = text != null && text.Contains("\"ok\":true");
             _checkedAt = Time.realtimeSinceStartup;
             if (!_proxyUp.Value) Core.GameLog.Warn("Proxy de IA apagado o inalcanzable: se usan las frases del guion.");
@@ -132,6 +135,7 @@ namespace Caso404.AI
         static async Task<string> SendAsync(string method, string url, string json, int timeoutSeconds, CancellationToken ct)
         {
             using var req = new UnityWebRequest(url, method) { downloadHandler = new DownloadHandlerBuffer(), timeout = timeoutSeconds };
+            req.SetRequestHeader(AiSettings.ClientHeader, Application.version);
             if (json != null)
             {
                 req.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
