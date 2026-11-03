@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Threading;
+using Caso404.AI;
 using Caso404.Core;
 using Caso404.Data;
 using Caso404.Save;
@@ -18,6 +20,8 @@ namespace Caso404.UI
         [SerializeField] private GameDatabase _database;
         [SerializeField] private ScreenFader _fader;
         [SerializeField] private string _firstCaseId = "c1";
+        [Tooltip("Para mostrar si la IA está conectada. Vacío: no se muestra.")]
+        [SerializeField] private AiSettings _aiSettings;
 
         SaveService _saves;
         TextMeshProUGUI _title;
@@ -25,6 +29,8 @@ namespace Caso404.UI
         RectTransform _options;
         TextMeshProUGUI _sensValue;
         RectTransform _toggles;
+        TextMeshProUGUI _aiStatus;
+        readonly CancellationTokenSource _cts = new();
 
         void Awake()
         {
@@ -34,7 +40,40 @@ namespace Caso404.UI
             Build();
         }
 
-        void Start() => StartCoroutine(TypeTitle());
+        void Start()
+        {
+            StartCoroutine(TypeTitle());
+            CheckAi();
+        }
+
+        void OnDestroy()
+        {
+            _cts.Cancel();
+            _cts.Dispose();
+        }
+
+        /// <summary>Pregunta al servidor si la IA está lista (solo lectura) y lo muestra abajo a la izquierda.</summary>
+        async void CheckAi()
+        {
+            if (_aiSettings == null) return;
+            SetAiStatus("Comprobando la IA…", _theme.Muted);
+            AiConnection status;
+            try { status = await AiStatus.CheckAsync(_aiSettings, _cts.Token); }
+            catch (System.OperationCanceledException) { return; }
+            if (this == null || _aiStatus == null) return;
+            switch (status)
+            {
+                case AiConnection.Online: SetAiStatus("IA conectada: los personajes responden lo que escribas", _theme.AlexCyan); break;
+                case AiConnection.Disabled: SetAiStatus("IA desactivada: los personajes usan frases del guion", _theme.Muted); break;
+                default: SetAiStatus("Sin conexión con la IA: los personajes usan frases del guion", _theme.WarningAmber); break;
+            }
+        }
+
+        void SetAiStatus(string text, Color color)
+        {
+            _aiStatus.text = $"<color={UITheme.Hex(color)}>●</color>  {text}";
+            _aiStatus.color = UITheme.WithAlpha(color, 0.85f);
+        }
 
         void Build()
         {
@@ -73,6 +112,10 @@ namespace Caso404.UI
             _continue.interactable = _saves.TryLoad(out _);
 
             BuildOptions(rt);
+
+            _aiStatus = UIFactory.Text(rt, "EstadoIA", "", _theme.MonoFont, _theme.SizeS, _theme.Muted, TextAlignmentOptions.MidlineLeft);
+            UIFactory.Place(_aiStatus.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(40, 30), new Vector2(900, 30));
+            _aiStatus.raycastTarget = false;
 
             var hint = UIFactory.Text(rt, "Hint", "Proyecto universitario · Ingeniería de Software · Unity", _theme.BodyFont, _theme.SizeS, _theme.Muted, TextAlignmentOptions.Center);
             UIFactory.Place(hint.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 30), new Vector2(1400, 30));
