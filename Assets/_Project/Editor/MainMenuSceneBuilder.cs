@@ -28,6 +28,7 @@ namespace Caso404.EditorTools
             Set(menu, "_theme", Theme);
             Set(menu, "_database", Db);
             Set(menu, "_fader", fader);
+            Set(menu, "_aiSettings", AssetDatabase.LoadAssetAtPath<Caso404.AI.AiSettings>(SharedAssetsBuilder.AiSettingsPath));
 
             VisualPass.Apply("MainMenu");
             EditorSceneManager.SaveScene(scene, ScenePath);
