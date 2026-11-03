@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: AiSettings
   m_EditorClassIdentifier: Caso404.Runtime::Caso404.AI.AiSettings
   _useOffline: 0
-  _proxyUrl: http://127.0.0.1:8790/dialogue
+  _proxyUrl: https://caso404-ia.tallerpro-ai-proxy.workers.dev/dialogue
   _model: 
   _timeoutSeconds: 15
   _maxQuestionLength: 200
+  _healthTimeoutSeconds: 4
