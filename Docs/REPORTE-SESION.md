@@ -20,7 +20,9 @@
 3. Recorre el expediente (Tab), el tablero (H) y una decisión.
 4. En el caso 2, revisa que las preguntas rápidas a ALEX hablen de Valeria y de la placa.
 
-Decisiones U1–U8 en `Docs/DECISIONES.md`.
+**Segunda pasada:** los personajes llevan ahora prendas que se leen como ropa: zapatos con volumen, costuras, puños y cinturilla, brazos y piernas menos musculosos y manos relajadas. El resumen de cada caso es una hoja con clip, sello y texto a máquina. Los campos de texto muestran un contador de caracteres.
+
+Decisiones U1–U10 en `Docs/DECISIONES.md`.
 
 ---
 
