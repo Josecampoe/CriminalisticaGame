@@ -1,0 +1,18 @@
+# Servidor de IA de El Caso 404 en Cloudflare Workers (plan gratuito).
+# La clave NO va aquí: se guarda como secreto con  npx wrangler secret put GEMINI_API_KEY
+name = "caso404-ia"
+main = "worker.mjs"
+compatibility_date = "2026-10-01"
+
+[vars]
+# Modelos en orden de preferencia: si uno agota su cupo gratuito, se usa el siguiente.
+GEMINI_MODELS = "gemini-3.5-flash-lite,gemini-3.8-flash"
+
+# Límite por jugador (IP): 20 preguntas por minuto.
+[[ratelimits]]
+name = "LIMITER"
+namespace_id = "4040"
+
+  [ratelimits.simple]
+  limit = 20
+  period = 60
