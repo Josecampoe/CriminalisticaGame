@@ -27,8 +27,8 @@ namespace Caso404.UI
         TextMeshProUGUI _title;
         Button _continue;
         RectTransform _options;
-        TextMeshProUGUI _sensValue;
-        RectTransform _toggles;
+        RectTransform _confirm;
+        TextMeshProUGUI _confirmText;
         TextMeshProUGUI _aiStatus;
         readonly CancellationTokenSource _cts = new();
 
@@ -103,15 +103,21 @@ namespace Caso404.UI
             UIFactory.Place(sub.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 150), new Vector2(1400, 40));
 
             var buttons = UIFactory.Rect("Buttons", rt);
-            UIFactory.Place(buttons, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -110), new Vector2(440, 330));
+            UIFactory.Place(buttons, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -120), new Vector2(480, 350));
             UIFactory.VLayout(buttons.gameObject, 14);
-            UIFactory.Button(buttons, "Nueva partida", _theme, _theme.Paper, _theme.Ink, StartNewGame, 64, _theme.SizeM);
+            UIFactory.Button(buttons, "Nueva partida", _theme, _theme.Paper, _theme.Ink, RequestNewGame, 64, _theme.SizeM);
             _continue = UIFactory.Ghost(buttons, "Continuar", _theme, _theme.TextLight, ContinueGame, 60, _theme.SizeM - 2);
             UIFactory.Ghost(buttons, "Opciones", _theme, _theme.TextLight, () => _options.gameObject.SetActive(true), 56);
             UIFactory.Ghost(buttons, "Salir", _theme, _theme.Muted, Quit, 56);
-            _continue.interactable = _saves.TryLoad(out _);
+            bool hasSave = _saves.TryLoad(out var saved);
+            _continue.interactable = hasSave;
+            var progress = hasSave ? SavedProgress(saved) : "";
+            if (progress.Length > 0)
+                UIFactory.SetLabel(_continue, $"Continuar\n<size=62%><font=\"{_theme.MonoFont.name}\"><color={UITheme.Hex(_theme.WarningAmber)}>{progress}</color></font></size>");
+            if (progress.Length > 0) UIFactory.Layout(_continue.gameObject, minHeight: 74, preferredHeight: 74);
 
             BuildOptions(rt);
+            BuildConfirm(rt);
 
             _aiStatus = UIFactory.Text(rt, "EstadoIA", "", _theme.MonoFont, _theme.SizeS, _theme.Muted, TextAlignmentOptions.MidlineLeft);
             UIFactory.Place(_aiStatus.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(40, 30), new Vector2(900, 30));
@@ -129,48 +135,78 @@ namespace Caso404.UI
             var boxBg = UIFactory.Card(_options, "Caja", new Color(0.06f, 0.065f, 0.08f, 0.98f), _theme);
             UIFactory.Frame(boxBg.transform, _theme, UITheme.WithAlpha(_theme.TextLight, 0.12f));
             var box = boxBg.rectTransform;
-            UIFactory.Place(box, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(800, 548));
-            var bv = UIFactory.VLayout(box.gameObject, 16, 0);
-            bv.padding = new RectOffset(48, 48, 40, 40);
-            UIFactory.Kicker(box, "Configuración", _theme, _theme.AlexCyan);
-            var title = UIFactory.Text(box, "Title", "Opciones", _theme.TitleFont, _theme.SizeL + 4, _theme.TextLight);
+            UIFactory.Place(box, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1240, 0));
+            var row = UIFactory.HLayout(box.gameObject, 48, 0, false);
+            row.padding = new RectOffset(52, 52, 44, 44);
+            row.childAlignment = TextAnchor.UpperLeft;
+            box.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            var left = UIFactory.Rect("Preferencias", box);
+            UIFactory.VLayout(left.gameObject, 16);
+            UIFactory.Layout(left.gameObject, preferredWidth: 520);
+            UIFactory.Kicker(left, "Configuración", _theme, _theme.AlexCyan);
+            var title = UIFactory.Text(left, "Title", "Opciones", _theme.TitleFont, _theme.SizeL + 4, _theme.TextLight);
             UIFactory.Layout(title.gameObject, preferredHeight: 50);
+            SettingsWidgets.Sensitivity(left, _theme);
+            SettingsWidgets.Toggles(left, _theme);
+            UIFactory.Ghost(left, "Volver", _theme, _theme.TextLight, () => _options.gameObject.SetActive(false), 52);
 
-            _sensValue = UIFactory.Text(box, "SensLabel", "", _theme.BodyFont, _theme.SizeBody, _theme.TextLight);
-            UIFactory.Layout(_sensValue.gameObject, preferredHeight: 30);
-            var sliderGo = DefaultControls.CreateSlider(new DefaultControls.Resources());
-            sliderGo.transform.SetParent(box, false);
-            UIFactory.Layout(sliderGo, minHeight: 30, preferredHeight: 30);
-            foreach (var img in sliderGo.GetComponentsInChildren<Image>()) { img.color = UITheme.WithAlpha(_theme.TextLight, 0.15f); UIFactory.Round(img, _theme, 0.5f); }
-            var fill = sliderGo.transform.Find("Fill Area/Fill");
-            if (fill != null) fill.GetComponent<Image>().color = _theme.AlexCyan;
-            var handle = sliderGo.transform.Find("Handle Slide Area/Handle");
-            if (handle != null) handle.GetComponent<Image>().color = _theme.TextLight;
-            var slider = sliderGo.GetComponent<Slider>();
-            slider.minValue = GameSettings.MinSensitivity;
-            slider.maxValue = GameSettings.MaxSensitivity;
-            slider.value = GameSettings.Sensitivity;
-            slider.onValueChanged.AddListener(v => { GameSettings.Sensitivity = v; RefreshOptions(); });
-
-            _toggles = UIFactory.Rect("Casillas", box);
-            UIFactory.VLayout(_toggles.gameObject, 10);
-            UIFactory.Layout(_toggles.gameObject, preferredHeight: 3 * 52 + 20);
-            UIFactory.Ghost(box, "Volver", _theme, _theme.TextLight, () => _options.gameObject.SetActive(false), 52);
-            RefreshOptions();
+            var right = UIFactory.Rect("Controles", box);
+            UIFactory.VLayout(right.gameObject, 12);
+            UIFactory.Layout(right.gameObject, preferredWidth: 560);
+            SettingsWidgets.Controls(right, _theme);
             _options.gameObject.SetActive(false);
         }
 
-        void RefreshOptions()
+        /// <summary>Ventana de confirmación: "Nueva partida" con una partida guardada la borraría.</summary>
+        void BuildConfirm(RectTransform root)
         {
-            _sensValue.text = $"Sensibilidad del mouse: {GameSettings.Sensitivity / GameSettings.DefaultSensitivity:0.0}x";
-            // Las casillas se rehacen para mostrar la marca (✓) del estado actual.
-            for (int i = _toggles.childCount - 1; i >= 0; i--) DestroyImmediate(_toggles.GetChild(i).gameObject);
-            UIFactory.CheckRow(_toggles, "Invertir eje Y", _theme, GameSettings.InvertY, true, () => { GameSettings.InvertY = !GameSettings.InvertY; RefreshOptions(); }, false);
-            UIFactory.CheckRow(_toggles, "Balanceo de cámara al caminar", _theme, GameSettings.HeadBob, true, () => { GameSettings.HeadBob = !GameSettings.HeadBob; RefreshOptions(); }, false);
-            UIFactory.CheckRow(_toggles, "Pantalla completa", _theme, GameSettings.Fullscreen, true, () => { GameSettings.Fullscreen = !GameSettings.Fullscreen; RefreshOptions(); }, false);
+            var bg = UIFactory.Backdrop(root, _theme, 0.92f);
+            bg.gameObject.name = "ConfirmarNueva";
+            _confirm = bg.rectTransform;
+            var card = UIFactory.Card(_confirm, "Caja", new Color(0.06f, 0.065f, 0.08f, 0.98f), _theme);
+            UIFactory.Frame(card.transform, _theme, UITheme.WithAlpha(_theme.AccentRed, 0.5f));
+            UIFactory.Place(card.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(760, 0));
+            var v = UIFactory.VLayout(card.gameObject, 16);
+            v.padding = new RectOffset(48, 48, 40, 40);
+            card.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            UIFactory.Kicker(card.transform, "Nueva partida", _theme, _theme.AccentRed);
+            var title = UIFactory.Text(card.transform, "Titulo", "¿Empezar desde cero?", _theme.TitleFont, _theme.SizeL + 4, _theme.TextLight);
+            UIFactory.Layout(title.gameObject, preferredHeight: 50);
+            _confirmText = UIFactory.Text(card.transform, "Texto", "", _theme.BodyFont, _theme.SizeBody, UITheme.WithAlpha(_theme.TextLight, 0.85f));
+            var buttons = UIFactory.Rect("Botones", card.transform);
+            UIFactory.HLayout(buttons.gameObject, 12);
+            UIFactory.Layout(buttons.gameObject, minHeight: 56, preferredHeight: 56);
+            UIFactory.Button(buttons, "Borrar y empezar", _theme, _theme.AccentRed, _theme.TextLight, () => { _confirm.gameObject.SetActive(false); StartNewGame(); }, 56);
+            UIFactory.Ghost(buttons, "Cancelar", _theme, _theme.TextLight, () => _confirm.gameObject.SetActive(false), 56);
+            _confirm.gameObject.SetActive(false);
         }
 
-        /// <summary>Empieza una partida nueva en la primera escena del caso 1.</summary>
+        /// <summary>Texto corto con el caso y la escena de la partida guardada (vacío si no hay).</summary>
+        string SavedProgress(GameState state)
+        {
+            if (state == null || _database == null) return "";
+            var c = _database.FindCase(state.currentCaseId);
+            var scene = _database.FindScene(state.currentSceneId);
+            if (c == null) return "";
+            return scene != null ? $"{c.Title} — {scene.DisplayName}" : c.Title;
+        }
+
+        /// <summary>Botón "Nueva partida": si hay una partida guardada, pide confirmación antes de borrarla.</summary>
+        public void RequestNewGame()
+        {
+            if (_saves.TryLoad(out var saved) && _confirm != null)
+            {
+                var progress = SavedProgress(saved);
+                _confirmText.text = "Tienes una investigación en curso" + (progress.Length > 0 ? $": <b>{progress}</b>" : "") +
+                                    ".\nSi empiezas una nueva, se perderá ese progreso.";
+                _confirm.gameObject.SetActive(true);
+                return;
+            }
+            StartNewGame();
+        }
+
+        /// <summary>Empieza una partida nueva en la primera escena del caso 1, sin preguntar.</summary>
         public void StartNewGame()
         {
             var c = _database.FindCase(_firstCaseId);
@@ -190,7 +226,7 @@ namespace Caso404.UI
                 currentSceneId = first.Id
             };
             _saves.Save(state);
-            Load(first.UnitySceneName);
+            Load(first.UnitySceneName, first.DisplayName);
         }
 
         /// <summary>Continúa en la escena guardada.</summary>
@@ -198,12 +234,12 @@ namespace Caso404.UI
         {
             if (!_saves.TryLoad(out var state)) { StartNewGame(); return; }
             var scene = _database.FindScene(state.currentSceneId) ?? _database.FindCase(_firstCaseId).Scenes[0];
-            Load(scene.UnitySceneName);
+            Load(scene.UnitySceneName, scene.DisplayName);
         }
 
-        void Load(string unityScene)
+        void Load(string unityScene, string displayName)
         {
-            if (_fader != null) _fader.FadeOutThen(() => SceneLoader.TryLoad(unityScene));
+            if (_fader != null) _fader.FadeOutThen(() => SceneLoader.TryLoad(unityScene), displayName);
             else SceneLoader.TryLoad(unityScene);
         }
 
