@@ -298,3 +298,19 @@ Registro de decisiones tomadas durante el desarrollo, con su motivo. Cuando el g
 - **U9. Personajes con prendas, no trajes pegados.** Ahora tienen costuras de hombro, puños, cuello, cinturilla, dobladillo y sombras en los costados. La tela lleva un tejido suave, sin las manchas del cuerpo base. Los zapatos tienen volumen (capellada y suela pegadas al hueso del pie); antes eran pies pintados con dedos. Brazos y piernas se adelgazan un poco escalando solo el grosor de los huesos, porque el cuerpo base es de superhéroe. En reposo, las manos quedan relajadas con la palma hacia el muslo. Valeria lleva blusa con solapas y botones, Elena una camiseta oscura bajo la chaqueta abierta y Sebastián cordones en el buzo.
 - **U10. Resumen del caso como hoja de expediente.** Lleva clip, sello "EXPEDIENTE ABIERTO" y texto a máquina que se completa con un clic o una tecla. Los campos de texto muestran un contador (por ejemplo "12/200", en ámbar cerca del límite) y su borde se ilumina mientras escribes.
 
+
+## Sesión de jugabilidad (7 de noviembre de 2026)
+
+- **J1. Paso un poco más rápido: 2.8 m/s (antes 2.2).** Sigue sin correr ni saltar (D2), pero recorrer el parqueadero o volver al balcón se hacía lento. El balanceo de la cámara ya se ajusta solo a la velocidad.
+- **J2. "Nueva partida" pide confirmación** si hay una partida guardada, y dice qué caso y escena se perderían. Antes la borraba sin avisar. "Continuar" muestra debajo el caso y la escena guardados.
+- **J3. Opciones y controles en la pausa.** La pausa (Esc) tiene "Opciones y controles": sensibilidad, eje Y, balanceo, pantalla completa y la lista de teclas. Al cerrarla se vuelve a la pausa. La vista (`OptionsView`) se crea al primer uso, así no hay que reconstruir las 7 escenas; el menú principal usa los mismos controles (`SettingsWidgets`).
+- **J4. Inspección con teclado y zoom.** E guarda la evidencia (la misma pulsación que abrió la inspección no cuenta) y la rueda del mouse acerca o aleja el objeto. Los botones muestran sus teclas. `FirstPersonController.UnlockedThisFrame` evita que la E que cierra una ventana vuelva a abrir la inspección.
+- **J5. Expediente con teclado.** Al abrirlo se selecciona la primera evidencia que falta analizar; ↑/↓ (o W/S) cambian de ficha y Enter analiza.
+- **J6. Botones que no se repiten.** Un botón pulsado con el mouse quedaba seleccionado y Enter o Espacio lo volvían a pulsar (p. ej. "Presionar" dos veces). `UIManager` suelta esa selección; los campos de texto conservan el foco.
+- **J7. Diálogos más ágiles.** Clic o Espacio completan la frase que se está escribiendo.
+- **J8. HUD:** los atajos incluyen WASD. El final dice "Sin acusación formal" en vez de "—" cuando el caso se cerró por una decisión.
+- **J9. Tablero: respuestas sin registrar.** Si marcas una opción y no pulsas «Responder», el pie del tablero lo dice en ámbar. Antes el botón de decisión seguía bloqueado sin explicar por qué.
+- **J10. "Cargando · destino" en el fundido a negro.** La carga de una escena tarda unos segundos en el portátil; ahora se ve a dónde se va en vez de una pantalla negra muda.
+- **J11. Pausa con contexto.** Dice el caso, la escena y cuántas evidencias hay (y cuántas faltan por analizar). Antes repetía "Apartamento 404" dos veces.
+- **J12. Hojas de papel ajustadas al texto.** La textura de papel imponía su tamaño como altura mínima y las ventanas cortas (pausa, resultados) quedaban con media hoja vacía. Se dibuja como `Sliced` sin bordes: se ve igual y se ajusta.
+- **J13. Legibilidad.** La línea del personaje lleva sombra (pasaba sobre ropa clara) y el expediente muestra sus teclas al pie.
