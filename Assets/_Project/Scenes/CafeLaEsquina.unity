@@ -20401,7 +20401,7 @@ MonoBehaviour:
   _input: {fileID: 647642226}
   _cameraPivot: {fileID: 1373674629}
   _uiModalChannel: {fileID: 11400000, guid: 356557c42d34d16498f08f0723baa90f, type: 2}
-  _walkSpeed: 2.2
+  _walkSpeed: 2.8
   _lookSensitivity: 0.12
   _gravity: -9.81
   _maxPitch: 80
