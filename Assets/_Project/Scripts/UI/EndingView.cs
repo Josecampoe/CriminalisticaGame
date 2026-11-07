@@ -100,7 +100,7 @@ namespace Caso404.UI
             var missedSolid = c.SolidProofs.Where(e => e.SpawnCondition.Evaluate(_game.State) && !_game.State.IsEvidenceAnalyzed(e.Id)).Select(e => e.DisplayName).ToList();
             string Row(string label, string value) =>
                 $"<color={UITheme.Hex(UITheme.WithAlpha(_theme.TextLight, 0.55f))}>{label}</color><pos=48%><b>{value}</b>";
-            var lines = Row("Acusaste a", accused != null ? accused.DisplayName : "—") + "\n" +
+            var lines = Row("Acusaste a", accused != null ? accused.DisplayName : "Sin acusación formal") + "\n" +
                         Row("Pruebas sólidas presentadas", result.SolidProofs.ToString()) + "\n" +
                         Row("Contradicciones de ALEX detectadas", $"{result.AlexContradictions} de {claims}") + "\n" +
                         Row("Evidencias encontradas", $"{found} de {available}");

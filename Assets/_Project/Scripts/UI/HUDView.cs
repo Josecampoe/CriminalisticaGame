@@ -141,9 +141,9 @@ namespace Caso404.UI
 
             // Atajos como teclas, abajo a la izquierda.
             var shortcuts = UIFactory.Text(root, "Atajos",
-                $"{Key("Tab")} Expediente     {Key("Q")} ALEX     {Key("H")} Tablero     {Key("E")} Interactuar     {Key("Esc")} Pausa",
+                $"{Key("WASD")} Moverse     {Key("E")} Interactuar     {Key("Tab")} Expediente     {Key("Q")} ALEX     {Key("H")} Tablero     {Key("Esc")} Pausa",
                 _theme.BodyFont, _theme.SizeS, UITheme.WithAlpha(_theme.TextLight, 0.8f));
-            UIFactory.Place(shortcuts.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(34, 26), new Vector2(1100, 30));
+            UIFactory.Place(shortcuts.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(34, 26), new Vector2(1300, 30));
 
             // Objetivo: tarjeta translúcida arriba a la izquierda con rótulo ámbar.
             var objBg = UIFactory.Round(UIFactory.Panel(root, "Objetivo", new Color(0.03f, 0.035f, 0.045f, 0.62f)), _theme);

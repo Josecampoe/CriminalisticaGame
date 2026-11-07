@@ -3,6 +3,7 @@ using Caso404.Core;
 using Caso404.Data;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace Caso404.UI
@@ -64,11 +65,17 @@ namespace Caso404.UI
             _reportTitle.fontStyle = FontStyles.Bold;
             _report = UIFactory.Text(card.transform, "Report", "", _theme.BodyFont, _theme.SizeM, _theme.Ink);
             _reason = UIFactory.Text(card.transform, "Reason", "", _theme.BodyFont, _theme.SizeS, _theme.Muted);
-            _analyze = UIFactory.Button(card.transform, "Analizar evidencia", _theme, _theme.Ink, _theme.Paper, OnAnalyze, 56);
+            _analyze = UIFactory.Button(card.transform, "Analizar evidencia   Enter", _theme, _theme.Ink, _theme.Paper, OnAnalyze, 56);
             _password = UIFactory.Input(card.transform, _theme, "Contraseña", 40);
             _extra = UIFactory.Button(card.transform, "Análisis adicional", _theme, _theme.Ink, _theme.Paper, OnExtra, 56);
             _extraResult = UIFactory.Text(card.transform, "ExtraResult", "", _theme.BodyFont, _theme.SizeBody, _theme.Ink);
             UIFactory.Layout(UIFactory.Rect("Spacer", card.transform).gameObject, flexibleHeight: 1);
+
+            var keys = UIFactory.Text(rt, "Teclas",
+                "<mark=#EDEDED26 padding=\"10,10,4,4\"><b>↑ ↓</b></mark>  cambiar de ficha      <mark=#EDEDED26 padding=\"10,10,4,4\"><b>Enter</b></mark>  analizar      <mark=#EDEDED26 padding=\"10,10,4,4\"><b>Tab</b></mark>  cerrar",
+                _theme.BodyFont, _theme.SizeS, UITheme.WithAlpha(_theme.TextLight, 0.55f), TextAlignmentOptions.MidlineLeft);
+            UIFactory.Place(keys.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(60, 18), new Vector2(900, 30));
+            keys.raycastTarget = false;
 
             _glitch = UIFactory.Text(rt, "Glitch404", "404", _theme.MonoFont, 220, _theme.AlexCyan, TextAlignmentOptions.Center);
             UIFactory.Stretch(_glitch.rectTransform);
@@ -91,8 +98,39 @@ namespace Caso404.UI
             int pending = _game.Evidence.UnanalyzedCount;
             _header.text = $"{_game.Case.Title}   <size=50%><color={UITheme.Hex(UITheme.WithAlpha(_theme.TextLight, 0.55f))}>{found} ficha{(found == 1 ? "" : "s")}" +
                            (pending > 0 ? $" · <color={UITheme.Hex(_theme.WarningAmber)}>{pending} sin analizar</color>" : "") + "</color></size>";
-            if (_selected == null || !_game.Evidence.IsFound(_selected)) _selected = _game.Evidence.FoundEvidence.FirstOrDefault();
+            // Se abre en la primera evidencia que falta analizar: es lo que el jugador viene a hacer.
+            var pendingEvidence = _game.Evidence.FoundEvidence.FirstOrDefault(e => _game.Evidence.CanAnalyze(e, out _));
+            if (pendingEvidence != null) _selected = pendingEvidence;
+            else if (_selected == null || !_game.Evidence.IsFound(_selected)) _selected = _game.Evidence.FoundEvidence.FirstOrDefault();
             Refresh();
+        }
+
+        /// <summary>Teclado: flechas (o W/S) para cambiar de ficha y Enter para analizar.</summary>
+        void Update()
+        {
+            if (!IsOpen || _ui == null || _ui.Top != this || UIFactory.IsTyping()) return;
+            var kb = Keyboard.current;
+            if (kb == null) return;
+            int step = kb.downArrowKey.wasPressedThisFrame || kb.sKey.wasPressedThisFrame ? 1
+                     : kb.upArrowKey.wasPressedThisFrame || kb.wKey.wasPressedThisFrame ? -1 : 0;
+            if (step != 0)
+            {
+                var found = _game.Evidence.FoundEvidence.ToList();
+                if (found.Count == 0) return;
+                int i = Mathf.Clamp(found.IndexOf(_selected) + step, 0, found.Count - 1);
+                _selected = found[i];
+                Refresh();
+                // Mantiene visible la ficha elegida cuando la lista es más larga que la pantalla.
+                var scroll = _list.GetComponentInParent<ScrollRect>();
+                if (scroll != null && found.Count > 1) scroll.verticalNormalizedPosition = 1f - (float)i / (found.Count - 1);
+                return;
+            }
+            if ((kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame) &&
+                _analyze.gameObject.activeInHierarchy && _analyze.interactable)
+            {
+                UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(null);
+                OnAnalyze();
+            }
         }
 
         void OnStateChanged()

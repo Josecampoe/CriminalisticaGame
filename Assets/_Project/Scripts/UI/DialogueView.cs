@@ -92,6 +92,10 @@ namespace Caso404.UI
             _line.enableAutoSizing = true;
             _line.fontSizeMin = 20f;
             _line.fontSizeMax = 27f;
+            // Sombra para que el texto se lea aunque pase sobre la ropa clara del personaje.
+            var lineShadow = _line.gameObject.AddComponent<Shadow>();
+            lineShadow.effectColor = new Color(0f, 0f, 0f, 0.85f);
+            lineShadow.effectDistance = new Vector2(2f, -2f);
             UIFactory.Layout(_line.gameObject, minHeight: 112, preferredHeight: 112);
             _thinking = UIFactory.Text(column, "Pensando", "", _theme.MonoFont, _theme.SizeS + 1, UITheme.WithAlpha(_theme.WarningAmber, 0.85f));
             UIFactory.Layout(_thinking.gameObject, preferredHeight: 22);
@@ -205,6 +209,13 @@ namespace Caso404.UI
                 _thinking.text = $"{_current.DisplayName} está pensando" + new string('.', 1 + (int)(Time.unscaledTime * 3f) % 3);
 
             var kb = Keyboard.current;
+            // Clic o Espacio completan la frase que se está escribiendo (para quien lee rápido).
+            if (_typing != null && !UIFactory.IsTyping())
+            {
+                var mouse = Mouse.current;
+                if ((kb != null && kb.spaceKey.wasPressedThisFrame) || (mouse != null && mouse.leftButton.wasPressedThisFrame))
+                    CompleteLine();
+            }
             if (kb == null || _busy || _chooser.gameObject.activeSelf || UIFactory.IsTyping()) return;
             for (int i = 0; i < 6; i++)
             {
@@ -297,6 +308,13 @@ namespace Caso404.UI
             _line.text = text;
             _line.maxVisibleCharacters = instant ? int.MaxValue : 0;
             if (!instant && isActiveAndEnabled) _typing = StartCoroutine(Typewriter());
+        }
+
+        void CompleteLine()
+        {
+            if (_typing != null) StopCoroutine(_typing);
+            _typing = null;
+            _line.maxVisibleCharacters = int.MaxValue;
         }
 
         IEnumerator Typewriter()

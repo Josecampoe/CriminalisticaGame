@@ -34,6 +34,22 @@ namespace Caso404.UI
 
         void Start() => NotifyModal();
 
+        /// <summary>
+        /// Un botón pulsado con el mouse queda seleccionado y Enter o Espacio lo volverían a pulsar (por ejemplo,
+        /// "Presionar" dos veces o enviar una acusación repetida). El juego usa atajos de teclado, así que se suelta
+        /// la selección; los campos de texto sí conservan el foco.
+        /// </summary>
+        void LateUpdate()
+        {
+            var es = UnityEngine.EventSystems.EventSystem.current;
+            var selected = es != null ? es.currentSelectedGameObject : null;
+            if (selected == null || selected == _lastChecked) return;
+            if (selected.GetComponent<TMPro.TMP_InputField>() != null) { _lastChecked = selected; return; }
+            es.SetSelectedGameObject(null);
+        }
+
+        GameObject _lastChecked;
+
         /// <summary>Abre un panel encima de los demás.</summary>
         public void Push(UIPanel panel)
         {
