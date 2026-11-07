@@ -16,12 +16,14 @@ namespace Caso404.Player
         public event Action HypothesisPressed;
         public event Action CancelPressed;
 
-        InputAction _move, _look, _interact, _journal, _alex, _hypothesis, _cancel, _rotateHold;
+        InputAction _move, _look, _interact, _journal, _alex, _hypothesis, _cancel, _rotateHold, _zoom;
 
         public Vector2 Move => _move.ReadValue<Vector2>();
         public Vector2 Look => _look.ReadValue<Vector2>();
         /// <summary>Botón para girar el objeto en el modo inspección (clic izquierdo o gatillo).</summary>
         public bool RotateHeld => _rotateHold.IsPressed();
+        /// <summary>Rueda del mouse (positivo = acercar). Se usa en el modo inspección.</summary>
+        public float Zoom => _zoom.ReadValue<float>();
 
         void Awake()
         {
@@ -44,6 +46,8 @@ namespace Caso404.Player
             _hypothesis = Button("Hypothesis", "<Keyboard>/h", "<Gamepad>/buttonWest");
             _cancel = Button("Cancel", "<Keyboard>/escape", "<Gamepad>/buttonEast");
             _rotateHold = Button("RotateHold", "<Mouse>/leftButton", "<Gamepad>/rightTrigger");
+            _zoom = new InputAction("Zoom", InputActionType.Value);
+            _zoom.AddBinding("<Mouse>/scroll/y");
         }
 
         void OnEnable()
@@ -77,7 +81,7 @@ namespace Caso404.Player
         void OnHypothesis(InputAction.CallbackContext _) => HypothesisPressed?.Invoke();
         void OnCancel(InputAction.CallbackContext _) => CancelPressed?.Invoke();
 
-        InputAction[] All() => new[] { _move, _look, _interact, _journal, _alex, _hypothesis, _cancel, _rotateHold };
+        InputAction[] All() => new[] { _move, _look, _interact, _journal, _alex, _hypothesis, _cancel, _rotateHold, _zoom };
 
         static InputAction Button(string name, params string[] bindings)
         {

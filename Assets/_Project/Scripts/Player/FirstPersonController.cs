@@ -13,7 +13,7 @@ namespace Caso404.Player
         [SerializeField] private InputReader _input;
         [SerializeField] private Transform _cameraPivot;
         [SerializeField] private BoolEventChannel _uiModalChannel;
-        [SerializeField] private float _walkSpeed = 2.2f;
+        [SerializeField] private float _walkSpeed = 2.8f;
         [SerializeField] private float _lookSensitivity = 0.12f;
         [SerializeField] private float _gravity = -9.81f;
         [SerializeField] private float _maxPitch = 80f;
@@ -26,6 +26,7 @@ namespace Caso404.Player
         Transform _focusTarget;
         float _sensitivityScale = 1f;
         bool _invertY;
+        int _unlockFrame = -1;
 
         /// <summary>True mientras un panel o el modo inspección bloquean el movimiento.</summary>
         public bool IsLocked => _locked;
@@ -33,12 +34,17 @@ namespace Caso404.Player
         /// <summary>True mientras la vista está fija en un personaje (conversación).</summary>
         public bool IsFocusing => _locked && _focusTarget != null;
 
+        /// <summary>True en el frame en que se cerró el último panel (la misma tecla no debe abrir otra cosa).</summary>
+        public bool UnlockedThisFrame => _unlockFrame == Time.frameCount;
+
         /// <summary>Velocidad horizontal actual en m/s (para el balanceo de la cámara).</summary>
         public float PlanarSpeed { get; private set; }
 
         void Awake()
         {
             _controller = GetComponent<CharacterController>();
+            // Pasos: se agregan aquí para no tener que reconstruir las escenas con un componente nuevo.
+            if (!TryGetComponent<FootstepAudio>(out _)) gameObject.AddComponent<FootstepAudio>();
             if (_input == null) Caso404.Core.GameLog.Error($"{name}: falta InputReader", this);
             if (_cameraPivot == null) Caso404.Core.GameLog.Error($"{name}: falta Camera Pivot", this);
         }
@@ -58,6 +64,7 @@ namespace Caso404.Player
         public void SetLocked(bool locked)
         {
             if (!locked) RefreshSettings();
+            if (_locked && !locked) _unlockFrame = Time.frameCount;
             _locked = locked;
             Cursor.lockState = locked ? CursorLockMode.None : CursorLockMode.Locked;
             Cursor.visible = locked;
