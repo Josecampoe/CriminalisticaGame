@@ -314,3 +314,5 @@ Registro de decisiones tomadas durante el desarrollo, con su motivo. Cuando el g
 - **J11. Pausa con contexto.** Dice el caso, la escena y cuántas evidencias hay (y cuántas faltan por analizar). Antes repetía "Apartamento 404" dos veces.
 - **J12. Hojas de papel ajustadas al texto.** La textura de papel imponía su tamaño como altura mínima y las ventanas cortas (pausa, resultados) quedaban con media hoja vacía. Se dibuja como `Sliced` sin bordes: se ve igual y se ajusta.
 - **J13. Legibilidad.** La línea del personaje lleva sombra (pasaba sobre ropa clara) y el expediente muestra sus teclas al pie.
+- **J14. Pasos y clic generados por código.** `FootstepAudio` suena cada ~0.7 m con tres variantes y tono al azar (el jugador no oía su propio movimiento). Los botones hacen un clic suave al pulsarlos (`UiSound`). Se agregan por código para no reconstruir las escenas y se pueden cambiar por grabaciones.
+- **J15. Retícula y aviso al guardar.** El punto central es un poco mayor y lleva contorno oscuro (se perdía sobre paredes claras). El aviso de evidencia guardada recuerda "Tab para analizar".
