@@ -29,6 +29,7 @@ namespace Caso404.EditorTools
         const string AnimFolder = ArtFolder + "/Animations";
         const string TexFolder = ArtFolder + "/Textures";
         const string MatFolder = ArtFolder + "/Materials";
+        const string MeshFolder = ArtFolder + "/Meshes";
         public const string PrefabFolder = "Assets/_Project/Prefabs/Characters";
         public const string ControllerPath = AnimFolder + "/chr_npc.controller";
         const int TexSize = 1024;
@@ -253,8 +254,8 @@ namespace Caso404.EditorTools
                 string[] fingers = { "Index", "Middle", "Ring", "Little" };
                 for (int f = 0; f < fingers.Length; f++)
                     for (int j = 1; j <= 3; j++)
-                        Const(clip, $"{side}Hand.{fingers[f]}.{j} Stretched", talking && right ? 0.4f : 0.6f - 0.08f * f - (j == 1 ? 0f : 0.05f));
-                Const(clip, $"{side}Hand.Thumb.1 Stretched", 0.35f);
+                        Const(clip, $"{side}Hand.{fingers[f]}.{j} Stretched", talking && right ? 0.5f : 0.8f - 0.06f * f - (j == 1 ? 0f : 0.04f));
+                Const(clip, $"{side}Hand.Thumb.1 Stretched", 0.5f);
                 Const(clip, $"{side}Hand.Thumb.Spread", 0.1f);
             }
 
@@ -461,29 +462,43 @@ namespace Caso404.EditorTools
 
         static float Lum(Color c) => c.r * 0.3f + c.g * 0.59f + c.b * 0.11f;
 
+        /// <summary>Qué prenda cubre cada punto del cuerpo. Decide el color pintado y qué parte de la malla lleva ropa con volumen.</summary>
+        enum Garment : byte { Skin, Top, Pants, Shoes }
+
+        /// <summary>Chaquetas, chaquetillas, sudaderas y blusones bajan un poco de la cintura; el uniforme va por dentro del pantalón.</summary>
+        static bool LongTop(Look look) => look.Pattern is Pattern.Suit or Pattern.Casual or Pattern.Hoodie or Pattern.Chef or Pattern.Scrubs;
+
+        static float HemY(Look look, float waist) => LongTop(look) ? waist - 0.07f : waist;
+
         /// <summary>
-        /// Color de la ropa en un punto del cuerpo, o null si ahí se ve la piel. Mangas y cuello se cortan por posición
-        /// (distancia a la muñeca o al hombro y altura del cuello) para que el borde sea una línea limpia.
+        /// Prenda en un punto del cuerpo. Mangas y cuello se cortan por posición (distancia a la muñeca o al hombro y
+        /// altura del cuello) para que el borde sea una línea limpia. El overol es una sola pieza.
         /// </summary>
-        static Color? ClothAt(Look look, Region region, Vector3 p, float waist, BodyMap map)
+        static Garment GarmentAt(Look look, Region region, Vector3 p, float waist, BodyMap map)
         {
             float ax = Mathf.Abs(p.x);
             if (region is Region.UpperArm or Region.LowerArm or Region.Hands || (region == Region.Torso && ax > map.ShoulderX))
             {
                 float cuff = look.ShortSleeves ? map.ShoulderX + (map.WristX - map.ShoulderX) * 0.42f : map.WristX - 0.012f;
-                return ax < cuff ? look.Top : null;
+                return ax < cuff ? Garment.Top : Garment.Skin;
             }
             if (region == Region.Neck || (region == Region.Torso && p.y > map.NeckBaseY && ax < map.ShoulderX * 0.45f))
-                return p.y < map.NeckBaseY + 0.012f ? look.Top : null; // el cuello de la prenda sube un poco
-            return region switch
-            {
-                Region.Torso => p.y < waist ? look.Pants : look.Top,
-                Region.Hips => p.y > waist + 0.02f && look.Pattern != Pattern.Overall ? look.Top : look.Pants,
-                Region.Legs => look.Pants,
-                Region.Feet => look.Shoes,
-                _ => null,
-            };
+                return p.y < map.NeckBaseY + 0.012f ? Garment.Top : Garment.Skin; // el cuello de la prenda sube un poco
+            if (region == Region.Feet) return Garment.Shoes;
+            if (region is not (Region.Torso or Region.Hips or Region.Legs)) return Garment.Skin;
+            if (look.Pattern == Pattern.Overall) return Garment.Top;
+            if (region == Region.Legs) return Garment.Pants;
+            return p.y < HemY(look, waist) ? Garment.Pants : Garment.Top;
         }
+
+        /// <summary>Color de la ropa en un punto del cuerpo, o null si ahí se ve la piel.</summary>
+        static Color? ClothAt(Look look, Region region, Vector3 p, float waist, BodyMap map) => GarmentAt(look, region, p, waist, map) switch
+        {
+            Garment.Top => look.Top,
+            Garment.Pants => look.Pants,
+            Garment.Shoes => look.Shoes,
+            _ => null,
+        };
 
         /// <summary>
         /// Piel, ropa y zapatos con brillo distinto: genera un mapa de metal/brillo por personaje (alfa = brillo) con las
@@ -517,12 +532,15 @@ namespace Caso404.EditorTools
                 imp.sRGBTexture = false;
                 imp.maxTextureSize = TexSize;
                 imp.SaveAndReimport();
-                var mat = AssetDatabase.LoadAssetAtPath<Material>($"{MatFolder}/M_chr_{look.Id}.mat");
-                if (mat == null) continue;
-                mat.SetTexture("_MetallicGlossMap", AssetDatabase.LoadAssetAtPath<Texture2D>(path));
-                mat.EnableKeyword("_METALLICSPECGLOSSMAP");
-                mat.SetFloat("_Smoothness", 1f);
-                EditorUtility.SetDirty(mat);
+                foreach (var matName in new[] { $"M_chr_{look.Id}", $"M_chr_{look.Id}_ropa" })
+                {
+                    var mat = AssetDatabase.LoadAssetAtPath<Material>($"{MatFolder}/{matName}.mat");
+                    if (mat == null) continue;
+                    mat.SetTexture("_MetallicGlossMap", AssetDatabase.LoadAssetAtPath<Texture2D>(path));
+                    mat.EnableKeyword("_METALLICSPECGLOSSMAP");
+                    mat.SetFloat("_Smoothness", 1f);
+                    EditorUtility.SetDirty(mat);
+                }
                 var hair = AssetDatabase.LoadAssetAtPath<Material>($"{MatFolder}/M_hair_{look.Id}.mat");
                 if (hair != null) { hair.SetFloat("_Smoothness", 0.55f); EditorUtility.SetDirty(hair); } // pelo con algo de brillo
             }
@@ -542,7 +560,7 @@ namespace Caso404.EditorTools
                 float shade = Mathf.Clamp(Lum(skin.light[i]) / 0.62f, 0.55f, 1.25f);
                 shade = Mathf.Lerp(1f, shade, 0.45f); // conserva un poco del volumen pintado, sin músculos marcados
                 Color? cloth = ClothAt(look, region, p, waist, map);
-                if (cloth != null) cloth = Details(look, region, p, h, waist, cloth.Value, i);
+                if (cloth != null) cloth = Details(look, region, p, h, waist, cloth.Value, i, map);
                 if (cloth != null && region == Region.Feet)
                 {
                     // Zapatos: color liso (sin los dedos del cuerpo base), suela y un brillo leve en la punta.
@@ -590,25 +608,21 @@ namespace Caso404.EditorTools
                 float cuff = look.ShortSleeves ? map.ShoulderX + (map.WristX - map.ShoulderX) * 0.42f : map.WristX - 0.012f;
                 if (cuff - ax < 0.022f) k *= 0.8f;                         // puño o ruedo de la manga
                 if (Mathf.Abs(ax - map.ShoulderX - 0.01f) < 0.004f) k *= 0.82f; // costura del hombro
-                if (p.y < map.NeckBaseY - 0.12f) k *= 0.9f;                // parte baja del brazo, más en sombra
             }
             if (region is Region.Torso or Region.Neck && p.y > map.NeckBaseY - 0.008f) k *= 0.82f; // cuello de la prenda
-            if (region is Region.Torso or Region.Hips && Mathf.Abs(p.y - waist) < 0.014f) k *= 0.72f; // cinturilla
+            if (region is Region.Torso or Region.Hips && Mathf.Abs(p.y - HemY(look, waist)) < 0.014f) k *= 0.72f; // ruedo o cinturilla
             if (region == Region.Legs && p.y - map.AnkleY < 0.03f) k *= 0.82f;                     // dobladillo
-            if (region == Region.Torso && !arm)
-            {
-                float side = Mathf.Clamp01((ax / Mathf.Max(0.05f, map.ShoulderX) - 0.62f) * 3f);
-                k *= 1f - 0.16f * side * side;                                                  // costados en sombra
-            }
+            // Las sombras de los costados y bajo los brazos ya las da el volumen de la ropa: no se pintan.
             return k;
         }
 
         /// <summary>Detalles por tipo de ropa: cuello en V del traje, cinturón, cuadros del pantalón de chef, bolsillos del overol...</summary>
-        static Color Details(Look look, Region region, Vector3 p, float h, float waist, Color cloth, int pixel)
+        static Color Details(Look look, Region region, Vector3 p, float h, float waist, Color cloth, int pixel, BodyMap map)
         {
             bool front = p.z < -0.02f; // en la pose T el modelo base mira a -Z
             float ax = Mathf.Abs(p.x);
-            bool pantsPart = region == Region.Legs || (region is Region.Hips or Region.Torso && p.y < waist);
+            bool pantsPart = GarmentAt(look, region, p, waist, map) == Garment.Pants;
+            float hem = HemY(look, waist);
             switch (look.Pattern)
             {
                 case Pattern.Suit:
@@ -655,12 +669,14 @@ namespace Caso404.EditorTools
                     if (pantsPart && Mathf.Abs(p.y - waist) < 0.012f) return C(0.25f, 0.18f, 0.1f);
                     break;
                 case Pattern.Casual:
-                    // Chaqueta abierta sobre una camiseta clara de cuello redondo, con el borde de la chaqueta marcado.
-                    if (region == Region.Torso && front && p.y > waist)
+                    // Chaqueta abierta sobre una camiseta oscura de cuello redondo, con el borde de la chaqueta marcado.
+                    // Bajo la cintura, por la abertura se ve el jean.
+                    if (region is Region.Torso or Region.Hips && front && p.y > hem)
                     {
-                        float open = 0.028f + (p.y - waist) * 0.07f;
+                        float open = 0.028f + Mathf.Max(0f, p.y - waist) * 0.07f;
                         if (ax < open)
                         {
+                            if (p.y < waist) return look.Pants;
                             bool neckline = p.y > h * 0.8f && ax < 0.05f;
                             return neckline ? C(0.16f, 0.16f, 0.18f) : C(0.24f, 0.24f, 0.26f);
                         }
@@ -706,15 +722,22 @@ namespace Caso404.EditorTools
                 var cap = Prim(PrimitiveType.Cylinder, "Gorra", head, new Vector3(top.x, top.y - 0.045f, top.z + 0.005f), new Vector3(0.2f, 0.045f, 0.21f), look.CapColor);
                 Prim(PrimitiveType.Cube, "Visera", cap.transform.parent, new Vector3(top.x, top.y - 0.075f, top.z - 0.12f), new Vector3(0.16f, 0.012f, 0.09f), look.CapColor * 0.85f);
             }
+            // Ropa con volumen (antes de adelgazar brazos y piernas: se ata a los huesos en la pose original).
+            var clothMat = Lit($"M_chr_{look.Id}_ropa", bodyTex, Color.white, 0.18f);
+            // Doble cara: si al sentarse se abre una rendija entre chaqueta y pantalón, se ve el forro y no el fondo.
+            clothMat.SetFloat("_Cull", 0f);
+            clothMat.doubleSidedGI = true;
+            float chestZ = Dress(root, look, map, clothMat);
             if (look.Badge)
             {
-                var badgePos = new Vector3(map.ChestFront.x, map.ChestFront.y, -Mathf.Abs(map.ChestFront.z) - 0.005f);
+                var badgePos = new Vector3(map.ChestFront.x, map.ChestFront.y, chestZ - 0.004f);
                 Prim(PrimitiveType.Cube, "Placa", chest, badgePos, new Vector3(0.045f, 0.055f, 0.01f), C(0.85f, 0.7f, 0.25f), 0.7f);
             }
 
             // El cuerpo base es de superhéroe: se adelgazan un poco brazos y piernas (solo el grosor, no el largo).
-            Thin(animator, HumanBodyBones.LeftUpperArm, HumanBodyBones.LeftLowerArm, HumanBodyBones.LeftHand, 0.84f);
-            Thin(animator, HumanBodyBones.RightUpperArm, HumanBodyBones.RightLowerArm, HumanBodyBones.RightHand, 0.84f);
+            // Las manos del modelo base son grandes: quedan al 90 %.
+            Thin(animator, HumanBodyBones.LeftUpperArm, HumanBodyBones.LeftLowerArm, HumanBodyBones.LeftHand, 0.84f, 0.9f);
+            Thin(animator, HumanBodyBones.RightUpperArm, HumanBodyBones.RightLowerArm, HumanBodyBones.RightHand, 0.84f, 0.9f);
             Thin(animator, HumanBodyBones.LeftUpperLeg, HumanBodyBones.LeftLowerLeg, HumanBodyBones.LeftFoot, 0.92f);
             Thin(animator, HumanBodyBones.RightUpperLeg, HumanBodyBones.RightLowerLeg, HumanBodyBones.RightFoot, 0.92f);
 
@@ -728,11 +751,472 @@ namespace Caso404.EditorTools
             Object.DestroyImmediate(root);
         }
 
+        // ================= Ropa con volumen =================
+
+        /// <summary>
+        /// Tubo de secciones transversales a lo largo de un eje (el torso a lo largo de Y, cada brazo a lo largo de X y
+        /// cada pierna a lo largo de Y). Guarda, por tramo de 2 cm y por sector angular, el radio máximo del cuerpo; a ese
+        /// radio se le aplican reglas de "tela" (rellenar huecos, caer recto) y luego se empuja cada vértice hasta él.
+        /// </summary>
+        sealed class Tube
+        {
+            const float Step = 0.02f;
+            readonly System.Func<Vector3, float> _axis;
+            readonly System.Func<Vector3, Vector2> _plane;
+            readonly System.Func<Vector2, Vector3> _lift;
+            readonly float _start;
+            public readonly int Bins, Sectors;
+            public readonly float[,] R;   // radio del cuerpo
+            public float[,] E;            // radio de la tela
+            readonly Vector2[] _center;
+
+            public Tube(IReadOnlyList<Vector3> points, int sectors, System.Func<Vector3, float> axis,
+                System.Func<Vector3, Vector2> plane, System.Func<Vector2, Vector3> lift)
+            {
+                _axis = axis; _plane = plane; _lift = lift; Sectors = sectors;
+                float min = points.Min(axis), max = points.Max(axis);
+                _start = min;
+                Bins = Mathf.Max(2, Mathf.CeilToInt((max - min) / Step) + 1);
+                var lo = Enumerable.Repeat(new Vector2(float.MaxValue, float.MaxValue), Bins).ToArray();
+                var hi = Enumerable.Repeat(new Vector2(float.MinValue, float.MinValue), Bins).ToArray();
+                foreach (var p in points)
+                {
+                    int b = Bin(p); var q = plane(p);
+                    lo[b] = Vector2.Min(lo[b], q); hi[b] = Vector2.Max(hi[b], q);
+                }
+                _center = new Vector2[Bins];
+                for (int b = 0; b < Bins; b++) _center[b] = lo[b].x <= hi[b].x ? (lo[b] + hi[b]) * 0.5f : new Vector2(float.NaN, 0f);
+                for (int b = 1; b < Bins; b++) if (float.IsNaN(_center[b].x)) _center[b] = _center[b - 1];
+                for (int b = Bins - 2; b >= 0; b--) if (float.IsNaN(_center[b].x)) _center[b] = _center[b + 1];
+                R = new float[Bins, Sectors];
+                foreach (var p in points)
+                {
+                    int b = Bin(p);
+                    var d = plane(p) - _center[b];
+                    int s = Mathf.FloorToInt(Sector(d)) % Sectors;
+                    R[b, s] = Mathf.Max(R[b, s], d.magnitude);
+                }
+                // Sectores vacíos: toman el valor de sus vecinos.
+                for (int b = 0; b < Bins; b++)
+                    for (int s = 0; s < Sectors; s++)
+                        if (R[b, s] <= 0f) R[b, s] = Mathf.Max(R[b, (s + 1) % Sectors], R[b, (s + Sectors - 1) % Sectors]);
+                E = (float[,])R.Clone();
+            }
+
+            int Bin(Vector3 p) => Mathf.Clamp(Mathf.FloorToInt((_axis(p) - _start) / Step), 0, Bins - 1);
+            float Sector(Vector2 d) => Mathf.Repeat(Mathf.Atan2(d.y, d.x) / (2f * Mathf.PI), 1f) * Sectors;
+
+            /// <summary>
+            /// Suaviza la tela entre sectores vecinos y entre tramos vecinos. Con <paramref name="floor"/> menor que 1 la
+            /// tela puede pasar un poco por dentro de los bultos (músculos), solo donde la piel de debajo se quitó.
+            /// </summary>
+            public void Smooth(int passes, float floor = 1f)
+            {
+                for (int pass = 0; pass < passes; pass++)
+                {
+                    var n = new float[Bins, Sectors];
+                    for (int b = 0; b < Bins; b++)
+                        for (int s = 0; s < Sectors; s++)
+                        {
+                            int b0 = Mathf.Max(0, b - 1), b1 = Mathf.Min(Bins - 1, b + 1);
+                            float around = E[b, (s + 1) % Sectors] + E[b, (s + Sectors - 1) % Sectors];
+                            float along = E[b0, s] + E[b1, s];
+                            n[b, s] = E[b, s] * 0.4f + around * 0.15f + along * 0.15f;
+                        }
+                    for (int b = 0; b < Bins; b++)
+                        for (int s = 0; s < Sectors; s++)
+                            E[b, s] = Mathf.Max(n[b, s], R[b, s] * floor);
+                }
+            }
+
+            /// <summary>Radio medio del cuerpo en el tramo (para el registro).</summary>
+            public float MeanR(int b) { float sum = 0f; for (int s = 0; s < Sectors; s++) sum += R[b, s]; return sum / Sectors; }
+
+            /// <summary>
+            /// Cuánto hay que mover el punto (en el plano de la sección) para llegar a la tela. Solo puede entrar en el
+            /// cuerpo (<paramref name="inward"/>) donde la piel de debajo se quitó.
+            /// </summary>
+            public Vector3 Push(Vector3 p, bool inward)
+            {
+                float fb = Mathf.Clamp((_axis(p) - _start) / Step - 0.5f, 0f, Bins - 1);
+                int b0 = Mathf.FloorToInt(fb), b1 = Mathf.Min(Bins - 1, b0 + 1);
+                float tb = fb - b0;
+                var center = Vector2.Lerp(_center[b0], _center[b1], tb);
+                var d = _plane(p) - center;
+                float r = d.magnitude;
+                if (r < 1e-4f) return Vector3.zero;
+                float fs = Sector(d) - 0.5f;
+                int s0 = Mathf.FloorToInt(fs), s1 = s0 + 1;
+                float ts = fs - s0;
+                s0 = (s0 % Sectors + Sectors) % Sectors; s1 = (s1 % Sectors + Sectors) % Sectors;
+                float target = Mathf.Lerp(Mathf.Lerp(E[b0, s0], E[b0, s1], ts), Mathf.Lerp(E[b1, s0], E[b1, s1], ts), tb);
+                return target > r || inward ? _lift(d / r * (target - r)) : Vector3.zero;
+            }
+        }
+
+        enum Part : byte { Torso, ArmLeft, ArmRight, LegLeft, LegRight }
+
+        static Part PartOf(Region region, Vector3 p, BodyMap map)
+        {
+            if (region is Region.UpperArm or Region.LowerArm or Region.Hands || (region == Region.Torso && Mathf.Abs(p.x) > map.ShoulderX))
+                return p.x > 0 ? Part.ArmLeft : Part.ArmRight;
+            if (region is Region.Legs or Region.Feet) return p.x > 0 ? Part.LegLeft : Part.LegRight;
+            return Part.Torso;
+        }
+
+        /// <summary>
+        /// Viste al personaje con ropa de verdad: una malla nueva que copia la parte del cuerpo cubierta por cada prenda,
+        /// la infla como tela (rellena la cintura y los músculos del cuerpo de superhéroe, mangas sueltas, pantalón recto
+        /// y chaqueta algo acampanada abajo) y la anima con los mismos huesos y pesos que el cuerpo. La textura pintada se
+        /// reutiliza con las mismas UV, así botones, solapas y cuadros siguen en su sitio. Del cuerpo se quitan los
+        /// triángulos que quedan totalmente tapados, así la piel nunca atraviesa la ropa al animarse.
+        /// Devuelve la Z del frente del pecho (lado izquierdo) para apoyar la placa.
+        /// </summary>
+        static float Dress(GameObject root, Look look, BodyMap map, Material clothMat)
+        {
+            var smr = root.GetComponentsInChildren<SkinnedMeshRenderer>().OrderByDescending(s => s.sharedMesh.vertexCount).First();
+            var src = smr.sharedMesh;
+            var baked = new Mesh();
+            smr.BakeMesh(baked, true);
+            var world = baked.vertices.Select(v => smr.transform.TransformPoint(v)).ToArray();
+            Object.DestroyImmediate(baked);
+            int n = world.Length;
+            var region = VertexRegions(smr);
+            float waist = map.Height * 0.585f;
+            var garment = new Garment[n];
+            var part = new Part[n];
+            for (int i = 0; i < n; i++)
+            {
+                garment[i] = GarmentAt(look, region[i], world[i], waist, map);
+                part[i] = PartOf(region[i], world[i], map);
+            }
+
+            // Vértices soldados: la malla repite vértices en las costuras de UV; la ropa debe moverse igual en ambos lados.
+            var weld = new int[n];
+            var weldOf = new Dictionary<Vector3Int, int>();
+            for (int i = 0; i < n; i++)
+            {
+                var key = Vector3Int.RoundToInt(world[i] * 10000f);
+                if (!weldOf.TryGetValue(key, out weld[i])) { weld[i] = weldOf.Count; weldOf[key] = weld[i]; }
+            }
+            int welded = weldOf.Count;
+            var tris = src.triangles;
+
+            // Normales del cuerpo (por vértice soldado) y bordes de la ropa (junto a piel, o entre camisa y pantalón).
+            var bodyNormal = new Vector3[welded];
+            var edge = new bool[welded];
+            var garmentMask = new int[welded];
+            var bodyAdj = new List<int>[welded];
+            for (int g = 0; g < welded; g++) bodyAdj[g] = new List<int>(6);
+            for (int t = 0; t < tris.Length; t += 3)
+            {
+                int a = tris[t], b = tris[t + 1], c = tris[t + 2];
+                var nrm = Vector3.Cross(world[b] - world[a], world[c] - world[a]);
+                bool clothTri = IsCloth(garment[a]) && IsCloth(garment[b]) && IsCloth(garment[c]);
+                int mask = clothTri ? 1 << (int)TriGarment(garment[a], garment[b], garment[c]) : 0;
+                foreach (var v in new[] { a, b, c })
+                {
+                    int w = weld[v];
+                    bodyNormal[w] += nrm;
+                    if (!clothTri) edge[w] = true;
+                    garmentMask[w] |= mask;
+                    foreach (var o in new[] { a, b, c }) if (o != v && !bodyAdj[w].Contains(weld[o])) bodyAdj[w].Add(weld[o]);
+                }
+            }
+            for (int g = 0; g < welded; g++)
+            {
+                bodyNormal[g] = bodyNormal[g].normalized;
+                if (garmentMask[g] == ((1 << (int)Garment.Top) | (1 << (int)Garment.Pants))) edge[g] = true;
+            }
+            // La piel se quita solo a 3 anillos o más de un borde: cerca de los bordes queda (pintada del color de la
+            // prenda) para que por mangas, cuello y ruedos no se vea a través del personaje.
+            var depth = Enumerable.Repeat(int.MaxValue, welded).ToArray();
+            var queue = new Queue<int>();
+            for (int g = 0; g < welded; g++) if (edge[g]) { depth[g] = 0; queue.Enqueue(g); }
+            while (queue.Count > 0)
+            {
+                int g = queue.Dequeue();
+                foreach (var o in bodyAdj[g])
+                    if (depth[o] > depth[g] + 1) { depth[o] = depth[g] + 1; queue.Enqueue(o); }
+            }
+            // La cadera se conserva siempre: al sentarse es donde más se separan chaqueta y pantalón.
+            var hips = new bool[welded];
+            for (int i = 0; i < n; i++) if (region[i] == Region.Hips) hips[weld[i]] = true;
+            var covered = depth.Select((d, g) => d >= 3 && !hips[g]).ToArray();
+
+            // Triángulos de la ropa: cada uno pertenece a una prenda; un triángulo entre camisa y pantalón va con la camisa.
+            // Nodo = (vértice soldado, prenda): en el ruedo la camisa y el pantalón quedan como bordes separados.
+            var nodeOf = new Dictionary<long, int>();
+            var nodeRest = new List<Vector3>();
+            var nodeWeld = new List<int>();
+            var nodePart = new List<Part>();
+            var nodeGarment = new List<Garment>();
+            var shellVerts = new List<int>();          // vértice original de cada vértice de la ropa
+            var shellNode = new List<int>();
+            var shellIndex = new Dictionary<long, int>();
+            var shellTris = new List<int>();
+            for (int t = 0; t < tris.Length; t += 3)
+            {
+                int a = tris[t], b = tris[t + 1], c = tris[t + 2];
+                if (!(IsCloth(garment[a]) && IsCloth(garment[b]) && IsCloth(garment[c]))) continue;
+                var primary = TriGarment(garment[a], garment[b], garment[c]);
+                // El pantalón sigue 5 cm por debajo de la camisa o chaqueta: así entre ruedo y pantalón no queda una rendija.
+                bool underTop = primary == Garment.Top && look.Pattern != Pattern.Overall
+                    && new[] { a, b, c }.All(v => region[v] is Region.Torso or Region.Hips && world[v].y < HemY(look, waist) + 0.05f && part[v] == Part.Torso);
+                foreach (var g in underTop ? new[] { Garment.Top, Garment.Pants } : new[] { primary })
+                foreach (var v in new[] { a, b, c })
+                {
+                    long nodeKey = (long)weld[v] * 4 + (int)g;
+                    if (!nodeOf.TryGetValue(nodeKey, out int node))
+                    {
+                        node = nodeRest.Count; nodeOf[nodeKey] = node;
+                        nodeRest.Add(world[v]); nodeWeld.Add(weld[v]); nodePart.Add(part[v]); nodeGarment.Add(g);
+                    }
+                    long vKey = (long)v * 4 + (int)g;
+                    if (!shellIndex.TryGetValue(vKey, out int sv))
+                    {
+                        sv = shellVerts.Count; shellIndex[vKey] = sv;
+                        shellVerts.Add(v); shellNode.Add(node);
+                    }
+                    shellTris.Add(sv);
+                }
+            }
+            int nodes = nodeRest.Count;
+            if (nodes == 0) return map.ChestFront.z;
+
+            // Tubos del cuerpo (con todos sus vértices, no solo los vestidos, para medir bien cada sección).
+            float wrist = map.WristX - 0.01f;
+            Tube Make(Part which, int sectors, System.Func<Vector3, float> axis, System.Func<Vector3, Vector2> plane, System.Func<Vector2, Vector3> lift)
+            {
+                var pts = new List<Vector3>();
+                for (int i = 0; i < n; i++)
+                {
+                    if (part[i] != which) continue;
+                    if (which is Part.ArmLeft or Part.ArmRight && Mathf.Abs(world[i].x) > wrist) continue;
+                    if (which is Part.LegLeft or Part.LegRight && world[i].y < map.AnkleY) continue;
+                    if (which == Part.Torso && region[i] == Region.Head) continue;
+                    pts.Add(world[i]);
+                }
+                return pts.Count > 10 ? new Tube(pts, sectors, axis, plane, lift) : null;
+            }
+            var tubes = new Dictionary<Part, Tube>
+            {
+                [Part.Torso] = Make(Part.Torso, 24, p => p.y, p => new Vector2(p.x, p.z), d => new Vector3(d.x, 0f, d.y)),
+                [Part.ArmLeft] = Make(Part.ArmLeft, 12, p => Mathf.Abs(p.x), p => new Vector2(p.y, p.z), d => new Vector3(0f, d.x, d.y)),
+                [Part.ArmRight] = Make(Part.ArmRight, 12, p => Mathf.Abs(p.x), p => new Vector2(p.y, p.z), d => new Vector3(0f, d.x, d.y)),
+                [Part.LegLeft] = Make(Part.LegLeft, 12, p => p.y, p => new Vector2(p.x, p.z), d => new Vector3(d.x, 0f, d.y)),
+                [Part.LegRight] = Make(Part.LegRight, 12, p => p.y, p => new Vector2(p.x, p.z), d => new Vector3(d.x, 0f, d.y)),
+            };
+            ShapeTorso(tubes[Part.Torso], look.Female ? 0.93f : 0.98f);
+            foreach (var arm in new[] { tubes[Part.ArmLeft], tubes[Part.ArmRight] }) ShapeSleeve(arm, look.Female ? 0.88f : 1f);
+            foreach (var leg in new[] { tubes[Part.LegLeft], tubes[Part.LegRight] }) ShapeTrouser(leg);
+
+            // Posición de la tela: empuje hasta el tubo + grosor de la prenda a lo largo de la normal.
+            bool jacket = LongTop(look) && look.Pattern != Pattern.Scrubs;
+            var pos = new Vector3[nodes];
+            for (int k = 0; k < nodes; k++)
+            {
+                var p = nodeRest[k];
+                var tube = tubes[nodePart[k]];
+                var push = tube != null ? tube.Push(p, covered[nodeWeld[k]]) : Vector3.zero;
+                bool arm = nodePart[k] is Part.ArmLeft or Part.ArmRight;
+                float thick = nodeGarment[k] == Garment.Pants ? 0.008f
+                    : arm ? (jacket ? 0.012f : 0.009f)
+                    : jacket ? 0.017f : 0.012f;
+                // La chaqueta se abre un poco hacia el ruedo (cae sobre la cadera en vez de pegarse a ella).
+                if (nodeGarment[k] == Garment.Top && nodePart[k] == Part.Torso && p.y < waist && look.Pattern != Pattern.Overall)
+                    push += Vector3.ProjectOnPlane(bodyNormal[nodeWeld[k]], Vector3.up).normalized * (waist - p.y) * 0.14f;
+                pos[k] = p + push + bodyNormal[nodeWeld[k]] * thick;
+            }
+
+            // Suavizado de Taubin (no encoge la malla) y la tela nunca queda dentro de la piel.
+            var adj = new HashSet<int>[nodes];
+            for (int k = 0; k < nodes; k++) adj[k] = new HashSet<int>();
+            for (int t = 0; t < shellTris.Count; t += 3)
+            {
+                int a = shellNode[shellTris[t]], b = shellNode[shellTris[t + 1]], c = shellNode[shellTris[t + 2]];
+                adj[a].Add(b); adj[a].Add(c); adj[b].Add(a); adj[b].Add(c); adj[c].Add(a); adj[c].Add(b);
+            }
+            for (int it = 0; it < 12; it++)
+            {
+                float f = it % 2 == 0 ? 0.5f : -0.53f;
+                var next = new Vector3[nodes];
+                for (int k = 0; k < nodes; k++)
+                {
+                    if (adj[k].Count == 0) { next[k] = pos[k]; continue; }
+                    var avg = Vector3.zero;
+                    foreach (var j in adj[k]) avg += pos[j];
+                    avg /= adj[k].Count;
+                    next[k] = pos[k] + (avg - pos[k]) * f;
+                }
+                pos = next;
+            }
+            for (int k = 0; k < nodes; k++)
+            {
+                if (covered[nodeWeld[k]]) continue; // debajo ya no hay piel
+                var nrm = bodyNormal[nodeWeld[k]];
+                float min = nodeGarment[k] == Garment.Pants ? 0.006f : 0.008f;
+                float d = Vector3.Dot(pos[k] - nodeRest[k], nrm);
+                if (d < min) pos[k] += nrm * (min - d);
+            }
+
+            // Normales de la ropa por nodo (iguales a ambos lados de las costuras de UV).
+            var nodeNormal = new Vector3[nodes];
+            for (int t = 0; t < shellTris.Count; t += 3)
+            {
+                int a = shellNode[shellTris[t]], b = shellNode[shellTris[t + 1]], c = shellNode[shellTris[t + 2]];
+                var nrm = Vector3.Cross(pos[b] - pos[a], pos[c] - pos[a]);
+                nodeNormal[a] += nrm; nodeNormal[b] += nrm; nodeNormal[c] += nrm;
+            }
+
+            // Malla de la ropa, atada a los huesos en la pose actual (la misma con la que se midió todo).
+            var uv = src.uv;
+            var weights = src.boneWeights;
+            var cloth = new Mesh { name = $"chr_{look.Id}_ropa" };
+            if (shellVerts.Count > 65000) cloth.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+            cloth.SetVertices(shellVerts.Select((v, i) => smr.transform.InverseTransformPoint(pos[shellNode[i]])).ToList());
+            cloth.SetNormals(shellVerts.Select((v, i) => smr.transform.InverseTransformDirection(nodeNormal[shellNode[i]].normalized)).ToList());
+            cloth.SetUVs(0, shellVerts.Select(v => uv[v]).ToList());
+            cloth.boneWeights = shellVerts.Select(v => weights[v]).ToArray();
+            cloth.bindposes = smr.bones.Select(b => b.worldToLocalMatrix * smr.transform.localToWorldMatrix).ToArray();
+            cloth.SetTriangles(shellTris, 0);
+            cloth.RecalculateBounds();
+
+            // Cuerpo sin la piel que queda tapada por completo.
+            var body = Object.Instantiate(src);
+            body.name = $"chr_{look.Id}_cuerpo";
+            for (int s = 0; s < body.subMeshCount; s++)
+            {
+                var keep = new List<int>();
+                var sub = src.GetTriangles(s);
+                for (int t = 0; t < sub.Length; t += 3)
+                    if (!(covered[weld[sub[t]]] && covered[weld[sub[t + 1]]] && covered[weld[sub[t + 2]]]))
+                        keep.AddRange(new[] { sub[t], sub[t + 1], sub[t + 2] });
+                body.SetTriangles(keep, s);
+            }
+
+            EnsureFolder(MeshFolder);
+            var clothPath = $"{MeshFolder}/chr_{look.Id}_ropa.asset";
+            var bodyPath = $"{MeshFolder}/chr_{look.Id}_cuerpo.asset";
+            AssetDatabase.DeleteAsset(clothPath); AssetDatabase.DeleteAsset(bodyPath);
+            AssetDatabase.CreateAsset(cloth, clothPath);
+            AssetDatabase.CreateAsset(body, bodyPath);
+            smr.sharedMesh = body;
+
+            var go = new GameObject("Ropa");
+            go.transform.SetParent(smr.transform.parent, false);
+            go.transform.localPosition = smr.transform.localPosition;
+            go.transform.localRotation = smr.transform.localRotation;
+            go.transform.localScale = smr.transform.localScale;
+            var clothSmr = go.AddComponent<SkinnedMeshRenderer>();
+            clothSmr.sharedMesh = cloth;
+            clothSmr.bones = smr.bones;
+            clothSmr.rootBone = smr.rootBone;
+            clothSmr.sharedMaterial = clothMat;
+            clothSmr.updateWhenOffscreen = false;
+            var bounds = smr.localBounds;
+            bounds.Expand(0.15f);
+            clothSmr.localBounds = bounds;
+            clothSmr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+
+            float chestZ = float.MaxValue;
+            for (int k = 0; k < nodes; k++)
+                if (nodePart[k] == Part.Torso && Mathf.Abs(pos[k].y - map.ChestFront.y) < 0.03f && Mathf.Abs(pos[k].x - map.ChestFront.x) < 0.03f)
+                    chestZ = Mathf.Min(chestZ, pos[k].z);
+            Debug.Log($"[Caso404] Ropa de {look.Id}: {shellVerts.Count} vértices, {shellTris.Count / 3} triángulos; cuerpo {body.triangles.Length / 3} de {tris.Length / 3} triángulos.");
+            return chestZ < float.MaxValue ? chestZ : -Mathf.Abs(map.ChestFront.z) - 0.02f;
+        }
+
+        static bool IsCloth(Garment g) => g is Garment.Top or Garment.Pants;
+
+        /// <summary>Prenda de un triángulo vestido: un triángulo entre camisa y pantalón va con la camisa.</summary>
+        static Garment TriGarment(Garment a, Garment b, Garment c) =>
+            a == Garment.Pants && b == Garment.Pants && c == Garment.Pants ? Garment.Pants : Garment.Top;
+
+        /// <summary>
+        /// Torso: la tela pasa por encima de las hendiduras (cintura de avispa, abdominales, pectorales). Cada sección toma
+        /// al menos una fracción del menor de los máximos de arriba y de abajo (24 cm a cada lado).
+        /// </summary>
+        static void ShapeTorso(Tube t, float fill)
+        {
+            if (t == null) return;
+            const int window = 12;
+            for (int s = 0; s < t.Sectors; s++)
+                for (int b = 0; b < t.Bins; b++)
+                {
+                    float up = 0f, down = 0f;
+                    for (int k = 1; k <= window; k++)
+                    {
+                        if (b + k < t.Bins) up = Mathf.Max(up, t.R[b + k, s]);
+                        if (b - k >= 0) down = Mathf.Max(down, t.R[b - k, s]);
+                    }
+                    t.E[b, s] = Mathf.Max(t.R[b, s], fill * Mathf.Min(up, down));
+                }
+            t.Smooth(5, 0.95f); // aplana espalda, pectorales y abdominales
+
+        }
+
+        /// <summary>
+        /// Manga: rellena el codo y se va angostando suave hacia el puño, sin seguir cada músculo. Además no pasa de un
+        /// grosor de brazo normal (el cuerpo base es de superhéroe y con la tela encima parecía llevar hombreras).
+        /// </summary>
+        static void ShapeSleeve(Tube t, float scale)
+        {
+            if (t == null) return;
+            for (int s = 0; s < t.Sectors; s++)
+            {
+                for (int b = t.Bins - 2; b >= 0; b--) t.E[b, s] = Mathf.Max(t.E[b, s], t.E[b + 1, s] - 0.0015f); // hacia el hombro
+                for (int b = 1; b < t.Bins; b++) t.E[b, s] = Mathf.Max(t.E[b, s], t.E[b - 1, s] - 0.004f);       // hacia el puño
+            }
+            t.Smooth(2);
+            for (int b = 0; b < t.Bins; b++)
+            {
+                float f = b / (float)(t.Bins - 1);
+                float cap = scale * (f < 0.45f ? Mathf.Lerp(0.072f, 0.06f, f / 0.45f) : Mathf.Lerp(0.06f, 0.052f, (f - 0.45f) / 0.55f));
+                for (int s = 0; s < t.Sectors; s++) t.E[b, s] = Mathf.Min(t.E[b, s], cap);
+            }
+            Debug.Log($"[Caso404] Manga: radio del cuerpo en hombro {t.MeanR(1):0.000}, codo {t.MeanR(t.Bins / 2):0.000}, muñeca {t.MeanR(t.Bins - 2):0.000}");
+        }
+
+        /// <summary>Pantalón: cae casi recto desde el muslo hasta el tobillo, en vez de marcar rodilla y pantorrilla.</summary>
+        static void ShapeTrouser(Tube t)
+        {
+            if (t == null) return;
+            for (int s = 0; s < t.Sectors; s++)
+            {
+                for (int b = t.Bins - 2; b >= 0; b--) t.E[b, s] = Mathf.Max(t.E[b, s], t.E[b + 1, s] - 0.0012f); // hacia abajo
+                for (int b = 1; b < t.Bins; b++) t.E[b, s] = Mathf.Max(t.E[b, s], t.E[b - 1, s] - 0.004f);
+            }
+            t.Smooth(2);
+        }
+
+        /// <summary>Zona del cuerpo de cada vértice (la que más peso tiene entre los huesos que lo mueven).</summary>
+        static Region[] VertexRegions(SkinnedMeshRenderer smr)
+        {
+            var weights = smr.sharedMesh.boneWeights;
+            var boneRegions = smr.bones.Select(b => RegionOfBone(b.name)).ToArray();
+            var result = new Region[weights.Length];
+            var acc = new float[10];
+            for (int i = 0; i < weights.Length; i++)
+            {
+                System.Array.Clear(acc, 0, acc.Length);
+                var w = weights[i];
+                acc[(int)boneRegions[w.boneIndex0]] += w.weight0;
+                acc[(int)boneRegions[w.boneIndex1]] += w.weight1;
+                acc[(int)boneRegions[w.boneIndex2]] += w.weight2;
+                acc[(int)boneRegions[w.boneIndex3]] += w.weight3;
+                int best = 1;
+                for (int r = 1; r < acc.Length; r++) if (acc[r] > acc[best]) best = r;
+                result[i] = (Region)best;
+            }
+            return result;
+        }
+
         /// <summary>
         /// Adelgaza un segmento (brazo o pierna): escala el hueso solo en los dos ejes perpendiculares a su largo y deshace
         /// la escala en el hueso siguiente, así el antebrazo queda algo más delgado y la mano o el pie conservan su tamaño.
         /// </summary>
-        static void Thin(Animator animator, HumanBodyBones upper, HumanBodyBones lower, HumanBodyBones end, float factor)
+        static void Thin(Animator animator, HumanBodyBones upper, HumanBodyBones lower, HumanBodyBones end, float factor, float endScale = 1f)
         {
             var a = animator.GetBoneTransform(upper);
             var b = animator.GetBoneTransform(lower);
@@ -741,7 +1225,7 @@ namespace Caso404.EditorTools
             a.localScale = AxisScale(b.localPosition, factor);
             float lowerFactor = Mathf.Lerp(factor, 1f, 0.5f);
             b.localScale = Div(AxisScale(c.localPosition, lowerFactor), a.localScale);
-            c.localScale = Div(Vector3.one, Vector3.Scale(a.localScale, b.localScale));
+            c.localScale = Div(Vector3.one * endScale, Vector3.Scale(a.localScale, b.localScale));
         }
 
         /// <summary>
@@ -797,7 +1281,8 @@ namespace Caso404.EditorTools
             go.transform.SetParent(bone, true);
             foreach (var r in go.GetComponentsInChildren<Renderer>())
             {
-                r.sharedMaterial = mat;
+                // Algunos peinados traen dos materiales: todos los mechones van del mismo color.
+                r.sharedMaterials = Enumerable.Repeat(mat, Mathf.Max(1, r.sharedMaterials.Length)).ToArray();
                 r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
             }
         }
@@ -817,13 +1302,43 @@ namespace Caso404.EditorTools
         static Material HairMaterial(Look look)
         {
             bool type2 = look.Hair is Hair.Long or Hair.Buns;
-            var tex = AssetDatabase.LoadAssetAtPath<Texture2D>($"{HairTextures}/T_Hair_{(type2 ? 2 : 1)}_BaseColor.png");
+            var tex = GrayHairTexture(type2 ? 2 : 1);
             // El color del pelo se logra dividiendo por el color medio de la textura (así el gris queda gris).
             var avg = AverageColor(tex);
             var tint = new Color(Mathf.Clamp(look.HairColor.r / Mathf.Max(avg.r, 0.05f), 0f, 6f),
                                  Mathf.Clamp(look.HairColor.g / Mathf.Max(avg.g, 0.05f), 0f, 6f),
                                  Mathf.Clamp(look.HairColor.b / Mathf.Max(avg.b, 0.05f), 0f, 6f));
             return Lit($"M_hair_{look.Id}", tex, tint, 0.3f);
+        }
+
+        /// <summary>
+        /// Versión en gris de la textura de pelo del paquete, con menos contraste: la original trae zonas de dos colores
+        /// y, teñida de rubio, dejaba mechones marrones. Así el tinte del personaje queda parejo y conserva las hebras.
+        /// </summary>
+        static Texture2D GrayHairTexture(int type)
+        {
+            var path = $"{TexFolder}/T_hair_{type}_gris.png";
+            var src = new Texture2D(2, 2);
+            src.LoadImage(File.ReadAllBytes($"{HairTextures}/T_Hair_{type}_BaseColor.png"));
+            var px = src.GetPixels();
+            float mean = 0f;
+            foreach (var c in px) mean += Lum(c);
+            mean = Mathf.Max(0.02f, mean / px.Length);
+            for (int i = 0; i < px.Length; i++)
+            {
+                float v = Mathf.Lerp(1f, Lum(px[i]) / mean, 0.35f) * 0.6f;
+                px[i] = new Color(v, v, v, px[i].a);
+            }
+            var gray = new Texture2D(src.width, src.height, TextureFormat.RGBA32, true);
+            gray.SetPixels(px);
+            gray.Apply();
+            File.WriteAllBytes(path, gray.EncodeToPNG());
+            Object.DestroyImmediate(src);
+            Object.DestroyImmediate(gray);
+            AssetDatabase.ImportAsset(path);
+            var result = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            AvgCache.Remove(result);
+            return result;
         }
 
         static readonly Dictionary<Texture2D, Color> AvgCache = new();
