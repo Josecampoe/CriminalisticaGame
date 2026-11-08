@@ -24,6 +24,9 @@ namespace Caso404.Interaction
         [SerializeField] private float _rotateSpeed = 0.35f;
         [SerializeField] private float _revealAngle = 150f;
         [SerializeField] private Vector3 _studioPosition = new(0f, -500f, 0f);
+        [SerializeField] private float _defaultFov = 30f;
+        [SerializeField] private float _minFov = 12f;
+        [SerializeField] private float _maxFov = 42f;
 
         Camera _studioCamera;
         Transform _studioRoot;
@@ -31,6 +34,7 @@ namespace Caso404.Interaction
         RenderTexture _texture;
         float _accumulatedAngle;
         int _layer;
+        int _beginFrame = -1;
 
         public EvidenceData Current { get; private set; }
         public bool IsActive => Current != null;
@@ -47,11 +51,22 @@ namespace Caso404.Interaction
         void OnEnable()
         {
             if (_player != null) _player.InspectRequested += Begin;
+            if (_input != null) _input.InteractPressed += OnInteractKey;
         }
 
         void OnDisable()
         {
             if (_player != null) _player.InspectRequested -= Begin;
+            if (_input != null) _input.InteractPressed -= OnInteractKey;
+        }
+
+        /// <summary>E durante la inspección: guarda la evidencia (o vuelve, si ya estaba guardada).</summary>
+        void OnInteractKey()
+        {
+            // La misma pulsación que abrió la inspección no debe guardarla al instante.
+            if (!IsActive || Time.frameCount == _beginFrame) return;
+            if (_game.Evidence.IsFound(Current)) End();
+            else Keep();
         }
 
         void OnDestroy()
@@ -64,7 +79,9 @@ namespace Caso404.Interaction
         {
             if (IsActive || evidence == null) return;
             Current = evidence;
+            _beginFrame = Time.frameCount;
             _accumulatedAngle = 0f;
+            _studioCamera.fieldOfView = _defaultFov;
             _preview = CreatePreview(evidence.InspectPrefab != null ? evidence.InspectPrefab : source);
             _studioCamera.enabled = true;
             Started?.Invoke(evidence);
@@ -93,7 +110,11 @@ namespace Caso404.Interaction
 
         void Update()
         {
-            if (!IsActive || _preview == null || _input == null || !_input.RotateHeld) return;
+            if (!IsActive || _preview == null || _input == null) return;
+            float zoom = _input.Zoom;
+            if (Mathf.Abs(zoom) > 0.01f)
+                _studioCamera.fieldOfView = Mathf.Clamp(_studioCamera.fieldOfView - Mathf.Sign(zoom) * 2.5f, _minFov, _maxFov);
+            if (!_input.RotateHeld) return;
             var delta = _input.Look * _rotateSpeed;
             _preview.transform.Rotate(_studioCamera.transform.up, -delta.x, Space.World);
             _preview.transform.Rotate(_studioCamera.transform.right, delta.y, Space.World);
@@ -119,7 +140,7 @@ namespace Caso404.Interaction
             _studioCamera.clearFlags = CameraClearFlags.SolidColor;
             _studioCamera.backgroundColor = new Color(0f, 0f, 0f, 0f);
             _studioCamera.cullingMask = 1 << _layer;
-            _studioCamera.fieldOfView = 30f;
+            _studioCamera.fieldOfView = _defaultFov;
             _studioCamera.nearClipPlane = 0.05f;
             _studioCamera.farClipPlane = 5f;
             _studioCamera.targetTexture = _texture;

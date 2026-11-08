@@ -90,6 +90,17 @@ namespace Caso404.EditorTools
             Shot("chr_caras_1", new Vector3(-2f, 1.6f, -1.6f), new Vector3(3, 0, 0));
             Shot("chr_caras_2", new Vector3(2f, 1.6f, -1.6f), new Vector3(3, 0, 0));
             Shot("chr_espalda", new Vector3(0, 1.4f, 6f), new Vector3(5, 180, 0));
+            Shot("chr_detalle_pecho", new Vector3(-2.5f, 1.35f, -0.9f), new Vector3(5, 0, 0));
+            Shot("chr_detalle_manos", new Vector3(-1.9f, 0.95f, -0.7f), new Vector3(10, -20, 0));
+            Shot("chr_fila_final", new Vector3(0, 1.3f, -5.2f), new Vector3(5, 0, 0));
+            Shot("chr_fila_media", new Vector3(0, 1.3f, -3.6f), new Vector3(5, 0, 0));
+        }
+
+        /// <summary>Línea de comandos: reconstruye los personajes y toma sus capturas.</summary>
+        public static void RebuildAndCaptureCharacters()
+        {
+            CharacterArtBuilder.Build();
+            CaptureCharacters();
         }
 
         /// <summary>En modo edición el Animator no corre: aplica a cada personaje su pose de reposo (de pie o sentado).</summary>

@@ -115,7 +115,7 @@ namespace Caso404.EditorTools
 
             foreach (var cam in Object.FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                 SetupCamera(cam, menu);
-            if (menu) { MenuBackdrop(root); return; }
+            if (menu) { MenuBackdrop(root); AmbientAudioBuilder.AddTo(root, sceneName); return; }
 
             // SceneKit.BeginEmpty vuelve a poner colores planos en los materiales compartidos: se reaplican las texturas.
             ProceduralMaterials.Build(false);

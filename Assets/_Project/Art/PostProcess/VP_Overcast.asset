@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-6334284472733686426
+--- !u!114 &-6627034460558770752
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -9,41 +9,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70afe9e12c7a7ed47911bb608a23a8ff, type: 3}
-  m_Name: SplitToning
-  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.SplitToning
+  m_Script: {fileID: 11500000, guid: 221518ef91623a7438a71fef23660601, type: 3}
+  m_Name: WhiteBalance
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.WhiteBalance
   active: 1
-  shadows:
+  temperature:
     m_OverrideState: 1
-    m_Value: {r: 0.46, g: 0.5, b: 0.53, a: 1}
-  highlights:
+    m_Value: -4
+  tint:
     m_OverrideState: 1
-    m_Value: {r: 0.58, g: 0.54, b: 0.48, a: 1}
-  balance:
-    m_OverrideState: 1
-    m_Value: -15
---- !u!114 &11400000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d7fd9488000d3734a9e00ee676215985, type: 3}
-  m_Name: VP_Overcast
-  m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.VolumeProfile
-  components:
-  - {fileID: 3907279559487396558}
-  - {fileID: 4220998676397875674}
-  - {fileID: 8166489370341955195}
-  - {fileID: 7647606285352871236}
-  - {fileID: 2676399922611162377}
-  - {fileID: 6899525932352458021}
-  - {fileID: -6334284472733686426}
-  - {fileID: 7023368860426163430}
---- !u!114 &2676399922611162377
+    m_Value: 0
+--- !u!114 &-6478383070695387818
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -71,7 +47,7 @@ MonoBehaviour:
   saturation:
     m_OverrideState: 1
     m_Value: -22
---- !u!114 &3907279559487396558
+--- !u!114 &-5860531913565836278
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -80,38 +56,82 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 97c23e3b12dc18c42a140437e53d3951, type: 3}
-  m_Name: Tonemapping
-  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.Tonemapping
+  m_Script: {fileID: 11500000, guid: 899c54efeace73346a0a16faa3afe726, type: 3}
+  m_Name: Vignette
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.Vignette
   active: 1
-  mode:
+  color:
     m_OverrideState: 1
-    m_Value: 2
-  neutralHDRRangeReductionMode:
+    m_Value: {r: 0, g: 0, b: 0, a: 1}
+  center:
     m_OverrideState: 1
-    m_Value: 2
-  acesPreset:
+    m_Value: {x: 0.5, y: 0.5}
+  intensity:
     m_OverrideState: 1
-    m_Value: 3
-  hueShiftAmount:
+    m_Value: 0.34
+  smoothness:
+    m_OverrideState: 1
+    m_Value: 0.45
+  rounded:
     m_OverrideState: 1
     m_Value: 0
-  detectPaperWhite:
+--- !u!114 &-3981563955508673688
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 558a8e2b6826cf840aae193990ba9f2e, type: 3}
+  m_Name: ShadowsMidtonesHighlights
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.ShadowsMidtonesHighlights
+  active: 1
+  shadows:
+    m_OverrideState: 1
+    m_Value: {x: 0.96, y: 0.98, z: 1.05, w: -0.02}
+  midtones:
+    m_OverrideState: 1
+    m_Value: {x: 1, y: 1, z: 1, w: 0}
+  highlights:
+    m_OverrideState: 1
+    m_Value: {x: 1, y: 1, z: 1, w: 0}
+  shadowsStart:
     m_OverrideState: 1
     m_Value: 0
-  paperWhite:
+  shadowsEnd:
     m_OverrideState: 1
-    m_Value: 300
-  detectBrightnessLimits:
+    m_Value: 0.3
+  highlightsStart:
+    m_OverrideState: 1
+    m_Value: 0.55
+  highlightsEnd:
     m_OverrideState: 1
     m_Value: 1
-  minNits:
+--- !u!114 &-3917606925269836634
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70afe9e12c7a7ed47911bb608a23a8ff, type: 3}
+  m_Name: SplitToning
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.SplitToning
+  active: 1
+  shadows:
     m_OverrideState: 1
-    m_Value: 0.005
-  maxNits:
+    m_Value: {r: 0.46, g: 0.5, b: 0.53, a: 1}
+  highlights:
     m_OverrideState: 1
-    m_Value: 1000
---- !u!114 &4220998676397875674
+    m_Value: {r: 0.58, g: 0.54, b: 0.48, a: 1}
+  balance:
+    m_OverrideState: 1
+    m_Value: -15
+--- !u!114 &-2234509135098904725
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -161,7 +181,7 @@ MonoBehaviour:
   dirtIntensity:
     m_OverrideState: 1
     m_Value: 0
---- !u!114 &6899525932352458021
+--- !u!114 &-2111479840031127627
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -170,51 +190,38 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 221518ef91623a7438a71fef23660601, type: 3}
-  m_Name: WhiteBalance
-  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.WhiteBalance
+  m_Script: {fileID: 11500000, guid: 97c23e3b12dc18c42a140437e53d3951, type: 3}
+  m_Name: Tonemapping
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.Tonemapping
   active: 1
-  temperature:
+  mode:
     m_OverrideState: 1
-    m_Value: -4
-  tint:
+    m_Value: 2
+  neutralHDRRangeReductionMode:
+    m_OverrideState: 1
+    m_Value: 2
+  acesPreset:
+    m_OverrideState: 1
+    m_Value: 3
+  hueShiftAmount:
     m_OverrideState: 1
     m_Value: 0
---- !u!114 &7023368860426163430
-MonoBehaviour:
-  m_ObjectHideFlags: 3
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 558a8e2b6826cf840aae193990ba9f2e, type: 3}
-  m_Name: ShadowsMidtonesHighlights
-  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.ShadowsMidtonesHighlights
-  active: 1
-  shadows:
-    m_OverrideState: 1
-    m_Value: {x: 0.96, y: 0.98, z: 1.05, w: -0.02}
-  midtones:
-    m_OverrideState: 1
-    m_Value: {x: 1, y: 1, z: 1, w: 0}
-  highlights:
-    m_OverrideState: 1
-    m_Value: {x: 1, y: 1, z: 1, w: 0}
-  shadowsStart:
+  detectPaperWhite:
     m_OverrideState: 1
     m_Value: 0
-  shadowsEnd:
+  paperWhite:
     m_OverrideState: 1
-    m_Value: 0.3
-  highlightsStart:
-    m_OverrideState: 1
-    m_Value: 0.55
-  highlightsEnd:
+    m_Value: 300
+  detectBrightnessLimits:
     m_OverrideState: 1
     m_Value: 1
---- !u!114 &7647606285352871236
+  minNits:
+    m_OverrideState: 1
+    m_Value: 0.005
+  maxNits:
+    m_OverrideState: 1
+    m_Value: 1000
+--- !u!114 &-706389702103816118
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -239,31 +246,24 @@ MonoBehaviour:
   texture:
     m_OverrideState: 1
     m_Value: {fileID: 0}
---- !u!114 &8166489370341955195
+--- !u!114 &11400000
 MonoBehaviour:
-  m_ObjectHideFlags: 3
+  m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 899c54efeace73346a0a16faa3afe726, type: 3}
-  m_Name: Vignette
-  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.Vignette
-  active: 1
-  color:
-    m_OverrideState: 1
-    m_Value: {r: 0, g: 0, b: 0, a: 1}
-  center:
-    m_OverrideState: 1
-    m_Value: {x: 0.5, y: 0.5}
-  intensity:
-    m_OverrideState: 1
-    m_Value: 0.34
-  smoothness:
-    m_OverrideState: 1
-    m_Value: 0.45
-  rounded:
-    m_OverrideState: 1
-    m_Value: 0
+  m_Script: {fileID: 11500000, guid: d7fd9488000d3734a9e00ee676215985, type: 3}
+  m_Name: VP_Overcast
+  m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.VolumeProfile
+  components:
+  - {fileID: -2111479840031127627}
+  - {fileID: -2234509135098904725}
+  - {fileID: -5860531913565836278}
+  - {fileID: -706389702103816118}
+  - {fileID: -6478383070695387818}
+  - {fileID: -6627034460558770752}
+  - {fileID: -3917606925269836634}
+  - {fileID: -3981563955508673688}

@@ -68,7 +68,7 @@ namespace Caso404.Interaction
         void OnInteract()
         {
             if (_current == null || !_current.CanInteract) return;
-            if (_context.Controller != null && _context.Controller.IsLocked) return;
+            if (_context.Controller != null && (_context.Controller.IsLocked || _context.Controller.UnlockedThisFrame)) return;
             _current.Interact(_context);
         }
 
