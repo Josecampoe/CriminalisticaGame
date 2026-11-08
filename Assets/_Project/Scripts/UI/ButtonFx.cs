@@ -29,7 +29,11 @@ namespace Caso404.UI
 
         public void OnPointerEnter(PointerEventData e) => _hover = true;
         public void OnPointerExit(PointerEventData e) { _hover = false; _pressed = false; }
-        public void OnPointerDown(PointerEventData e) => _pressed = true;
+        public void OnPointerDown(PointerEventData e)
+        {
+            _pressed = true;
+            if (_selectable.IsInteractable()) UiSound.Click();
+        }
         public void OnPointerUp(PointerEventData e) => _pressed = false;
         public void OnSelect(BaseEventData e) => _selected = true;
         public void OnDeselect(BaseEventData e) => _selected = false;

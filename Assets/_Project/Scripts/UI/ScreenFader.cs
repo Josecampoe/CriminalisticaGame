@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,6 +14,7 @@ namespace Caso404.UI
 
         CanvasGroup _group;
         Coroutine _routine;
+        TextMeshProUGUI _label;
 
         /// <summary>True mientras está oscureciendo para cambiar de escena.</summary>
         public bool IsFadingOut { get; private set; }
@@ -28,15 +30,36 @@ namespace Caso404.UI
             _group = gameObject.AddComponent<CanvasGroup>();
             _group.alpha = 1f;
             _group.blocksRaycasts = true;
+
+            // Texto "Cargando…" abajo a la derecha mientras la pantalla está en negro (la carga puede tardar unos segundos).
+            if (_theme != null && _theme.MonoFont != null)
+            {
+                _label = UIFactory.Text(transform, "Cargando", "", _theme.MonoFont, _theme.SizeS + 2,
+                    UITheme.WithAlpha(_theme.TextLight, 0.7f), TMPro.TextAlignmentOptions.BottomRight);
+                UIFactory.Place(_label.rectTransform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-48, 40), new Vector2(1200, 40));
+                _label.characterSpacing = 4f;
+                _label.raycastTarget = false;
+            }
+        }
+
+        void Update()
+        {
+            if (_label == null || !IsFadingOut || string.IsNullOrEmpty(_label.text)) return;
+            _label.alpha = 0.45f + 0.35f * Mathf.Sin(Time.unscaledTime * 4f); // parpadeo suave
         }
 
         void Start() => _routine = StartCoroutine(Fade(0f, null));
 
         /// <summary>Oscurece la pantalla y luego ejecuta la acción (normalmente cargar otra escena).</summary>
-        public void FadeOutThen(Action action)
+        public void FadeOutThen(Action action) => FadeOutThen(action, null);
+
+        /// <summary>Igual que <see cref="FadeOutThen(Action)"/>, mostrando "Cargando · destino" sobre el negro.</summary>
+        public void FadeOutThen(Action action, string destination)
         {
             if (IsFadingOut) return;
             IsFadingOut = true;
+            if (_label != null)
+                _label.text = string.IsNullOrEmpty(destination) ? "CARGANDO…" : $"CARGANDO  ·  {destination.ToUpperInvariant()}";
             if (_routine != null) StopCoroutine(_routine);
             _routine = StartCoroutine(Fade(1f, action));
         }

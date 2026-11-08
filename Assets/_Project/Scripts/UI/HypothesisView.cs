@@ -169,6 +169,21 @@ namespace Caso404.UI
                     : complete ? "Hipótesis completa. Puedes seguir con la investigación."
                     : "Responde todas las preguntas para terminar la escena.";
             }
+            // Marcar una opción no basta: hay que registrarla. Si falta, se dice por qué el botón sigue bloqueado.
+            if (!scene.HasAccusation && HasUnsavedSelection())
+                _footer.text = $"<color={UITheme.Hex(_theme.WarningAmber)}>Tienes opciones marcadas sin registrar: pulsa «Responder» en esa pregunta.</color>";
+        }
+
+        bool HasUnsavedSelection()
+        {
+            foreach (var hyp in Shown())
+            foreach (var q in hyp.Questions)
+            {
+                if (!_selection.TryGetValue(q.Id, out var selected) || selected.Count == 0) continue;
+                var saved = _game.State.GetHypothesisAnswer(q.Id)?.optionIds;
+                if (saved == null || !selected.SetEquals(saved)) return true;
+            }
+            return false;
         }
 
         void OnMain()

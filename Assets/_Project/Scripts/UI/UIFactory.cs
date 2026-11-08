@@ -164,7 +164,9 @@ namespace Caso404.UI
             if (theme.PaperSprite != null)
             {
                 img.sprite = theme.PaperSprite;
-                img.type = Image.Type.Simple;
+                // Sliced sin bordes se dibuja igual que Simple, pero no impone el tamaño de la textura como altura
+                // mínima: así las hojas que se ajustan a su texto (intros, pausa) no quedan con espacio vacío.
+                img.type = Image.Type.Sliced;
                 img.color = Color.white;
             }
             var shadow = img.gameObject.AddComponent<Shadow>();

@@ -104,11 +104,12 @@ namespace Caso404.UI
             _ring.raycastTarget = false;
             _crosshair = UIFactory.Panel(root, "Reticula", UITheme.WithAlpha(_theme.TextLight, 0.8f));
             UIFactory.Round(_crosshair, _theme, 0.3f);
-            UIFactory.Place(_crosshair.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(6, 6));
+            UIFactory.Place(_crosshair.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(7, 7));
             _crosshair.raycastTarget = false;
-            var shadow = _crosshair.gameObject.AddComponent<Shadow>();
-            shadow.effectColor = new Color(0f, 0f, 0f, 0.6f);
-            shadow.effectDistance = new Vector2(1f, -1f);
+            // Contorno oscuro: el punto se ve también sobre paredes claras o lámparas.
+            var outline = _crosshair.gameObject.AddComponent<Outline>();
+            outline.effectColor = new Color(0f, 0f, 0f, 0.65f);
+            outline.effectDistance = new Vector2(1.2f, -1.2f);
 
             // Indicación de interacción bajo la retícula, en una píldora oscura.
             var promptBg = UIFactory.Round(UIFactory.Panel(root, "Indicacion", new Color(0.03f, 0.035f, 0.045f, 0.72f)), _theme, 1.4f);
@@ -141,9 +142,9 @@ namespace Caso404.UI
 
             // Atajos como teclas, abajo a la izquierda.
             var shortcuts = UIFactory.Text(root, "Atajos",
-                $"{Key("Tab")} Expediente     {Key("Q")} ALEX     {Key("H")} Tablero     {Key("E")} Interactuar     {Key("Esc")} Pausa",
+                $"{Key("WASD")} Moverse     {Key("E")} Interactuar     {Key("Tab")} Expediente     {Key("Q")} ALEX     {Key("H")} Tablero     {Key("Esc")} Pausa",
                 _theme.BodyFont, _theme.SizeS, UITheme.WithAlpha(_theme.TextLight, 0.8f));
-            UIFactory.Place(shortcuts.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(34, 26), new Vector2(1100, 30));
+            UIFactory.Place(shortcuts.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(34, 26), new Vector2(1300, 30));
 
             // Objetivo: tarjeta translúcida arriba a la izquierda con rótulo ámbar.
             var objBg = UIFactory.Round(UIFactory.Panel(root, "Objetivo", new Color(0.03f, 0.035f, 0.045f, 0.62f)), _theme);
@@ -195,7 +196,7 @@ namespace Caso404.UI
             _prompt.text = has ? $"{Key("E")}  {target.Prompt}" : "";
             _promptGroup.alpha = has ? 1f : 0f;
             var color = has && target.IsNew ? _theme.WarningAmber : _theme.TextLight;
-            _crosshair.rectTransform.sizeDelta = has ? new Vector2(8, 8) : new Vector2(6, 6);
+            _crosshair.rectTransform.sizeDelta = has ? new Vector2(9, 9) : new Vector2(7, 7);
             _crosshair.color = has ? color : UITheme.WithAlpha(_theme.TextLight, 0.8f);
             _ring.color = has ? UITheme.WithAlpha(color, 0.9f) : UITheme.WithAlpha(color, 0f);
         }
@@ -234,7 +235,8 @@ namespace Caso404.UI
             return "";
         }
 
-        void OnCollected(EvidenceData ev) => ShowToast($"Guardada en el expediente: {ev.DisplayName}", _theme.WarningAmber);
+        void OnCollected(EvidenceData ev) =>
+            ShowToast($"Guardada en el expediente: {ev.DisplayName}" + (ev.CanBeAnalyzed ? "   ·   Tab para analizar" : ""), _theme.WarningAmber);
         void OnClaimRaised(LieData claim) => ShowToast("ALEX tiene una observación  (Q)", _theme.AlexCyan);
         void OnClaimRefuted(LieData claim) => ShowToast("Contradicción de ALEX detectada", _theme.AccentRed);
 

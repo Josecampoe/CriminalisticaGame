@@ -36,6 +36,7 @@ namespace Caso404.UI
         DecisionData _pendingDecision;
         DecisionData _followUpDecision;
         Action _afterFollowUp;
+        OptionsView _options;
 
         /// <summary>Id de la escena que se está cargando (para pruebas).</summary>
         public string LoadingSceneId { get; private set; }
@@ -140,8 +141,30 @@ namespace Caso404.UI
         void OnCancel()
         {
             if (_ui.Top != null || _ui.LastCloseFrame == Time.frameCount) return;
-            var body = $"{_game.Case.Title} — {_game.Scene.DisplayName}\n\nLa partida se guarda al decidir y al cambiar de escena.";
-            _message.Show("Pausa", body, null, true, ("Continuar", (Action)null), ("Guardar y salir al menú", GoToMenu));
+            ShowPause();
+        }
+
+        void ShowPause()
+        {
+            int found = _game.Evidence.FoundEvidence.Count();
+            int pending = _game.Evidence.UnanalyzedCount;
+            var body = $"<b>{CaseLabel()} — {_game.Case.Title}</b>\nEstás en: {_game.Scene.DisplayName}\n" +
+                       $"Expediente: {found} evidencia{(found == 1 ? "" : "s")}" + (pending > 0 ? $", {pending} sin analizar" : "") +
+                       "\n\nLa partida se guarda al decidir, al cambiar de escena y al salir al menú.";
+            _message.Show("Pausa", body, null, true,
+                ("Continuar", (Action)null), ("Opciones y controles", ShowOptions), ("Guardar y salir al menú", GoToMenu));
+        }
+
+        /// <summary>Opciones dentro de la partida; al cerrarlas se vuelve a la pausa.</summary>
+        void ShowOptions()
+        {
+            if (_options == null)
+            {
+                // Se crea al primer uso para no tener que reconstruir las escenas con un campo nuevo.
+                _options = OptionsView.Create(_message.transform.parent, _theme, _ui);
+                _options.Closed += ShowPause;
+            }
+            _options.Open();
         }
 
         void OpenHypothesis()
@@ -239,7 +262,7 @@ namespace Caso404.UI
             _game.State.SetCurrentScene(_game.Case.Id, next.Id); // para que "Continuar" abra la escena nueva
             _game.SaveGame();
             LoadingSceneId = next.Id;
-            if (_fader != null) _fader.FadeOutThen(() => SceneLoader.TryLoad(next.UnitySceneName));
+            if (_fader != null) _fader.FadeOutThen(() => SceneLoader.TryLoad(next.UnitySceneName), next.DisplayName);
             else SceneLoader.TryLoad(next.UnitySceneName);
         }
 
@@ -299,7 +322,7 @@ namespace Caso404.UI
             _game.State.SetCurrentScene(nextCase.Id, first.Id);
             _game.SaveGame();
             LoadingSceneId = first.Id;
-            if (_fader != null) _fader.FadeOutThen(() => SceneLoader.TryLoad(first.UnitySceneName));
+            if (_fader != null) _fader.FadeOutThen(() => SceneLoader.TryLoad(first.UnitySceneName), first.DisplayName);
             else SceneLoader.TryLoad(first.UnitySceneName);
         }
 
@@ -307,7 +330,7 @@ namespace Caso404.UI
         public void GoToMenu()
         {
             _game.SaveGame();
-            if (_fader != null) _fader.FadeOutThen(() => SceneLoader.TryLoad(MainMenuScene));
+            if (_fader != null) _fader.FadeOutThen(() => SceneLoader.TryLoad(MainMenuScene), "Menú principal");
             else SceneLoader.TryLoad(MainMenuScene);
         }
     }
