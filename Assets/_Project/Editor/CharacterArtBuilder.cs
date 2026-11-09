@@ -628,13 +628,10 @@ namespace Caso404.EditorTools
                 case Pattern.Suit:
                     if (region == Region.Torso && front && p.y > waist)
                     {
-                        float v = (p.y - h * 0.72f) * 0.3f + 0.006f;                  // apertura en V de la chaqueta
-                        if (p.y > h * 0.72f && ax < v) return C(0.7f, 0.72f, 0.76f);  // blusa gris perla
-                        if (p.y > h * 0.62f && ax < v + 0.03f && ax >= v) return cloth * 1.45f; // solapas satinadas
-                        if (p.y > h * 0.62f && ax < v + 0.034f && ax >= v + 0.03f) return cloth * 0.6f; // borde de la solapa
-                        if (ax < 0.006f && p.y < h * 0.69f) return cloth * 0.65f;     // cierre de la chaqueta
-                        float by = Mathf.Repeat(p.y - waist, 0.075f);
-                        if (Mathf.Abs(ax - 0.014f) < 0.007f && by < 0.012f && p.y < h * 0.66f) return C(0.35f, 0.33f, 0.3f); // botones
+                        // Apertura en V angosta con la blusa gris perla. Sin solapas pintadas: en la malla salían dentadas.
+                        float v = (p.y - h * 0.74f) * 0.22f + 0.004f;
+                        if (p.y > h * 0.74f && ax < v) return C(0.62f, 0.64f, 0.68f);
+                        if (ax < 0.004f && p.y < h * 0.74f && p.y > waist) return cloth * 0.8f; // cierre de la chaqueta
                     }
                     break;
                 case Pattern.Chef:
@@ -648,20 +645,23 @@ namespace Caso404.EditorTools
                     if (region == Region.Torso && front && p.y > waist + 0.05f && p.y < h * 0.78f)
                     {
                         float bx = Mathf.Abs(ax - 0.06f), by = Mathf.Repeat(p.y, 0.07f);
-                        if (bx < 0.008f && by < 0.012f) return C(0.25f, 0.25f, 0.27f);
+                        if (bx < 0.006f && by < 0.01f) return cloth * 0.78f; // botones de tela, discretos
                     }
                     break;
                 case Pattern.Overall:
                     // Bolsillo de pecho y costuras más oscuras
-                    if (region == Region.Torso && front && p.y > h * 0.68f && p.y < h * 0.74f && ax < 0.06f) return cloth * 0.82f;
+                    if (region == Region.Torso && front && p.y > h * 0.68f && p.y < h * 0.74f && ax < 0.06f) return cloth * 0.92f;
                     if (Mathf.Abs(p.y - waist) < 0.008f) return cloth * 0.75f;
                     break;
                 case Pattern.Uniform:
                     if (Mathf.Abs(p.y - waist) < 0.018f) return C(0.06f, 0.06f, 0.06f); // cinturón
-                    if (region == Region.Torso && front && p.y > h * 0.7f && Mathf.Abs(ax - 0.1f) < 0.035f && p.y < h * 0.75f) return cloth * 0.8f; // bolsillos
                     break;
                 case Pattern.Scrubs:
-                    if (region == Region.Torso && front && p.y > h * 0.72f && ax < (p.y - h * 0.72f) * 0.6f + 0.01f) return cloth * 0.7f; // cuello en V
+                    if (region == Region.Torso && front && p.y > h * 0.765f)
+                    {
+                        float v = (p.y - h * 0.765f) * 0.45f + 0.004f;
+                        if (ax < v && ax > v - 0.007f) return cloth * 0.8f; // ribete del cuello en V (no un triángulo oscuro)
+                    }
                     break;
                 case Pattern.Hoodie:
                     if (region == Region.Torso && front && p.y > h * 0.71f && p.y < h * 0.79f && Mathf.Abs(ax - 0.035f) < 0.004f) return C(0.85f, 0.85f, 0.82f); // cordones
@@ -1037,7 +1037,8 @@ namespace Caso404.EditorTools
                 int a = shellNode[shellTris[t]], b = shellNode[shellTris[t + 1]], c = shellNode[shellTris[t + 2]];
                 adj[a].Add(b); adj[a].Add(c); adj[b].Add(a); adj[b].Add(c); adj[c].Add(a); adj[c].Add(b);
             }
-            for (int it = 0; it < 12; it++)
+            // 40 pasadas: con 12 la tela quedaba con bultos que la luz marcaba como manchas.
+            for (int it = 0; it < 40; it++)
             {
                 float f = it % 2 == 0 ? 0.5f : -0.53f;
                 var next = new Vector3[nodes];
@@ -1067,6 +1068,18 @@ namespace Caso404.EditorTools
                 int a = shellNode[shellTris[t]], b = shellNode[shellTris[t + 1]], c = shellNode[shellTris[t + 2]];
                 var nrm = Vector3.Cross(pos[b] - pos[a], pos[c] - pos[a]);
                 nodeNormal[a] += nrm; nodeNormal[b] += nrm; nodeNormal[c] += nrm;
+            }
+            // Normales suavizadas con sus vecinas: la luz resbala sobre la tela en vez de marcar cada arruga de la malla.
+            for (int pass = 0; pass < 6; pass++)
+            {
+                var soft = new Vector3[nodes];
+                for (int k = 0; k < nodes; k++)
+                {
+                    var sum = nodeNormal[k].normalized * 2f;
+                    foreach (var j in adj[k]) sum += nodeNormal[j].normalized;
+                    soft[k] = sum;
+                }
+                nodeNormal = soft;
             }
 
             // Malla de la ropa, atada a los huesos en la pose actual (la misma con la que se midió todo).
@@ -1152,7 +1165,7 @@ namespace Caso404.EditorTools
                     }
                     t.E[b, s] = Mathf.Max(t.R[b, s], fill * Mathf.Min(up, down));
                 }
-            t.Smooth(5, 0.95f); // aplana espalda, pectorales y abdominales
+            t.Smooth(10, 0.95f); // aplana espalda, pectorales y abdominales
 
         }
 
@@ -1172,7 +1185,7 @@ namespace Caso404.EditorTools
             for (int b = 0; b < t.Bins; b++)
             {
                 float f = b / (float)(t.Bins - 1);
-                float cap = scale * (f < 0.45f ? Mathf.Lerp(0.072f, 0.06f, f / 0.45f) : Mathf.Lerp(0.06f, 0.052f, (f - 0.45f) / 0.55f));
+                float cap = scale * (f < 0.45f ? Mathf.Lerp(0.064f, 0.057f, f / 0.45f) : Mathf.Lerp(0.057f, 0.05f, (f - 0.45f) / 0.55f));
                 for (int s = 0; s < t.Sectors; s++) t.E[b, s] = Mathf.Min(t.E[b, s], cap);
             }
             Debug.Log($"[Caso404] Manga: radio del cuerpo en hombro {t.MeanR(1):0.000}, codo {t.MeanR(t.Bins / 2):0.000}, muñeca {t.MeanR(t.Bins - 2):0.000}");
