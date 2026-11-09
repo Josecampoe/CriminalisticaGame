@@ -42,6 +42,8 @@ namespace Caso404.Tests
         [UnityTest]
         public IEnumerator CaptureAllScreens()
         {
+            // Partida guardada de ejemplo: "Continuar" muestra el progreso y "Nueva partida" pide confirmación.
+            new Caso404.Save.SaveService().Save(new GameState { currentCaseId = "c1", currentSceneId = "c1_s2", alexTrust = 60 });
             yield return SceneManager.LoadSceneAsync("MainMenu");
             yield return new WaitForSecondsRealtime(1.5f);
             yield return Shot("00_menu");
@@ -49,6 +51,10 @@ namespace Caso404.Tests
             options.gameObject.SetActive(true);
             yield return Shot("00b_opciones");
             options.gameObject.SetActive(false);
+            var menu = Object.FindAnyObjectByType<MainMenuView>();
+            menu.RequestNewGame();
+            yield return Shot("00e_confirmar_nueva");
+            menu.transform.Find("ConfirmarNueva").gameObject.SetActive(false);
 
             Object.FindAnyObjectByType<MainMenuView>().StartNewGame();
             yield return new WaitForSecondsRealtime(2f);
@@ -64,6 +70,17 @@ namespace Caso404.Tests
             ((MessageView)ui.Top).Choose("Empezar");
             yield return new WaitForSecondsRealtime(0.5f);
             yield return Shot("02_hud");
+            var controller = Object.FindAnyObjectByType<GameUIController>();
+            typeof(GameUIController).GetMethod("ShowPause", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).Invoke(controller, null);
+            yield return new WaitForSecondsRealtime(0.4f);
+            yield return Shot("02b_pausa");
+            ((MessageView)ui.Top).Choose("Opciones y controles");
+            yield return new WaitForSecondsRealtime(0.4f);
+            yield return Shot("02c_opciones_partida");
+            ui.Top.Close(); // vuelve a la pausa
+            yield return new WaitForSecondsRealtime(0.2f);
+            ((MessageView)ui.Top).Choose("Continuar");
+            yield return new WaitForSecondsRealtime(0.3f);
 
             var game = Object.FindAnyObjectByType<GameContext>();
             var player = Object.FindAnyObjectByType<PlayerContext>();

@@ -5,8 +5,8 @@ main = "worker.mjs"
 compatibility_date = "2026-10-01"
 
 [vars]
-# Modelos en orden de preferencia: si uno agota su cupo gratuito, se usa el siguiente.
-GEMINI_MODELS = "gemini-3.5-flash-lite,gemini-3.8-flash"
+# Modelos en orden de preferencia: primero el de mejor calidad; si agota su cupo gratuito, el más rápido.
+GEMINI_MODELS = "gemini-3.8-flash,gemini-3.5-flash-lite"
 
 # Límite por jugador (IP): 20 preguntas por minuto.
 [[ratelimits]]

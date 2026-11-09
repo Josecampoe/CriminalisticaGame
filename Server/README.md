@@ -15,7 +15,7 @@ El juego viene configurado para hablar con **https://caso404-ia.tallerpro-ai-pro
 - **La clave vive solo en Cloudflare**, como secreto. Se pone una vez: `cd Server` y `npx wrangler secret put GEMINI_API_KEY` (pega la clave cuando la pida). Nunca va en git ni en el juego.
 - **Usa una clave de un proyecto de Google sin facturación**: así es imposible que haya cobros; como mucho se acaba el cupo gratuito del día y el juego usa el guion hasta que se renueve.
 - **Protecciones**: solo acepta pedidos con la forma de los del juego (topes de tamaño, 400 caracteres por pregunta), exige la cabecera `X-Caso404-Client` y limita a 20 preguntas por minuto por jugador.
-- **Varios modelos**: si el primero de `GEMINI_MODELS` (en `wrangler.toml`) agota su cupo, prueba el siguiente.
+- **Dos modelos a la vez**: pregunta al mejor (`gemini-3.8-flash`) y al rápido (`gemini-3.5-flash-lite`) al mismo tiempo; usa el mejor si responde en 6 s y, si no (saturado o sin cupo), el rápido. Así la espera ronda 2-6 s. El orden está en `GEMINI_MODELS` (`wrangler.toml`).
 - **Publicar cambios**: `cd Server` y `npx wrangler deploy`. **Ver errores en vivo**: `npx wrangler tail`.
 - `/health` responde `"ok": true` solo si el servidor tiene la clave. El menú del juego muestra "IA conectada" o "Sin conexión con la IA".
 
