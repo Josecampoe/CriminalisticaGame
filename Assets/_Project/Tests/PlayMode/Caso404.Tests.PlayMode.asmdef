@@ -3,6 +3,7 @@
     "rootNamespace": "Caso404.Tests",
     "references": [
         "Caso404.Runtime",
+        "Unity.InputSystem",
         "UnityEngine.UI",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
