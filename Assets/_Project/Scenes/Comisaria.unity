@@ -45921,7 +45921,7 @@ MonoBehaviour:
   _input: {fileID: 1824673531}
   _context: {fileID: 1824673530}
   _camera: {fileID: 1684454949}
-  _range: 2.5
+  _range: 3
   _interactableMask:
     serializedVersion: 2
     m_Bits: 257

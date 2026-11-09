@@ -9832,7 +9832,7 @@ MonoBehaviour:
   _input: {fileID: 353940239}
   _context: {fileID: 353940238}
   _camera: {fileID: 1473716552}
-  _range: 2.5
+  _range: 3
   _interactableMask:
     serializedVersion: 2
     m_Bits: 257
