@@ -137,10 +137,14 @@ namespace Caso404.UI
             panel.Open();
         }
 
-        /// <summary>Escape sin paneles abiertos: menú de pausa.</summary>
+        /// <summary>
+        /// Escape: si hay un panel abierto lo cierra (si se puede); si no, abre la pausa. Todo en un solo manejador:
+        /// antes UIManager también escuchaba Escape y, según el orden, cerraba la pausa en el mismo frame en que se abría.
+        /// </summary>
         void OnCancel()
         {
-            if (_ui.Top != null || _ui.LastCloseFrame == Time.frameCount) return;
+            if (_ui.Top != null) { _ui.CloseTop(); return; }
+            if (_ui.LastCloseFrame == Time.frameCount || UIFactory.IsTyping()) return;
             ShowPause();
         }
 

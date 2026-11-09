@@ -1,6 +1,4 @@
 using System.Collections;
-using System.Threading;
-using Caso404.AI;
 using Caso404.Core;
 using Caso404.Data;
 using Caso404.Save;
@@ -20,8 +18,6 @@ namespace Caso404.UI
         [SerializeField] private GameDatabase _database;
         [SerializeField] private ScreenFader _fader;
         [SerializeField] private string _firstCaseId = "c1";
-        [Tooltip("Para mostrar si la IA está conectada. Vacío: no se muestra.")]
-        [SerializeField] private AiSettings _aiSettings;
 
         SaveService _saves;
         TextMeshProUGUI _title;
@@ -29,8 +25,7 @@ namespace Caso404.UI
         RectTransform _options;
         RectTransform _confirm;
         TextMeshProUGUI _confirmText;
-        TextMeshProUGUI _aiStatus;
-        readonly CancellationTokenSource _cts = new();
+        RectTransform _front;
 
         void Awake()
         {
@@ -43,36 +38,6 @@ namespace Caso404.UI
         void Start()
         {
             StartCoroutine(TypeTitle());
-            CheckAi();
-        }
-
-        void OnDestroy()
-        {
-            _cts.Cancel();
-            _cts.Dispose();
-        }
-
-        /// <summary>Pregunta al servidor si la IA está lista (solo lectura) y lo muestra abajo a la izquierda.</summary>
-        async void CheckAi()
-        {
-            if (_aiSettings == null) return;
-            SetAiStatus("Comprobando la IA…", _theme.Muted);
-            AiConnection status;
-            try { status = await AiStatus.CheckAsync(_aiSettings, _cts.Token); }
-            catch (System.OperationCanceledException) { return; }
-            if (this == null || _aiStatus == null) return;
-            switch (status)
-            {
-                case AiConnection.Online: SetAiStatus("IA conectada: los personajes responden lo que escribas", _theme.AlexCyan); break;
-                case AiConnection.Disabled: SetAiStatus("IA desactivada: los personajes usan frases del guion", _theme.Muted); break;
-                default: SetAiStatus("Sin conexión con la IA: los personajes usan frases del guion", _theme.WarningAmber); break;
-            }
-        }
-
-        void SetAiStatus(string text, Color color)
-        {
-            _aiStatus.text = $"<color={UITheme.Hex(color)}>●</color>  {text}";
-            _aiStatus.color = UITheme.WithAlpha(color, 0.85f);
         }
 
         void Build()
@@ -90,24 +55,26 @@ namespace Caso404.UI
                 vignette.raycastTarget = false;
             }
 
-            var kicker = UIFactory.Kicker(rt, "Expediente reservado", _theme, UITheme.WithAlpha(_theme.AccentRed, 0.9f), TextAlignmentOptions.Center);
+            // Portada (título y botones): se oculta mientras Opciones está abierto para que no se vea por detrás.
+            _front = UIFactory.Stretch(UIFactory.Rect("Portada", rt));
+            var kicker = UIFactory.Kicker(_front, "Expediente reservado", _theme, UITheme.WithAlpha(_theme.AccentRed, 0.9f), TextAlignmentOptions.Center);
             UIFactory.Place(kicker.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 345), new Vector2(800, 24));
-            _title = UIFactory.Text(rt, "Title", $"EL CASO <color={UITheme.Hex(_theme.AccentRed)}>404</color>", _theme.TitleFont, 132, _theme.TextLight, TextAlignmentOptions.Center);
+            _title = UIFactory.Text(_front, "Title", $"EL CASO <color={UITheme.Hex(_theme.AccentRed)}>404</color>", _theme.TitleFont, 132, _theme.TextLight, TextAlignmentOptions.Center);
             _title.characterSpacing = 6f;
             UIFactory.Place(_title.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 250), new Vector2(1500, 160));
             var tshadow = _title.gameObject.AddComponent<Shadow>();
             tshadow.effectColor = new Color(0f, 0f, 0f, 0.8f);
             tshadow.effectDistance = new Vector2(3f, -4f);
-            var sub = UIFactory.Text(rt, "Subtitle", "Valdora, 2031  ·  Unidad de Criminalística", _theme.MonoFont, _theme.SizeM - 2, _theme.AlexCyan, TextAlignmentOptions.Center);
+            var sub = UIFactory.Text(_front, "Subtitle", "Valdora, 2031  ·  Unidad de Criminalística", _theme.MonoFont, _theme.SizeM - 2, _theme.AlexCyan, TextAlignmentOptions.Center);
             sub.characterSpacing = 4f;
             UIFactory.Place(sub.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 150), new Vector2(1400, 40));
 
-            var buttons = UIFactory.Rect("Buttons", rt);
+            var buttons = UIFactory.Rect("Buttons", _front);
             UIFactory.Place(buttons, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -120), new Vector2(480, 350));
             UIFactory.VLayout(buttons.gameObject, 14);
             UIFactory.Button(buttons, "Nueva partida", _theme, _theme.Paper, _theme.Ink, RequestNewGame, 64, _theme.SizeM);
             _continue = UIFactory.Ghost(buttons, "Continuar", _theme, _theme.TextLight, ContinueGame, 60, _theme.SizeM - 2);
-            UIFactory.Ghost(buttons, "Opciones", _theme, _theme.TextLight, () => _options.gameObject.SetActive(true), 56);
+            UIFactory.Ghost(buttons, "Opciones", _theme, _theme.TextLight, () => ShowOptions(true), 56);
             UIFactory.Ghost(buttons, "Salir", _theme, _theme.Muted, Quit, 56);
             bool hasSave = _saves.TryLoad(out var saved);
             _continue.interactable = hasSave;
@@ -119,12 +86,9 @@ namespace Caso404.UI
             BuildOptions(rt);
             BuildConfirm(rt);
 
-            _aiStatus = UIFactory.Text(rt, "EstadoIA", "", _theme.MonoFont, _theme.SizeS, _theme.Muted, TextAlignmentOptions.MidlineLeft);
-            UIFactory.Place(_aiStatus.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(40, 30), new Vector2(900, 30));
-            _aiStatus.raycastTarget = false;
-
-            var hint = UIFactory.Text(rt, "Hint", "Proyecto universitario · Ingeniería de Software · Unity", _theme.BodyFont, _theme.SizeS, _theme.Muted, TextAlignmentOptions.Center);
-            UIFactory.Place(hint.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 30), new Vector2(1400, 30));
+            var tagline = UIFactory.Text(_front, "Lema", "INVESTIGA   ·   INTERROGA   ·   DESCONFÍA", _theme.MonoFont, _theme.SizeS, UITheme.WithAlpha(_theme.TextLight, 0.55f), TextAlignmentOptions.Center);
+            tagline.characterSpacing = 6f;
+            UIFactory.Place(tagline.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 44), new Vector2(1400, 30));
         }
 
         void BuildOptions(RectTransform root)
@@ -149,13 +113,19 @@ namespace Caso404.UI
             UIFactory.Layout(title.gameObject, preferredHeight: 50);
             SettingsWidgets.Sensitivity(left, _theme);
             SettingsWidgets.Toggles(left, _theme);
-            UIFactory.Ghost(left, "Volver", _theme, _theme.TextLight, () => _options.gameObject.SetActive(false), 52);
+            UIFactory.Ghost(left, "Volver", _theme, _theme.TextLight, () => ShowOptions(false), 52);
 
             var right = UIFactory.Rect("Controles", box);
-            UIFactory.VLayout(right.gameObject, 12);
+            UIFactory.VLayout(right.gameObject, 6);
             UIFactory.Layout(right.gameObject, preferredWidth: 560);
             SettingsWidgets.Controls(right, _theme);
             _options.gameObject.SetActive(false);
+        }
+
+        void ShowOptions(bool show)
+        {
+            _options.gameObject.SetActive(show);
+            _front.gameObject.SetActive(!show);
         }
 
         /// <summary>Ventana de confirmación: "Nueva partida" con una partida guardada la borraría.</summary>

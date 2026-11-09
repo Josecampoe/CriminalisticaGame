@@ -11,22 +11,19 @@ namespace Caso404.UI
     /// </summary>
     public static class SettingsWidgets
     {
-        /// <summary>Texto con todos los controles del juego, en dos columnas (tecla y acción).</summary>
-        public static string ControlsText(UITheme theme)
+        /// <summary>Controles del juego: teclas (separadas por "|") y acción.</summary>
+        public static readonly (string keys, string action)[] Bindings =
         {
-            string Row(string key, string action) =>
-                $"<color={UITheme.Hex(theme.WarningAmber)}><b>{key}</b></color><pos=34%>{action}";
-            return string.Join("\n",
-                Row("WASD / flechas", "Moverse"),
-                Row("Mouse", "Mirar"),
-                Row("E", "Inspeccionar, hablar, guardar evidencia"),
-                Row("Clic izq. + mouse", "Girar el objeto (rueda: acercar)"),
-                Row("Tab", "Expediente: analizar evidencias"),
-                Row("Q", "ALEX: preguntar, aceptar o cuestionar"),
-                Row("H", "Tablero de hipótesis y decisiones"),
-                Row("1–6 / Enter", "Respuestas rápidas / escribir en un diálogo"),
-                Row("Esc", "Cerrar ventana o pausar"));
-        }
+            ("W A S D", "Moverse (también flechas)"),
+            ("Mouse", "Mirar alrededor"),
+            ("E", "Inspeccionar, hablar y guardar evidencia"),
+            ("Clic|Rueda", "Girar y acercar el objeto inspeccionado"),
+            ("Tab", "Expediente: analizar evidencias"),
+            ("Q", "ALEX: preguntar, aceptar o cuestionar"),
+            ("H", "Tablero de hipótesis y decisiones"),
+            ("1–6|Enter", "Respuestas rápidas o escribir en un diálogo"),
+            ("Esc", "Cerrar ventana o pausar"),
+        };
 
         /// <summary>Etiqueta y barra de sensibilidad del mouse. Guarda el valor al moverla.</summary>
         public static void Sensitivity(Transform parent, UITheme theme)
@@ -67,12 +64,44 @@ namespace Caso404.UI
             Refresh();
         }
 
-        /// <summary>Tarjeta oscura con la lista de controles.</summary>
+        /// <summary>Lista de controles: a la izquierda las teclas como teclas de teclado, a la derecha la acción.</summary>
         public static void Controls(Transform parent, UITheme theme)
         {
-            UIFactory.Kicker(parent, "Controles", theme, theme.AlexCyan);
-            var text = UIFactory.Text(parent, "Controles", ControlsText(theme), theme.BodyFont, theme.SizeS + 1, UITheme.WithAlpha(theme.TextLight, 0.88f));
-            text.lineSpacing = 6f;
+            var title = UIFactory.Kicker(parent, "Controles", theme, theme.AlexCyan);
+            UIFactory.Layout(title.gameObject, preferredHeight: 30);
+            foreach (var (keys, action) in Bindings)
+            {
+                var row = UIFactory.Rect("Fila", parent);
+                var h = UIFactory.HLayout(row.gameObject, 16, 0, false);
+                h.childAlignment = TextAnchor.MiddleLeft;
+                UIFactory.Layout(row.gameObject, minHeight: 40, preferredHeight: 40);
+
+                var caps = UIFactory.Rect("Teclas", row);
+                var ch = UIFactory.HLayout(caps.gameObject, 6, 0, false);
+                ch.childAlignment = TextAnchor.MiddleLeft;
+                UIFactory.Layout(caps.gameObject, minHeight: 34, preferredHeight: 34, preferredWidth: 180);
+                foreach (var key in keys.Split('|')) KeyCap(caps, key, theme);
+
+                var label = UIFactory.Text(row, "Accion", action, theme.BodyFont, theme.SizeS + 1, UITheme.WithAlpha(theme.TextLight, 0.9f), TextAlignmentOptions.MidlineLeft);
+                label.textWrappingMode = TextWrappingModes.NoWrap;
+                label.overflowMode = TextOverflowModes.Ellipsis;
+                UIFactory.Layout(label.gameObject, minHeight: 34, preferredHeight: 34, flexibleWidth: 1);
+            }
+        }
+
+        /// <summary>Tecla dibujada como una tecla de teclado: caja redondeada clara con borde y letra en mono.</summary>
+        static void KeyCap(Transform parent, string key, UITheme theme)
+        {
+            var bg = UIFactory.Round(UIFactory.Panel(parent, "Tecla", UITheme.WithAlpha(theme.TextLight, 0.1f)), theme, 0.8f);
+            bg.raycastTarget = false;
+            var h = UIFactory.HLayout(bg.gameObject, 0, 0, false);
+            h.padding = new RectOffset(12, 12, 4, 4);
+            h.childAlignment = TextAnchor.MiddleCenter;
+            UIFactory.Layout(bg.gameObject, minHeight: 34, preferredHeight: 34, preferredWidth: key.Length <= 1 ? 40 : -1);
+            var t = UIFactory.Text(bg.transform, "Texto", key, theme.MonoFont, theme.SizeS, theme.WarningAmber, TextAlignmentOptions.Center);
+            t.textWrappingMode = TextWrappingModes.NoWrap;
+            t.fontStyle = FontStyles.Bold;
+            UIFactory.Frame(bg.transform, theme, UITheme.WithAlpha(theme.TextLight, 0.22f));
         }
     }
 }
