@@ -142,7 +142,7 @@ namespace Caso404.UI
 
             // Atajos como teclas, abajo a la izquierda.
             var shortcuts = UIFactory.Text(root, "Atajos",
-                $"{Key("WASD")} Moverse     {Key("E")} Interactuar     {Key("Tab")} Expediente     {Key("Q")} ALEX     {Key("H")} Tablero     {Key("Esc")} Pausa",
+                $"{Key("WASD")} Moverse     {Key("E")} Interactuar     {Key("Tab")} Laboratorio     {Key("Q")} ALEX     {Key("H")} Tablero     {Key("Esc")} Pausa",
                 _theme.BodyFont, _theme.SizeS, UITheme.WithAlpha(_theme.TextLight, 0.8f));
             UIFactory.Place(shortcuts.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(34, 26), new Vector2(1300, 30));
 

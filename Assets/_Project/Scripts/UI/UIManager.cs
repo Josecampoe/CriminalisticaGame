@@ -6,11 +6,13 @@ using UnityEngine;
 namespace Caso404.UI
 {
     /// <summary>
-    /// Pila de paneles abiertos. Escape cierra el de arriba. Avisa por un canal cuándo hay un panel modal abierto
+    /// Pila de paneles abiertos. Escape cierra el de arriba (lo decide GameUIController, que también abre la pausa,
+    /// para que una sola pulsación no abra y cierre la pausa a la vez). Avisa por un canal cuándo hay un panel modal abierto
     /// (el jugador se bloquea y se libera el cursor) sin conocer al jugador.
     /// </summary>
     public class UIManager : MonoBehaviour
     {
+        [Tooltip("Solo en escenas sin GameUIController: entonces Escape cierra el panel de arriba desde aquí.")]
         [SerializeField] private InputReader _input;
         [SerializeField] private BoolEventChannel _modalChannel;
 
@@ -24,7 +26,8 @@ namespace Caso404.UI
 
         void OnEnable()
         {
-            if (_input != null) _input.CancelPressed += CloseTop;
+            // En las escenas de juego Escape lo maneja GameUIController (cerrar o pausar en un solo paso).
+            if (_input != null && GetComponent<GameUIController>() == null) _input.CancelPressed += CloseTop;
         }
 
         void OnDisable()
@@ -75,6 +78,7 @@ namespace Caso404.UI
             var top = Top;
             if (top != null && top.ClosesWithEscape) Remove(top);
         }
+
 
         /// <summary>True si el panel está abierto.</summary>
         public bool IsOpen(UIPanel panel) => _stack.Contains(panel);

@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: "Grabador de video de la administraci\xF3n"
   _description: "El grabador (DVR) de las c\xE1maras del edificio."
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 1408408731537361772, guid: ed10a1e04cab2d748b41fcecdd8320c1, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

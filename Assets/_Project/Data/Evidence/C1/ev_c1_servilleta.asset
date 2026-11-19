@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: Servilleta con nota
   _description: Una servilleta con algo escrito a mano.
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 4688611657868736011, guid: b4749f83eb95d2d4e809849b71c83491, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

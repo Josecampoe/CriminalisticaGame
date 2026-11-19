@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: "Tel\xE9fono bajo el sof\xE1"
   _description: "Un tel\xE9fono celular olvidado debajo del sof\xE1."
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 5475245019881521851, guid: b428dd5fee3146645a812f092ff30d09, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

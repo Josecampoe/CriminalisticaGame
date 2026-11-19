@@ -17,6 +17,15 @@ namespace Caso404.UI
         [SerializeField] private Color _warningAmber = FromHex("#E0A526");
         [SerializeField] private Color _muted = FromHex("#6B7280");
 
+        [Header("Laboratorio forense (paleta clínica: blanco y azul claro)")]
+        [SerializeField] private Color _labBg = FromHex("#E6EEF4");
+        [SerializeField] private Color _labPanel = FromHex("#FFFFFF");
+        [SerializeField] private Color _labBlue = FromHex("#2B78B8");
+        [SerializeField] private Color _labBlueLight = FromHex("#D3E7F6");
+        [SerializeField] private Color _labInk = FromHex("#17304A");
+        [SerializeField] private Color _labMuted = FromHex("#5B6F82");
+        [SerializeField] private Color _labGreen = FromHex("#23866A");
+
         [Header("Fuentes (TextMeshPro)")]
         [Tooltip("Títulos y expediente (ideal: Special Elite)")]
         [SerializeField] private TMP_FontAsset _titleFont;
@@ -56,6 +65,20 @@ namespace Caso404.UI
         public Color AlexCyan => _alexCyan;
         public Color WarningAmber => _warningAmber;
         public Color Muted => _muted;
+        /// <summary>Fondo del laboratorio (azul muy claro).</summary>
+        public Color LabBg => _labBg;
+        /// <summary>Paneles y hojas del laboratorio (blanco).</summary>
+        public Color LabPanel => _labPanel;
+        /// <summary>Azul de acento del laboratorio (botones, rótulos, barrido del escáner).</summary>
+        public Color LabBlue => _labBlue;
+        /// <summary>Azul claro para selección y fondos suaves.</summary>
+        public Color LabBlueLight => _labBlueLight;
+        /// <summary>Texto principal sobre blanco (azul marino, contraste &gt; 10:1).</summary>
+        public Color LabInk => _labInk;
+        /// <summary>Texto secundario sobre blanco (contraste ≥ 4.5:1).</summary>
+        public Color LabMuted => _labMuted;
+        /// <summary>Estado "analizada" (verde clínico).</summary>
+        public Color LabGreen => _labGreen;
 
         public TMP_FontAsset TitleFont { get => _titleFont != null ? _titleFont : BodyFont; internal set => _titleFont = value; }
         public TMP_FontAsset BodyFont { get => _bodyFont != null ? _bodyFont : TMP_Settings.defaultFontAsset; internal set => _bodyFont = value; }

@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: Cerradura de la puerta
   _description: La cerradura de la puerta principal del 404.
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 3266610781579575612, guid: a6f890c13cfe5c24ea9d2cd88ae39479, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

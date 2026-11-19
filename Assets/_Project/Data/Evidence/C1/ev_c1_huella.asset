@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: "Huella de zapato en el balc\xF3n"
   _description: "Una huella de zapato marcada con barro en el piso del balc\xF3n."
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 654358188051725375, guid: ba57e65e46c8042478377b9063377567, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

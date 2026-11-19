@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: Registro del llavero maestro
   _description: La hoja de control del llavero de mantenimiento.
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 1678490951335807416, guid: 73bd25293a1779847af7926da2076f1a, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

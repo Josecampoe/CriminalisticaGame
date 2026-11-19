@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: Sensor de humo
   _description: El sensor de humo del techo de la sala B.
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 5413798817798742988, guid: 7ec39ddc3c0ad3646a57a7351b2bc463, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

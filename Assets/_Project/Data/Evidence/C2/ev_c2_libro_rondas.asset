@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: Libro de rondas
   _description: El libro de rondas de la guardia nocturna.
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 5889106547371989342, guid: d8f2d0fe2d4dd1c4290e0e0a9085282c, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

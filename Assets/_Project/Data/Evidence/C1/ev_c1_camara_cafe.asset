@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: "Video del caf\xE9"
   _description: "La grabaci\xF3n de la c\xE1mara de seguridad del caf\xE9."
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 7017979708313259738, guid: a336a21f2f76bb640b0fcb9c8668a768, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

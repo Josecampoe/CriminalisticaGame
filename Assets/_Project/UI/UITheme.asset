@@ -20,6 +20,13 @@ MonoBehaviour:
   _alexCyan: {r: 0.30980393, g: 0.81960785, b: 0.77254903, a: 1}
   _warningAmber: {r: 0.8784314, g: 0.64705884, b: 0.14901961, a: 1}
   _muted: {r: 0.41960785, g: 0.44705883, b: 0.5019608, a: 1}
+  _labBg: {r: 0.9019608, g: 0.93333334, b: 0.95686275, a: 1}
+  _labPanel: {r: 1, g: 1, b: 1, a: 1}
+  _labBlue: {r: 0.16862746, g: 0.47058824, b: 0.72156864, a: 1}
+  _labBlueLight: {r: 0.827451, g: 0.90588236, b: 0.9647059, a: 1}
+  _labInk: {r: 0.09019608, g: 0.1882353, b: 0.2901961, a: 1}
+  _labMuted: {r: 0.35686275, g: 0.43529412, b: 0.50980395, a: 1}
+  _labGreen: {r: 0.13725491, g: 0.5254902, b: 0.41568628, a: 1}
   _titleFont: {fileID: 11400000, guid: ebbee7f715086e94db3e908654f17894, type: 2}
   _paperSprite: {fileID: 21300000, guid: 5ff8f2c23d7787f4b80f04d67127c5a0, type: 3}
   _screenSprite: {fileID: 21300000, guid: 6c1ac79d603f4b6448d1d41d21a3a54b, type: 3}

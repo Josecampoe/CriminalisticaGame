@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: Registro de la puerta
   _description: ALEX puede mostrar el registro de la puerta de seguridad de la sala B.
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 4545316154637127156, guid: 531ffe36745314a4e8d77933eef01c3c, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

@@ -57,7 +57,7 @@ namespace Caso404.UI
 
             // Columna derecha: controles.
             var right = UIFactory.Rect("Controles", card.transform);
-            UIFactory.VLayout(right.gameObject, 12);
+            UIFactory.VLayout(right.gameObject, 6);
             UIFactory.Layout(right.gameObject, preferredWidth: 560);
             SettingsWidgets.Controls(right, _theme);
         }

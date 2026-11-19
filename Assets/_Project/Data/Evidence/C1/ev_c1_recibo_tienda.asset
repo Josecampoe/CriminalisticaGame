@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: "Recibo en la chaqueta de Hern\xE1n"
   _description: Un recibo arrugado en el bolsillo de la chaqueta del portero.
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 8059980419941003952, guid: 00c5ed52788b4314d9f5a7a16682a68c, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: Caneca con cenizas
   _description: "Una caneca met\xE1lica con restos quemados."
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 5045840729525650787, guid: 027d5895591bf1f44a3cd1268b99cf08, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

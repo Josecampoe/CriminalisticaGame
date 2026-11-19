@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: Overol gris
   _description: "Un overol gris colgado en el casillero de Andr\xE9s."
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 2475346268343657172, guid: 97a3b476993144348b4620479a616156, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

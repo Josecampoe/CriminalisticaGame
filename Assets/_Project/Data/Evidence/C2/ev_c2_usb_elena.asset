@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: "USB en la mano de Tom\xE1s"
   _description: "Una memoria USB en la mano de Tom\xE1s."
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 3276118660978054000, guid: b85002649bbaf4a46815b35f5c3be780, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

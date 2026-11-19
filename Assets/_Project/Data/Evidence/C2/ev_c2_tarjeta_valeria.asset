@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: Registro de accesos del piso 12
   _description: El registro de tarjetas de acceso del piso 12.
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 3889710341207649877, guid: 032b33a8bc0786048b9c993dcd368d09, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []
