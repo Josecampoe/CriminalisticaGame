@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Caso404.AI;
 using Caso404.Core;
 using Caso404.Data;
@@ -29,8 +27,8 @@ namespace Caso404.Dialogue
     }
 
     /// <summary>
-    /// Conversaciones con los personajes. La IA (o el modo sin conexión) solo pone la voz;
-    /// descubrir mentiras, revelar secretos y entregar evidencias lo deciden reglas deterministas con los datos.
+    /// Conversaciones con los personajes: diálogo predeterminado escrito en los datos (CharacterProfile), sin IA.
+    /// Descubrir mentiras, revelar secretos y entregar evidencias lo deciden reglas deterministas con los datos.
     /// </summary>
     public class DialogueService
     {
@@ -43,17 +41,15 @@ namespace Caso404.Dialogue
 
         readonly GameStateService _state;
         readonly EvidenceService _evidence;
-        readonly IAiClient _ai;
         readonly CaseData _case;
         bool _pressedThisConversation;
 
         public CharacterProfile Current { get; private set; }
 
-        public DialogueService(GameStateService state, EvidenceService evidence, IAiClient ai, CaseData caseData)
+        public DialogueService(GameStateService state, EvidenceService evidence, CaseData caseData)
         {
             _state = state;
             _evidence = evidence;
-            _ai = ai ?? new OfflineAiClient();
             _case = caseData;
         }
 
@@ -105,19 +101,28 @@ namespace Caso404.Dialogue
         public bool IsRefusing(CharacterProfile c) =>
             c != null && c.CooperatesAfterSeeing != null && !c.RefusesUnless.IsEmpty && c.RefusesUnless.Evaluate(_state) && !_state.HasFlag($"coop_{c.Id}");
 
-        /// <summary>Pregunta por un tema (o con texto libre). Nunca falla: si la IA no responde, usa el respaldo.</summary>
-        public async Task<DialogueLine> AskAsync(CharacterProfile c, DialogueTopic topic, string question, CancellationToken ct)
+        /// <summary>Lo que dice el investigador al elegir cada tema (se muestra y queda en la memoria de la conversación).</summary>
+        public static string QuestionFor(DialogueTopic topic) => topic switch
         {
-            if (IsRefusing(c)) return Remember(c, new DialogueLine { Speaker = c.DisplayName, Text = c.RefusalLine, Emotion = "enojado" }, question ?? topic.ToString());
+            DialogueTopic.Crime => "¿Qué pasó? Cuénteme lo que sabe.",
+            DialogueTopic.OtherPerson => "¿Qué me puede decir de los demás?",
+            DialogueTopic.Press => "No me mienta. Sé que oculta algo.",
+            DialogueTopic.Calm => "Tranquilo. Solo quiero entender qué pasó.",
+            _ => ""
+        };
+
+        /// <summary>
+        /// Pregunta por un tema. Los personajes responden con su diálogo escrito en los datos (sin IA):
+        /// así cada respuesta es la del guion y el caso se puede seguir igual en cada partida. Solo ALEX usa IA.
+        /// </summary>
+        public DialogueLine Ask(CharacterProfile c, DialogueTopic topic)
+        {
+            var question = QuestionFor(topic);
+            if (IsRefusing(c)) return Remember(c, new DialogueLine { Speaker = c.DisplayName, Text = c.RefusalLine, Emotion = "enojado" }, question);
             if (topic == DialogueTopic.Calm) return Calm(c);
             if (topic == DialogueTopic.Press) return Press(c);
 
-            AiReply reply = null;
-            try { reply = await _ai.AskAsync(BuildRequest(c, topic, question), ct); }
-            catch (OperationCanceledException) { throw; }
-            catch (Exception e) { GameLog.Warn($"IA sin respuesta, se usa el respaldo: {e.Message}"); }
-
-            if (!AiReplyValidator.IsValid(reply, c, _state)) reply = OfflineAiClient.BuildReply(c, topic, question);
+            var reply = OfflineAiClient.BuildReply(c, topic, null);
             _state.LearnFacts(reply.usedFactIds.Where(f => c.Secrets.All(s => s.FactId != f)));
             return Remember(c, new DialogueLine { Speaker = c.DisplayName, Text = reply.reply, Emotion = reply.emotion }, question);
         }
@@ -195,15 +200,15 @@ namespace Caso404.Dialogue
             _pressedThisConversation = true;
             bool anyExposed = c.Lies.Any(l => l != null && _state.IsLieExposed(l.Id));
             var text = anyExposed ? c.Fallback.Press.Text : c.Fallback.Crime.Text;
-            return Remember(c, new DialogueLine { Speaker = c.DisplayName, Text = text, Emotion = anyExposed ? "nervioso" : "enojado" }, "Presionar");
+            return Remember(c, new DialogueLine { Speaker = c.DisplayName, Text = text, Emotion = anyExposed ? "nervioso" : "enojado" }, QuestionFor(DialogueTopic.Press));
         }
 
         DialogueLine Calm(CharacterProfile c)
         {
             var secret = _pressedThisConversation ? null : FindCalmSecret(c);
             if (secret == null)
-                return Remember(c, new DialogueLine { Speaker = c.DisplayName, Text = c.Fallback.Crime.Text, Emotion = "triste" }, "Hablar con calma");
-            return RevealSecret(c, secret, "Hablar con calma");
+                return Remember(c, new DialogueLine { Speaker = c.DisplayName, Text = c.Fallback.Crime.Text, Emotion = "triste" }, QuestionFor(DialogueTopic.Calm));
+            return RevealSecret(c, secret, QuestionFor(DialogueTopic.Calm));
         }
 
         DialogueLine RevealSecret(CharacterProfile c, SecretEntry secret, string playerSaid)
@@ -218,19 +223,6 @@ namespace Caso404.Dialogue
 
         SecretEntry FindCalmSecret(CharacterProfile c) => c?.Secrets.FirstOrDefault(s =>
             s.RequiresCalmApproach && !s.OnlyInEnding && !_state.KnowsFact(s.FactId) && s.UnlockCondition.Evaluate(_state));
-
-        AiRequest BuildRequest(CharacterProfile c, DialogueTopic topic, string question) => new()
-        {
-            Character = c,
-            Topic = topic,
-            Question = question,
-            SceneId = _state.State.currentSceneId,
-            AlexTrust = _state.AlexTrust,
-            AnalyzedEvidence = _evidence.AnalyzedEvidence.Select(e => $"{e.Id}: {e.AnalysisResult}").ToList(),
-            KnownFacts = _state.State.knownFactIds.ToList(),
-            History = _state.GetConversation(c.Id).TakeLast(10).ToList(),
-            ExposedLieIds = c.Lies.Where(l => l != null && _state.IsLieExposed(l.Id)).Select(l => l.Id).ToList()
-        };
 
         /// <summary>Marca en la memoria donde empieza una conversación nueva con el mismo personaje.</summary>
         public const string NewConversationMark = "(— otra conversación, más tarde —)";

@@ -68,7 +68,7 @@ namespace Caso404.Core
             Hypotheses = new HypothesisService(State);
             Accusation = new AccusationService(State, Case);
             SceneFlow = new SceneFlowService(State, Case);
-            Dialogue = new DialogueService(State, Evidence, AiClient, Case);
+            Dialogue = new DialogueService(State, Evidence, Case);
 
             State.SetCurrentScene(Case.Id, Scene.Id);
             Evidence.EvidenceCollected += OnEvidenceCollected;

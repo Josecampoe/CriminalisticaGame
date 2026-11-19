@@ -99,6 +99,15 @@ namespace Caso404.Tests
             journal.Open();
             yield return new WaitForSecondsRealtime(0.4f);
             yield return Shot("04_expediente");
+            var analyze = journal.GetComponentsInChildren<UnityEngine.UI.Button>(true).FirstOrDefault(b => b.name.StartsWith("Btn_Iniciar"));
+            if (analyze != null && analyze.gameObject.activeInHierarchy)
+            {
+                analyze.onClick.Invoke();
+                yield return new WaitForSecondsRealtime(0.8f);
+                yield return Shot("04b_laboratorio_analizando");
+                yield return new WaitForSecondsRealtime(1.6f);
+                yield return Shot("04c_laboratorio_informe");
+            }
             journal.Close();
 
             var alex = Object.FindAnyObjectByType<AlexPanelView>();
@@ -122,7 +131,7 @@ namespace Caso404.Tests
             var dialogue = Object.FindAnyObjectByType<DialogueView>();
             UnityEngine.UI.Button Btn(string n) => dialogue.GetComponentsInChildren<UnityEngine.UI.Button>(true).First(b => b.name == n);
             Btn("Btn_Sobre el crimen").onClick.Invoke();
-            yield return new WaitForSecondsRealtime(4.5f); // sin proxy: 2 s de espera y luego la frase del guion
+            yield return new WaitForSecondsRealtime(2f); // la frase del guion con efecto de escritura
             yield return Shot("06_dialogo");
             Btn("Btn_Presentar evidencia").onClick.Invoke();
             yield return new WaitForSecondsRealtime(0.3f);

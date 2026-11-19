@@ -250,8 +250,7 @@ namespace Caso404.Tests
             yield return Talk("laura", d =>
             {
                 Assert.IsTrue(d.Present(Profile("laura"), Item(d, "ev_c1_telefono")).ExposedLie);
-                var t = d.AskAsync(Profile("laura"), AI.DialogueTopic.Calm, null, default);
-                t.Wait();
+                d.Ask(Profile("laura"), AI.DialogueTopic.Calm);
             });
             Assert.IsInstanceOf<DecisionView>(Ui.Top, "Se abre dec_c1_cuaderno");
             yield return Decide(g.Case.FindDecision("dec_c1_cuaderno"), "B");
