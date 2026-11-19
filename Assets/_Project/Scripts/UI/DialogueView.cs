@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Linq;
-using System.Threading;
 using Caso404.AI;
 using Caso404.Core;
 using Caso404.Data;
@@ -16,9 +15,9 @@ namespace Caso404.UI
 {
     /// <summary>
     /// Diálogo en formato de cine: franjas negras arriba, degradado abajo y el texto sobre la escena (la cámara mira
-    /// al rostro del personaje). Nombre, rol, emoción, texto con efecto de escritura, botones rápidos con atajos 1–6
-    /// (crimen, otra persona, presentar evidencia, presionar, despedirse, hablar con calma) y campo para escribir.
-    /// Muestra "X está pensando…" mientras responde la IA.
+    /// al rostro del personaje). Nombre, rol, emoción, la pregunta del investigador y la respuesta con efecto de
+    /// escritura, y botones con atajos 1–6 (crimen, otra persona, presentar evidencia, presionar, despedirse,
+    /// hablar con calma). El diálogo es predeterminado: no hay preguntas abiertas (solo ALEX usa IA).
     /// </summary>
     public class DialogueView : UIPanel
     {
@@ -32,20 +31,17 @@ namespace Caso404.UI
         TextMeshProUGUI _name;
         TextMeshProUGUI _role;
         TextMeshProUGUI _line;
-        TextMeshProUGUI _thinking;
+        TextMeshProUGUI _question;
         RectTransform _tagHolder;
         RectTransform _quick;
         RectTransform _extraRow;
         RectTransform _chooser;
         RectTransform _chooserList;
         TextMeshProUGUI _chooserTitle;
-        TMP_InputField _input;
-        Button _ask, _calm;
+        Button _calm;
         Button[] _quickButtons;
         CharacterProfile _current;
-        CancellationTokenSource _cts;
         Coroutine _typing;
-        bool _busy;
 
         protected override void Build()
         {
@@ -87,6 +83,13 @@ namespace Caso404.UI
 
             UIFactory.Divider(column, UITheme.WithAlpha(_theme.WarningAmber, 0.35f));
 
+            // Lo que preguntó el investigador, pequeño y tenue sobre la respuesta.
+            _question = UIFactory.Text(column, "Pregunta", "", _theme.BodyFont, _theme.SizeBody, UITheme.WithAlpha(_theme.TextLight, 0.55f));
+            _question.fontStyle = FontStyles.Italic;
+            _question.textWrappingMode = TextWrappingModes.NoWrap;
+            _question.overflowMode = TextOverflowModes.Ellipsis;
+            UIFactory.Layout(_question.gameObject, preferredHeight: 28);
+
             _line = UIFactory.Text(column, "Linea", "", _theme.BodyFont, 27, _theme.TextLight);
             _line.lineSpacing = 8f;
             _line.enableAutoSizing = true;
@@ -97,34 +100,23 @@ namespace Caso404.UI
             lineShadow.effectColor = new Color(0f, 0f, 0f, 0.85f);
             lineShadow.effectDistance = new Vector2(2f, -2f);
             UIFactory.Layout(_line.gameObject, minHeight: 112, preferredHeight: 112);
-            _thinking = UIFactory.Text(column, "Pensando", "", _theme.MonoFont, _theme.SizeS + 1, UITheme.WithAlpha(_theme.WarningAmber, 0.85f));
-            UIFactory.Layout(_thinking.gameObject, preferredHeight: 22);
 
             _quick = UIFactory.Rect("Rapidas", column);
             UIFactory.HLayout(_quick.gameObject, 10);
             UIFactory.Layout(_quick.gameObject, preferredHeight: 48);
             _quickButtons = new[]
             {
-                QuickButton(1, "Sobre el crimen", _theme.Paper, () => Ask(DialogueTopic.Crime, null)),
-                QuickButton(2, "Sobre otra persona", _theme.Paper, () => Ask(DialogueTopic.OtherPerson, null)),
+                QuickButton(1, "Sobre el crimen", _theme.Paper, () => Ask(DialogueTopic.Crime)),
+                QuickButton(2, "Sobre otra persona", _theme.Paper, () => Ask(DialogueTopic.OtherPerson)),
                 QuickButton(3, "Presentar evidencia", _theme.WarningAmber, OpenChooser),
-                QuickButton(4, "Presionar", _theme.AccentRed, () => Ask(DialogueTopic.Press, null)),
+                QuickButton(4, "Presionar", _theme.AccentRed, () => Ask(DialogueTopic.Press)),
                 QuickButton(5, "Despedirse", _theme.Muted, Close),
             };
-            _calm = QuickButton(6, "Hablarle con calma", _theme.AlexCyan, () => Ask(DialogueTopic.Calm, null));
+            _calm = QuickButton(6, "Hablarle con calma", _theme.AlexCyan, () => Ask(DialogueTopic.Calm));
 
             _extraRow = UIFactory.Rect("TemasExtra", column);
             UIFactory.HLayout(_extraRow.gameObject, 10, 0, false);
             UIFactory.Layout(_extraRow.gameObject, preferredHeight: 44);
-
-            var inputRow = UIFactory.Rect("Escribir", column);
-            UIFactory.HLayout(inputRow.gameObject, 10, 0, false);
-            UIFactory.Layout(inputRow.gameObject, preferredHeight: 52);
-            _input = UIFactory.Input(inputRow, _theme, "Escribe tu pregunta y pulsa Enter (máx. 200 caracteres)", 200);
-            UIFactory.Layout(_input.gameObject, minHeight: 52, preferredHeight: 52, flexibleWidth: 1);
-            _input.onSubmit.AddListener(_ => AskTyped());
-            _ask = UIFactory.Button(inputRow, "Preguntar", _theme, _theme.Paper, _theme.Ink, AskTyped, 52);
-            UIFactory.Layout(_ask.gameObject, minHeight: 52, preferredHeight: 52, preferredWidth: 200);
 
             BuildChooser(rt);
         }
@@ -173,7 +165,6 @@ namespace Caso404.UI
         {
             if (_player != null) _player.TalkRequested -= OnTalkRequested;
             if (_game != null && _game.State != null) _game.State.Changed -= RefreshButtons;
-            CancelPending();
         }
 
         void OnTalkRequested(CharacterProfile character, Transform head)
@@ -183,11 +174,11 @@ namespace Caso404.UI
             _name.text = character.DisplayName;
             _role.text = character.Role;
             SetTag("", _theme.Muted);
-            _input.text = "";
+            _question.text = "";
             _chooser.gameObject.SetActive(false);
             var greeting = _game.Dialogue.Greeting(character);
             SetLine(string.IsNullOrEmpty(greeting)
-                ? $"<color={UITheme.Hex(UITheme.WithAlpha(_theme.TextLight, 0.55f))}><i>¿Qué le preguntas a {character.DisplayName}?</i></color>"
+                ? $"<color={UITheme.Hex(UITheme.WithAlpha(_theme.TextLight, 0.55f))}><i>Elige qué decirle a {character.DisplayName} (teclas 1–6).</i></color>"
                 : $"“{greeting}”", instant: string.IsNullOrEmpty(greeting));
             if (_player.Controller != null) _player.Controller.FocusOn(head);
             Open();
@@ -196,7 +187,6 @@ namespace Caso404.UI
 
         protected override void OnHidden()
         {
-            CancelPending();
             _game.Dialogue.End();
             _current = null;
             Closed?.Invoke();
@@ -205,9 +195,6 @@ namespace Caso404.UI
         void Update()
         {
             if (!IsOpen) return;
-            if (_busy && _current != null)
-                _thinking.text = $"{_current.DisplayName} está pensando" + new string('.', 1 + (int)(Time.unscaledTime * 3f) % 3);
-
             var kb = Keyboard.current;
             // Clic o Espacio completan la frase que se está escribiendo (para quien lee rápido).
             if (_typing != null && !UIFactory.IsTyping())
@@ -216,7 +203,7 @@ namespace Caso404.UI
                 if ((kb != null && kb.spaceKey.wasPressedThisFrame) || (mouse != null && mouse.leftButton.wasPressedThisFrame))
                     CompleteLine();
             }
-            if (kb == null || _busy || _chooser.gameObject.activeSelf || UIFactory.IsTyping()) return;
+            if (kb == null || _chooser.gameObject.activeSelf || UIFactory.IsTyping()) return;
             for (int i = 0; i < 6; i++)
             {
                 if (!kb[Key.Digit1 + i].wasPressedThisFrame && !kb[Key.Numpad1 + i].wasPressedThisFrame) continue;
@@ -224,36 +211,14 @@ namespace Caso404.UI
                 if (b.gameObject.activeInHierarchy && b.interactable) b.onClick.Invoke();
                 return;
             }
-            if (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame) _input.ActivateInputField();
         }
 
-        async void Ask(DialogueTopic topic, string question)
+        void Ask(DialogueTopic topic)
         {
-            if (_busy || _current == null) return;
-            _busy = true;
+            if (_current == null) return;
+            var line = _game.Dialogue.Ask(_current, topic);
+            ShowLine(line, DialogueService.QuestionFor(topic));
             RefreshButtons();
-            CancelPending();
-            _cts = new CancellationTokenSource();
-            try
-            {
-                var line = await _game.Dialogue.AskAsync(_current, topic, question, _cts.Token);
-                if (this != null && IsOpen) ShowLine(line);
-            }
-            catch (OperationCanceledException) { }
-            finally
-            {
-                _busy = false;
-                if (this != null) RefreshButtons();
-            }
-        }
-
-        void AskTyped()
-        {
-            var q = _input.text?.Trim();
-            if (string.IsNullOrEmpty(q) || _busy) return;
-            _input.text = "";
-            SetLine($"<color={UITheme.Hex(UITheme.WithAlpha(_theme.TextLight, 0.55f))}><i>Tú: {q}</i></color>", instant: true);
-            Ask(DialogueTopic.FreeText, q);
         }
 
         void OpenChooser()
@@ -285,11 +250,12 @@ namespace Caso404.UI
         {
             CloseChooser();
             if (_current == null) return;
-            ShowLine(_game.Dialogue.Present(_current, item));
+            ShowLine(_game.Dialogue.Present(_current, item), $"Le muestras: {item.Label}");
         }
 
-        void ShowLine(DialogueLine line)
+        void ShowLine(DialogueLine line, string playerSaid = null)
         {
+            _question.text = string.IsNullOrEmpty(playerSaid) ? "" : $"Tú: {playerSaid}";
             if (line.ExposedLie) SetTag("¡MENTIRA DESCUBIERTA!", _theme.AccentRed);
             else SetTag(string.IsNullOrEmpty(line.Emotion) ? "" : line.Emotion.ToUpperInvariant(), _theme.Muted);
             SetLine($"“{line.Text}”", instant: false);
@@ -335,14 +301,9 @@ namespace Caso404.UI
         void RefreshButtons()
         {
             if (_quickButtons == null) return;
-            foreach (var b in _quickButtons) b.interactable = !_busy;
-            _ask.interactable = !_busy;
-            _input.interactable = !_busy;
             bool calm = _current != null && _game.Dialogue.CanUseCalmApproach(_current);
             _calm.gameObject.SetActive(calm);
-            _calm.interactable = !_busy;
             RebuildExtraTopics();
-            _thinking.text = "";
         }
 
         void RebuildExtraTopics()
@@ -355,20 +316,11 @@ namespace Caso404.UI
             foreach (var topic in _game.Dialogue.AvailableExtraTopics(c))
             {
                 var t = topic;
-                var b = UIFactory.Ghost(_extraRow, $"▲  {t.Label}", _theme, _theme.WarningAmber, () => ShowLine(_game.Dialogue.AskExtra(c, t)), 44, _theme.SizeS + 1);
+                var b = UIFactory.Ghost(_extraRow, $"▲  {t.Label}", _theme, _theme.WarningAmber, () => ShowLine(_game.Dialogue.AskExtra(c, t), t.Label), 44, _theme.SizeS + 1);
                 UIFactory.Layout(b.gameObject, minHeight: 44, preferredHeight: 44, preferredWidth: 420);
-                b.interactable = !_busy;
                 count++;
             }
             _extraRow.gameObject.SetActive(count > 0);
-        }
-
-        void CancelPending()
-        {
-            if (_cts == null) return;
-            _cts.Cancel();
-            _cts.Dispose();
-            _cts = null;
         }
     }
 }
