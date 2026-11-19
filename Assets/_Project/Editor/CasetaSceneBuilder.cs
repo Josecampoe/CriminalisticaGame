@@ -48,7 +48,10 @@ namespace Caso404.EditorTools
             Wall(env, "Parq Oeste (sur de la caseta)", new Vector3(0, 0, -4), new Vector3(0, 0, 0), "concrete");
             Wall(env, "Parq Oeste (norte de la caseta)", new Vector3(0, 0, 4), new Vector3(0, 0, 8), "concrete");
             for (int i = 0; i < 3; i++) Box($"Columna {i}", env, new Vector3(4f + i * 3.5f, 1.35f, 2f), new Vector3(0.5f, 2.7f, 0.5f), "concrete");
-            Box("Carro", env, new Vector3(6f, 0.55f, -1.5f), new Vector3(1.8f, 0.8f, 4.2f), "car");
+            // Carros estacionados entre las líneas (modelos de Quaternius, CC0).
+            CarModels.Place(env, "Carro (gris)", "NormalCar1", new Vector3(3.5f, 0f, -1.5f), 0f, CarModels.Paints[0]);
+            CarModels.Place(env, "Camioneta (blanca)", "SUV", new Vector3(6.5f, 0f, -1.5f), 180f, CarModels.Paints[4]);
+            CarModels.Place(env, "Carro (azul noche)", "NormalCar2", new Vector3(9.5f, 0f, -1.6f), 0f, CarModels.Paints[3]);
             Box("Moto (espacio vacío)", env, new Vector3(11f, 0.003f, 5f), new Vector3(1f, 0.005f, 2.2f), "yellow", keepCollider: false);
             for (int i = 0; i < 4; i++) Box($"Línea {i}", env, new Vector3(2f + i * 3f, 0.003f, -1.5f), new Vector3(0.1f, 0.005f, 4f), "yellow", keepCollider: false);
 

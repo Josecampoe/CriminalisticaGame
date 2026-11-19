@@ -78,8 +78,8 @@ namespace Caso404.EditorTools
             Wall(env, "Parq Norte", new Vector3(12, 0, 9), new Vector3(22, 0, 9), "concrete");
             Wall(env, "Parq Este", new Vector3(22, 0, -3), new Vector3(22, 0, 9), "concrete");
             for (int i = 0; i < 3; i++) Box($"Columna {i}", env, new Vector3(16f + i * 3f, 1.35f, 3f), new Vector3(0.5f, 2.7f, 0.5f), "concrete");
-            Car(env, new Vector3(14.5f, 0, -1f));
-            Car(env, new Vector3(20f, 0, 0.5f));
+            CarModels.Place(env, "Carro (vino)", "NormalCar2", new Vector3(14.5f, 0f, -1f), 0f, CarModels.Paints[2]);
+            CarModels.Place(env, "Carro (plata)", "NormalCar1", new Vector3(20f, 0f, 0.5f), 180f, CarModels.Paints[1]);
             for (int i = 0; i < 4; i++) Box($"Línea {i}", env, new Vector3(13.2f + i * 2.8f, 0.003f, -0.5f), new Vector3(0.1f, 0.005f, 4f), "yellow", keepCollider: false);
             Box("Contenedor", env, new Vector3(18f, 0.7f, 7.6f), new Vector3(2.6f, 1.4f, 1.4f), "container");
 
@@ -130,10 +130,5 @@ namespace Caso404.EditorTools
             Finish(scene, ScenePath);
         }
 
-        static void Car(Transform parent, Vector3 floorPos)
-        {
-            Box("Carro", parent, floorPos + new Vector3(0, 0.55f, 0), new Vector3(1.8f, 0.8f, 4.2f), "car");
-            Box("Cabina", parent, floorPos + new Vector3(0, 1.15f, -0.2f), new Vector3(1.6f, 0.5f, 2.2f), "screen_off", keepCollider: false);
-        }
     }
 }

@@ -41,7 +41,6 @@ namespace Caso404.EditorTools
             SharedAssetsBuilder.Build(); // texturas de papel y pantalla de la UI
             ProceduralMaterials.Build(false);
             AmbientAudioBuilder.Build(false);
-            CharacterArtBuilder.BuildSurfaceMasks(); // piel, ropa y zapatos con brillo distinto
             foreach (var path in SceneKit.BuildOrder)
             {
                 if (!File.Exists(path)) continue;
@@ -76,7 +75,6 @@ namespace Caso404.EditorTools
         {
             SharedAssetsBuilder.Build();
             AmbientAudioBuilder.Build(false);
-            CharacterArtBuilder.BuildSurfaceMasks();
             MainMenuSceneBuilder.Build();
             Apartment404SceneBuilder.Build();
             CafeSceneBuilder.Build();
@@ -149,6 +147,9 @@ namespace Caso404.EditorTools
                 SceneKit.Set(atmosphere, "_nightProfile", Profile(Ambience.Night));
             }
             Debug.Log($"[Caso404] Paso visual en {sceneName}: {lights.Count} luces con lámpara visible, {boxes} cubos con UV en metros, {props} piezas de utilería.");
+            // Modelo 3D de cada evidencia para el laboratorio (también lo usa la inspección).
+            int models = EvidenceModels.CaptureOpenScene();
+            Debug.Log($"[Caso404] {models} modelos de evidencia guardados para el laboratorio.");
         }
 
         /// <summary>
@@ -191,7 +192,7 @@ namespace Caso404.EditorTools
             if (data == null) data = cam.gameObject.AddComponent<UniversalAdditionalCameraData>();
             data.renderPostProcessing = true;
             data.antialiasing = AntialiasingMode.SubpixelMorphologicalAntiAliasing;
-            data.antialiasingQuality = AntialiasingQuality.Medium;
+            data.antialiasingQuality = AntialiasingQuality.High;
             data.dithering = true; // evita bandas en los degradados oscuros
             cam.allowHDR = true;
             if (!menu) cam.farClipPlane = 900f;
@@ -350,7 +351,6 @@ namespace Caso404.EditorTools
             group.SetParent(root, false);
             var housing = SceneKit.Mat("dark");
             var shade = SceneKit.Mat("lamp_shade", new Color(0.12f, 0.12f, 0.11f), 0.45f, 0.6f);
-            int tubeIndex = 0;
             foreach (var l in lights)
             {
                 if (IsGlow(l)) continue;
@@ -369,17 +369,7 @@ namespace Caso404.EditorTools
                         l.intensity = Mathf.Max(l.intensity, 1.6f);
                         l.range = Mathf.Max(l.range, 9f);
                     }
-                    // Algunos tubos viejos parpadean (sótano, parqueaderos y servidores).
-                    if (ambience != Ambience.Overcast && tubeIndex++ % 3 == 1)
-                    {
-                        var flicker = l.gameObject.GetComponent<LightFlicker>();
-                        if (flicker == null) flicker = l.gameObject.AddComponent<LightFlicker>();
-                        SceneKit.Set(flicker, "_light", l);
-                        SceneKit.Set(flicker, "_tube", tube.GetComponent<Renderer>());
-                        var so = new SerializedObject(flicker);
-                        so.FindProperty("_tubeEmission").colorValue = new Color(0.86f, 0.94f, 1f) * 3.2f;
-                        so.ApplyModifiedPropertiesWithoutUndo();
-                    }
+                    // Sin tubos que parpadean: los cortes de luz al azar hacían titilar el piso y apagaban el color (J26).
                 }
                 else
                 {
@@ -931,10 +921,7 @@ namespace Caso404.EditorTools
             vg.intensity.Override(0.34f);
             vg.smoothness.Override(0.45f);
 
-            var fg = Add<FilmGrain>(profile);
-            fg.type.Override(FilmGrainLookup.Medium3);
-            fg.intensity.Override(0.22f);
-            fg.response.Override(0.8f);
+            // Sin grano de película: el ruido animado hacía titilar los pisos oscuros al moverse (DECISIONES J26).
 
             var ca = Add<ColorAdjustments>(profile);
             ca.postExposure.Override(exposure);
