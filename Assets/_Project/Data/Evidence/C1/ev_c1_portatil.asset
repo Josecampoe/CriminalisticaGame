@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: "Port\xE1til de Elena"
   _description: "Un port\xE1til tirado en el contenedor del parqueadero."
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 7599998437195376709, guid: d731dfc5f89d68948a3b1d97e64e1370, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

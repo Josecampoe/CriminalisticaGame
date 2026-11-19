@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: "Grabaci\xF3n de la c\xE1mara del pasillo"
   _description: "ALEX puede recuperar la grabaci\xF3n de la c\xE1mara del pasillo."
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 3321085869571486704, guid: 2109e541121374c4596862305afc1fca, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: "Escritorio vac\xEDo"
   _description: "El escritorio de Elena, casi vac\xEDo. En la pared hay fotos de ella."
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 7749022516205685547, guid: fdd48237376e14f4eb31c3203a469118, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

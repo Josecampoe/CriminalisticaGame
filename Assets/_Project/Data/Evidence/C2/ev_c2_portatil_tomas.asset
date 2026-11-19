@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: "Port\xE1til de Tom\xE1s"
   _description: "El port\xE1til de Tom\xE1s Quintero."
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 2757736036219284771, guid: a4ce84d29c51ca042bd8cc88243719d1, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

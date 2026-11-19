@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: "Sobre en el casillero de In\xE9s"
   _description: Un sobre con dinero en efectivo.
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 1255068122323601868, guid: f72f109bdfd7147419a47697a39138de, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

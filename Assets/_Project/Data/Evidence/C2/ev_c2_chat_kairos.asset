@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: "Tel\xE9fono olvidado de Sebasti\xE1n"
   _description: "Un tel\xE9fono olvidado en el escritorio de Sebasti\xE1n."
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 3533590403868707250, guid: 59d0e48bbfa3b5d48a15acd69022a3f2, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

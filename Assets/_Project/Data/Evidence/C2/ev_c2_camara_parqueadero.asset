@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: "C\xE1mara del parqueadero"
   _description: "La grabaci\xF3n de la c\xE1mara del parqueadero subterr\xE1neo."
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 1435034644413364555, guid: 0bd532c9a2c418b4180a33a329f61657, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

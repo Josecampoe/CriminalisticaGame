@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: Consola de Valeria
   _description: La consola de la oficina de Valeria Duarte.
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 5330351497204307113, guid: 314ebc01c2811cf47937757698e57551, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

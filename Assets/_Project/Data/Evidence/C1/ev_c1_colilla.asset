@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: "Colilla en el balc\xF3n"
   _description: "Una colilla de cigarrillo en el piso del balc\xF3n."
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 5870555029437382216, guid: b540907ecfe10f84cb600f7323a63e60, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

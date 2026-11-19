@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: Nota pegada en una taza
   _description: 'Una taza con una nota pegada: "Sebas, tenemos que hablar."'
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 3983972589937314585, guid: 071b7d4cd384a31448d9f76693a4e64f, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: "Ventana rota del balc\xF3n"
   _description: "La ventana del balc\xF3n est\xE1 rota. Hay vidrios por todas partes."
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 283197787273825423, guid: acfe27c3c6c1ba14b980cec3fe2bd4a5, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

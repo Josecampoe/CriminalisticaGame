@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: "Panel del sistema de extinci\xF3n"
   _description: El panel rojo del sistema de gas.
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 4644648441673903713, guid: 30c9010bd358f7c4ba1db062011c8b5e, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

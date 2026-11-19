@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: "Recibo del dat\xE1fono"
   _description: "Un recibo de pago con tarjeta del Caf\xE9 La Esquina."
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 2276240219041301701, guid: ed394a4f4a01f964894e0c83c43003d5, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: Libro de registro
   _description: "El libro de registro de la porter\xEDa del Edificio Mirador."
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 3244679431263948554, guid: 3e8d99606554f4944812a55499c44bf8, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []

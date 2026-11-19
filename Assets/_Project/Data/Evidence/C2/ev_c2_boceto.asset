@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: Boceto enmarcado
   _description: "Un boceto enmarcado en la oficina de Tom\xE1s."
   _icon: {fileID: 0}
-  _inspectPrefab: {fileID: 0}
+  _inspectPrefab: {fileID: 7863868318001061345, guid: c6b2398674938f44ba1c4072ca1bceaa, type: 3}
   _source: 0
   _spawnCondition:
     _allEvidenceAnalyzed: []
