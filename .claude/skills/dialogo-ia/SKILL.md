@@ -6,6 +6,8 @@ description: Sistema de diálogos con IA de El Caso 404 - sospechosos que respon
 # Diálogo con IA — El Caso 404
 
 ## Principio
+> **Cambio de diseño (DECISIONES J22):** los personajes usan diálogo predeterminado (las frases de `CharacterProfile`), sin IA ni preguntas abiertas. **Solo ALEX usa IA.** Lo de abajo sobre el modelo aplica a ALEX; para los personajes valen los datos y las reglas deterministas.
+
 La IA es **actor, no guionista**. Cada personaje recibe solo lo que sabe; la verdad, las mentiras permitidas y los finales están en datos. El juego debe poder jugarse completo sin conexión con respuestas de respaldo.
 
 ## Datos de cada personaje (`CharacterProfile`)
