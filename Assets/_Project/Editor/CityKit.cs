@@ -72,8 +72,6 @@ namespace Caso404.EditorTools
             var pole = SceneKit.Mat("poste", new Color(0.2f, 0.21f, 0.22f), 0.4f, 0.5f);
             var trunk = SceneKit.Mat("tronco", new Color(0.28f, 0.2f, 0.14f));
             var leaves = SceneKit.Mat("follaje", new Color(0.2f, 0.32f, 0.2f));
-            var tire = SceneKit.Mat("llanta", new Color(0.05f, 0.05f, 0.05f));
-            var carGlass = SceneKit.Mat("vidrio_carro", new Color(0.08f, 0.1f, 0.13f), 0.9f);
             var cable = SceneKit.Mat("cable", new Color(0.05f, 0.05f, 0.05f));
             var lightRed = Glow("semaforo_rojo", new Color(1f, 0.12f, 0.08f), 3f);
             var lightGreen = Glow("semaforo_verde", new Color(0.15f, 1f, 0.45f), 3f);
@@ -85,8 +83,6 @@ namespace Caso404.EditorTools
                 Glow(o.Night ? "aviso_ambar_noche" : "aviso_ambar", new Color(1f, 0.65f, 0.15f), o.Night ? 4f : 0.6f),
                 Glow(o.Night ? "aviso_blanco_noche" : "aviso_blanco", new Color(0.95f, 0.93f, 0.85f), o.Night ? 3f : 0.5f),
             };
-            var carColors = new[] { "carro_rojo", "carro_blanco", "carro_gris", "carro_azul", "carro_amarillo" };
-            var carTints = new[] { new Color(0.55f, 0.1f, 0.1f), new Color(0.85f, 0.85f, 0.83f), new Color(0.4f, 0.42f, 0.44f), new Color(0.14f, 0.22f, 0.45f), new Color(0.85f, 0.65f, 0.1f) };
 
             // Calzada: un solo plano grande
             batch.Box(asphalt, new Vector3(hostCenter.x, y - 0.05f, hostCenter.y), new Vector3(560, 0.1f, 560), Quaternion.identity);
@@ -143,9 +139,9 @@ namespace Caso404.EditorTools
                     for (float t = -block / 2f + 3f; t <= block / 2f - 3f; t += 6f)
                     {
                         if (rnd.NextDouble() < 0.45) continue;
-                        int k = rnd.Next(carColors.Length);
-                        var body = SceneKit.Mat(carColors[k], carTints[k], 0.6f, 0.3f);
-                        Car(batch, curbLine + along * t, Quaternion.LookRotation(along), body, carGlass, tire);
+                        string model = CarModels.Civil[rnd.Next(CarModels.Civil.Length)];
+                        var paint = CarModels.Paints[rnd.Next(CarModels.Paints.Length)];
+                        batch.Car(model, Matrix4x4.TRS(curbLine + along * t, Quaternion.LookRotation(along), Vector3.one), paint);
                     }
                 }
                 // Semáforos en las cuatro esquinas de la cuadra (rojo o verde según la esquina)
@@ -299,16 +295,6 @@ namespace Caso404.EditorTools
             mat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
             EditorUtility.SetDirty(mat);
             return mat;
-        }
-
-        static void Car(Batcher b, Vector3 pos, Quaternion rot, Material body, Material glass, Material tire)
-        {
-            Vector3 P(float x, float yy, float z) => pos + rot * new Vector3(x, yy, z);
-            b.Box(body, P(0, 0.6f, 0), new Vector3(1.8f, 0.7f, 4.2f), rot);
-            b.Box(glass, P(0, 1.15f, -0.2f), new Vector3(1.6f, 0.5f, 2.2f), rot);
-            foreach (var x in new[] { -0.85f, 0.85f })
-                foreach (var z in new[] { -1.35f, 1.35f })
-                    b.Box(tire, P(x, 0.32f, z), new Vector3(0.25f, 0.64f, 0.64f), rot);
         }
 
         static void Mountains(Batcher batch, Vector2 center, float y, bool night, System.Random rnd)
@@ -497,10 +483,23 @@ namespace Caso404.EditorTools
                 return m;
             }
 
-            void Add(Material mat, Mesh mesh, Matrix4x4 m)
+            void Add(Material mat, Mesh mesh, Matrix4x4 m, int subMesh = 0)
             {
                 if (!_parts.TryGetValue(mat, out var list)) _parts[mat] = list = new List<CombineInstance>();
-                list.Add(new CombineInstance { mesh = mesh, transform = m });
+                list.Add(new CombineInstance { mesh = mesh, transform = m, subMeshIndex = subMesh });
+            }
+
+            /// <summary>Agrega un carro del paquete (cada parte con su material: pintura, vidrio, llantas...).</summary>
+            public void Car(string model, Matrix4x4 m, Color paint)
+            {
+                var src = AssetDatabase.LoadAssetAtPath<GameObject>(CarModels.PathOf(model));
+                if (src == null) return;
+                foreach (var mf in src.GetComponentsInChildren<MeshFilter>())
+                {
+                    var mats = CarModels.Remap(mf.GetComponent<MeshRenderer>(), model, paint);
+                    var local = m * src.transform.worldToLocalMatrix * mf.transform.localToWorldMatrix;
+                    for (int i = 0; i < mf.sharedMesh.subMeshCount && i < mats.Length; i++) Add(mats[i], mf.sharedMesh, local, i);
+                }
             }
 
             public void Box(Material mat, Vector3 pos, Vector3 size, Quaternion rot) => Add(mat, _cube ??= Prim(PrimitiveType.Cube), Matrix4x4.TRS(pos, rot, size));
