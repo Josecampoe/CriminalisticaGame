@@ -322,3 +322,34 @@ Registro de decisiones tomadas durante el desarrollo, con su motivo. Cuando el g
 - **J19. Esc abre la pausa siempre.** Dos componentes escuchaban Esc: `GameUIController` abría la pausa y `UIManager` cerraba el panel de arriba, que según el orden era esa misma pausa recién abierta. Ahora decide uno solo: si hay un panel lo cierra, si no abre la pausa. La prueba simula la tecla con el Input System y fallaba con el código anterior.
 - **J20. Menú principal más limpio.** Se quitó el aviso del estado de la IA y la línea de "Proyecto universitario"; en su lugar va el lema "Investiga · Interroga · Desconfía". En Opciones la portada se oculta (antes el título y los botones se veían por detrás) y los controles se muestran como filas con teclas dibujadas en vez de texto con tabulaciones.
 - **J21. Ropa más limpia.** Más suavizado de la malla de la ropa y de sus normales (la luz marcaba bultos como manchas), hombros y mangas algo más angostos, y fuera los detalles pintados que en la malla salían dentados: solapas del traje, bolsillos de los uniformes y el triángulo oscuro del cuello de Laura (ahora es un ribete). Botones de la chaquetilla del chef del mismo tono de la tela.
+- **J22. Diálogo predeterminado con los personajes; solo ALEX usa IA.** Los personajes ya no tienen pregunta abierta. Responden con las frases escritas en sus datos (`CharacterProfile`: crimen, otra persona, presionar, hablar con calma, temas extra y presentar evidencia). Se quitaron el campo de texto, el botón Preguntar y el "pensando…". La pantalla muestra lo que dice el investigador ("Tú: …") encima de la respuesta. Motivo: así cada respuesta es la del guion, no hay frases inventadas por el modelo y el interrogatorio es igual en cada partida. Las reglas que descubren mentiras y secretos ya eran deterministas y no cambian. ALEX sigue con su panel y el campo para escribirle, porque su papel es justamente conversar y manipular.
+- **J23. El análisis de evidencias es un laboratorio forense.** La pantalla de Tab pasa de "Expediente" a "Laboratorio forense":
+  - Lista de **muestras** M-01, M-02… con una franja de color según su estado.
+  - **Estación de análisis**: lente de microscopio con retícula y marcas que giran, espectro de lectura propio de cada muestra y barra de progreso.
+  - **Informe de laboratorio** en papel, con número, sello CONCLUIDO (o ALEX si lo procesó él) y firma del analista.
+
+  Al pulsar "Iniciar análisis", el resultado se guarda al instante y una animación de 1.6 s lo presenta: barrido de la lente, espectro que se estabiliza y caída del sello. Mantiene la paleta: ámbar para el equipo, papel para el informe y cian para lo que toca ALEX.
+- **J24. Personajes con ropa modelada (Quaternius Ultimate Modular Men/Women, CC0).** La ropa generada por código sobre el cuerpo de superhéroe seguía viéndose rara después de varios intentos (J17, J21). Ahora cada personaje combina piezas de un paquete libre que ya trae la ropa modelada. Cabeza, torso, piernas y pies comparten el mismo esqueleto, así que se pueden mezclar. Cada material (piel, pelo, camisa, pantalón) toma el color que corresponde al oficio de cada uno en el guion:
+  - Carlos: chaqueta blanca de chef.
+  - Laura: uniforme de enfermera verde azulado.
+  - Hernán: saco de portero con placa.
+  - Andrés: overol gris y gorra.
+  - Sebastián: buzo y jean.
+  - Valeria: traje oscuro.
+  - Inés: saco de guardia azul marino con placa.
+  - Elena: camiseta, jean y botines.
+
+  Se mantienen las animaciones humanoides hechas por código (reposo, hablar y sentado). El estilo pasa a low-poly de colores planos, el mismo de los edificios de Kenney. El arte del sistema anterior (texturas pintadas y mallas de ropa) se borró.
+- **J25. Carros reales en parqueaderos y calles (Quaternius Cars, CC0).** Las cajas con cabina se reemplazaron por modelos de sedán, camioneta y deportivo. Los vidrios son oscuros y brillantes, las llantas mate, y la pintura usa tonos sobrios (gris, plata, vino, azul noche, blanco, verde). En la calle se fusionan por material para que no cuesten más que las cajas.
+- **J26. Pisos sin parpadeo.** La causa principal era un efecto a propósito: un tercio de los tubos fluorescentes del sótano, los parqueaderos y los servidores (`LightFlicker`) bajaban al azar a entre 5 y 40 % de su luz cada pocos segundos. Por eso el piso titilaba y "se perdía el color". Se quitó el efecto. Además se corrigieron tres causas menores:
+  - La oclusión ambiental en pantalla (SSAO) estaba en su calidad más baja, con ruido que "caminaba" al moverse. Se apagó: la oclusión horneada ya da el contacto.
+  - El grano de película animado se notaba sobre los pisos oscuros. Se quitó.
+  - El sesgo de las sombras era muy bajo (0.1) y causaba rayas sobre el piso (*shadow acne*). Ahora es 1.
+
+  Además, el antialiasing SMAA pasa a calidad alta. Apagar la SSAO también ahorra tiempo de GPU en gráficos integrados.
+- **J27. Música en rotación y sin ruidos.** Ahora hay cinco piezas de suspenso de 75 a 90 s, cada una en otra tonalidad menor (La, Re, Mi, Do y Si) y con otra textura: piano escaso, arpegio o latido grave. `MusicPlayer` las rota en orden aleatorio, sin repetir la misma dos veces seguidas, con un fundido cruzado de 4 s. No se corta al cambiar de escena. Se quitó el timbre de celesta con un parcial inarmónico, que sonaba metálico, y un filtro suave elimina los agudos ásperos. También se quitaron los pasos, que eran ruido filtrado: ahora solo suena la música y los avisos cortos de la interfaz.
+- **J28. Laboratorio con la evidencia en 3D y colores clínicos.** El laboratorio pasa a blanco con azul claro (tokens `Lab*` del `UITheme`), porque el ámbar no se sentía de laboratorio:
+  - **Centro:** la evidencia real gira sobre una mesa blanca iluminada, filmada por una cámara propia en una RenderTexture (`LabStage`). Se puede girar arrastrando y tiene esquinas de mira. Al analizar, una banda y una luz azul de escáner la recorren.
+  - **Derecha:** el informe en una hoja blanca con franja azul, sello y firma.
+
+  Para que se vea también una evidencia recogida en otra escena, el paso visual guarda un modelo de cada evidencia (`EvidenceModels`, en `Prefabs/Evidence`) y lo asigna como `InspectPrefab`. Las evidencias entregadas en un diálogo se muestran como un sobre de evidencia.
