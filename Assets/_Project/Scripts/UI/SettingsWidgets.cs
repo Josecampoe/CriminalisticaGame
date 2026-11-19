@@ -18,10 +18,10 @@ namespace Caso404.UI
             ("Mouse", "Mirar alrededor"),
             ("E", "Inspeccionar, hablar y guardar evidencia"),
             ("Clic|Rueda", "Girar y acercar el objeto inspeccionado"),
-            ("Tab", "Expediente: analizar evidencias"),
+            ("Tab", "Laboratorio: analizar evidencias"),
             ("Q", "ALEX: preguntar, aceptar o cuestionar"),
             ("H", "Tablero de hipótesis y decisiones"),
-            ("1–6|Enter", "Respuestas rápidas o escribir en un diálogo"),
+            ("1–6", "Elegir qué decir en un diálogo"),
             ("Esc", "Cerrar ventana o pausar"),
         };
 
