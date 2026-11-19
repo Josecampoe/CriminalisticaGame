@@ -114,7 +114,7 @@ namespace Caso404.Tests
         public void Ines_ExposedLieOpensHerDecision_AndProtectionGivesBackup()
         {
             var w = World();
-            var d = new DialogueService(w.State, w.Evidence, new OfflineAiClient(), w.Case);
+            var d = new DialogueService(w.State, w.Evidence, w.Case);
             DecisionData triggered = null;
             d.DecisionTriggered += x => triggered = x;
             w.CollectAndAnalyze("ev_c2_libro_rondas");
@@ -135,7 +135,7 @@ namespace Caso404.Tests
         public void Sebastian_ConfessesKairosWhenShownTheChat()
         {
             var w = World();
-            var d = new DialogueService(w.State, w.Evidence, new OfflineAiClient(), w.Case);
+            var d = new DialogueService(w.State, w.Evidence, w.Case);
             w.CollectAndAnalyze("ev_c2_chat_kairos");
             var seb = w.Case.FindSuspect("sebastian");
             d.Begin(seb);
@@ -150,12 +150,12 @@ namespace Caso404.Tests
         {
             var w = World();
             w.State.AddFlag("end_c1_engano");
-            var d = new DialogueService(w.State, w.Evidence, new OfflineAiClient(), w.Case);
+            var d = new DialogueService(w.State, w.Evidence, w.Case);
             var elena = w.Case.FindCharacter("elena");
             d.Begin(elena);
             Assert.IsTrue(d.IsRefusing(elena));
             Assert.IsEmpty(d.AvailableExtraTopics(elena), "Mientras no coopera no ofrece sus temas");
-            StringAssert.Contains("Carlos", d.AskAsync(elena, DialogueTopic.Crime, null, default).Result.Text);
+            StringAssert.Contains("Carlos", d.Ask(elena, DialogueTopic.Crime).Text);
             w.CollectAndAnalyze("ev_c2_usb_elena");
             d.Present(elena, d.GetPresentableItems().First(i => i.Evidence != null && i.Evidence.Id == "ev_c2_usb_elena"));
             Assert.IsFalse(d.IsRefusing(elena));
@@ -167,7 +167,7 @@ namespace Caso404.Tests
         {
             var w = World();
             w.State.AddFlag("flag_c1_cuaderno");
-            var d = new DialogueService(w.State, w.Evidence, new OfflineAiClient(), w.Case);
+            var d = new DialogueService(w.State, w.Evidence, w.Case);
             var elena = w.Case.FindCharacter("elena");
             StringAssert.Contains("cuaderno", d.Greeting(elena));
             d.Greeting(elena);

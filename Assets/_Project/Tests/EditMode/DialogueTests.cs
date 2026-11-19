@@ -10,7 +10,7 @@ namespace Caso404.Tests
     /// <summary>Reglas deterministas del diálogo (sin IA): mentiras, secretos y evidencias entregadas.</summary>
     public class DialogueTests
     {
-        static DialogueService Make(Case1World w) => new(w.State, w.Evidence, new OfflineAiClient(), w.Case);
+        static DialogueService Make(Case1World w) => new(w.State, w.Evidence, w.Case);
         static CharacterProfile Who(Case1World w, string id) => w.Case.FindSuspect(id);
         static PresentableItem Item(DialogueService d, string evidenceId) => d.GetPresentableItems().First(i => i.Evidence != null && i.Evidence.Id == evidenceId);
 
@@ -32,7 +32,7 @@ namespace Caso404.Tests
             SecretEntry revealed = null;
             d.SecretRevealed += (_, s) => revealed = s;
             Assert.IsTrue(d.CanUseCalmApproach(laura));
-            d.AskAsync(laura, DialogueTopic.Calm, null, CancellationToken.None).Wait();
+            d.Ask(laura, DialogueTopic.Calm);
             Assert.IsNotNull(revealed);
             Assert.AreEqual("dec_c1_cuaderno", revealed.TriggersDecision.Id);
             Assert.IsTrue(w.State.KnowsFact("f_c1_laura_cuaderno"));
@@ -47,7 +47,7 @@ namespace Caso404.Tests
             w.CollectAndAnalyze("ev_c1_telefono");
             d.Begin(laura);
             d.Present(laura, Item(d, "ev_c1_telefono"));
-            d.AskAsync(laura, DialogueTopic.Press, null, CancellationToken.None).Wait();
+            d.Ask(laura, DialogueTopic.Press);
             Assert.IsFalse(d.CanUseCalmApproach(laura));
             d.Begin(laura); // nueva conversación
             Assert.IsTrue(d.CanUseCalmApproach(laura));
@@ -94,7 +94,7 @@ namespace Caso404.Tests
             var d = Make(w);
             var laura = Who(w, "laura");
             d.Begin(laura);
-            var line = d.AskAsync(laura, DialogueTopic.OtherPerson, null, CancellationToken.None).Result;
+            var line = d.Ask(laura, DialogueTopic.OtherPerson);
             StringAssert.Contains("Carlos vino esa noche", line.Text);
             Assert.IsTrue(w.State.KnowsFact("f_c1_laura_gritos"));
         }
