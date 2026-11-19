@@ -43,8 +43,6 @@ namespace Caso404.Player
         void Awake()
         {
             _controller = GetComponent<CharacterController>();
-            // Pasos: se agregan aquí para no tener que reconstruir las escenas con un componente nuevo.
-            if (!TryGetComponent<FootstepAudio>(out _)) gameObject.AddComponent<FootstepAudio>();
             if (_input == null) Caso404.Core.GameLog.Error($"{name}: falta InputReader", this);
             if (_cameraPivot == null) Caso404.Core.GameLog.Error($"{name}: falta Camera Pivot", this);
         }
