@@ -33,6 +33,15 @@ namespace Caso404.UI
             _title = UIFactory.Text(rt, "Title", "", _theme.TitleFont, 44, _theme.TextLight, TextAlignmentOptions.Center);
             UIFactory.Place(_title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -70), new Vector2(1400, 60));
 
+            // Resplandor cálido detrás del objeto, como una lámpara de escritorio: lo separa del fondo oscurecido.
+            if (_theme.GlowSprite != null)
+            {
+                var glow = UIFactory.Panel(rt, "Resplandor", UITheme.WithAlpha(_theme.WarningAmber, 0.16f));
+                glow.sprite = _theme.GlowSprite;
+                glow.raycastTarget = false;
+                UIFactory.Place(glow.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 30), new Vector2(1000, 860));
+            }
+
             _image = UIFactory.Rect("View", rt).gameObject.AddComponent<RawImage>();
             UIFactory.Place(_image.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 30), new Vector2(620, 620));
             _image.raycastTarget = false;
