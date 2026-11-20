@@ -39,6 +39,8 @@ namespace Caso404.EditorTools
             theme.BodyFont = body != null ? body : font;
             theme.MonoFont = mono != null ? mono : font;
             theme.PaperSprite = UiSprite("ui_papel", 512, 640, PaperPixel);
+            // Del mismo tamaño aproximado que el tablero de hipótesis: así la textura casi no se estira.
+            theme.PaperWideSprite = UiSprite("ui_papel_ancho", 1600, 720, PaperPixel);
             theme.ScreenSprite = UiSprite("ui_pantalla", 256, 512, ScreenPixel);
             theme.RoundSprite = UiSprite("ui_redondeado", 64, 64, (x, y, w, h) => RoundPixel(x, y, w, h, false), 20);
             theme.FrameSprite = UiSprite("ui_marco", 64, 64, (x, y, w, h) => RoundPixel(x, y, w, h, true), 20);
@@ -181,8 +183,12 @@ namespace Caso404.EditorTools
             // Se revisa siempre: un sprite único (no hoja "Multiple"), sin mipmaps y con su borde 9-slice.
             var imp = (TextureImporter)AssetImporter.GetAtPath(path);
             var wanted = new Vector4(border, border, border, border);
-            if (imp.textureType != TextureImporterType.Sprite || imp.spriteImportMode != SpriteImportMode.Single || imp.spriteBorder != wanted)
+            // Sin compresión: la compresión por bloques (DXT/BC) convierte los degradados suaves del papel y la viñeta en
+            // cuadros borrosos que, estirados a pantalla completa, se ven como manchas. Son texturas pequeñas.
+            if (imp.textureType != TextureImporterType.Sprite || imp.spriteImportMode != SpriteImportMode.Single || imp.spriteBorder != wanted
+                || imp.textureCompression != TextureImporterCompression.Uncompressed)
             {
+                imp.textureCompression = TextureImporterCompression.Uncompressed;
                 imp.textureType = TextureImporterType.Sprite;
                 imp.spriteImportMode = SpriteImportMode.Single;
                 imp.mipmapEnabled = false;
@@ -199,10 +205,13 @@ namespace Caso404.EditorTools
         {
             float u = x / (float)w, v = y / (float)h;
             var c = new Color(0.914f, 0.886f, 0.816f);
-            float fibers = Mathf.PerlinNoise(x * 0.9f, y * 0.04f) * 0.5f + Mathf.PerlinNoise(x * 0.05f + 9f, y * 0.05f) * 0.5f;
+            // Manchas suaves de baja frecuencia + un grano muy fino y tenue. (Antes el ruido iba a 0.9 por píxel: a esa
+            // frecuencia Perlin genera un patrón de interferencia que se veía como rayas sucias detrás del texto.)
+            float mottle = Mathf.PerlinNoise(x * 0.008f + 3f, y * 0.008f + 7f) * 0.6f + Mathf.PerlinNoise(x * 0.03f + 9f, y * 0.03f) * 0.4f;
+            float grain = (Hash(x, y) - 0.5f) * 0.018f;
             float edge = Mathf.Min(Mathf.Min(u, 1f - u), Mathf.Min(v, 1f - v));
             float aged = Mathf.Clamp01(1f - edge * 9f);
-            c *= 0.95f + 0.07f * fibers;
+            c *= 0.965f + 0.045f * mottle + grain;
             c = Color.Lerp(c, new Color(0.78f, 0.68f, 0.5f), aged * 0.45f);
             float ring = Mathf.Abs(Vector2.Distance(new Vector2(u * w, v * h), new Vector2(w * 0.78f, h * 0.2f)) - 52f);
             if (ring < 5f) c = Color.Lerp(c, new Color(0.7f, 0.58f, 0.42f), (1f - ring / 5f) * 0.35f * Mathf.PerlinNoise(x * 0.1f, y * 0.1f));
@@ -210,6 +219,14 @@ namespace Caso404.EditorTools
             if (fold < 2f) c *= 0.93f + fold * 0.03f;
             c.a = 1f;
             return c;
+        }
+
+        /// <summary>Ruido blanco determinista de 0 a 1 por píxel (grano del papel).</summary>
+        static float Hash(int x, int y)
+        {
+            uint h = (uint)(x * 374761393 + y * 668265263);
+            h = (h ^ (h >> 13)) * 1274126177u;
+            return ((h ^ (h >> 16)) & 0xFFFF) / 65535f;
         }
 
         /// <summary>Pantalla oscura: líneas de barrido cada 3 px y un brillo leve hacia el centro.</summary>
