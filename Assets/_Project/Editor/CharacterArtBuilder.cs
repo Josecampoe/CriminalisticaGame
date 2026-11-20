@@ -50,7 +50,10 @@ namespace Caso404.EditorTools
             public Piece Head, Body, Legs, Feet;
             public float SkinTone;             // 0 = piel clara, 1 = piel oscura
             public Color Hair;
-            public Dictionary<string, Color> Colors = new(); // nombre del material del paquete → color nuevo
+            // Color de cada material del paquete. La clave puede ser "Material" (todas las piezas) o "Pieza:Material"
+            // (solo esa pieza: Head, Body, Legs o Feet), porque el traje y el pantalón comparten material "Suit".
+            public Dictionary<string, Color> Colors = new();
+            public Dictionary<string, Fabric> Fabrics = new(); // misma clave; si falta: cuero en los pies, algodón en lo demás
             public float Height = 1f;           // escala uniforme (el paquete mide ~1.85 m)
             public bool Badge, Cap;
             public Color CapColor;
@@ -62,31 +65,46 @@ namespace Caso404.EditorTools
         static readonly Look[] Looks =
         {
             // Caso 1
-            new() { Id = "carlos", SkinTone = 0.45f, Hair = C(0.12f, 0.08f, 0.06f), Height = 0.96f,   // chef: chaqueta blanca
-                Head = M("Adventurer", "Head"), Body = M("Casual2", "Body"), Legs = M("Suit", "Legs"), Feet = M("Suit", "Feet"),
-                Colors = { ["LightBrown"] = C(0.9f, 0.9f, 0.87f), ["Suit"] = C(0.13f, 0.13f, 0.14f), ["Black"] = C(0.07f, 0.07f, 0.07f) } },
-            new() { Id = "laura", Female = true, SkinTone = 0.3f, Hair = C(0.3f, 0.16f, 0.1f), Height = 0.94f,  // enfermera: uniforme verde azulado
-                Head = W("Formal", "Head"), Body = W("Casual", "Body"), Legs = W("Casual", "Legs"), Feet = W("Casual", "Feet"),
-                Colors = { ["White"] = C(0.25f, 0.55f, 0.57f), ["Orange"] = C(0.22f, 0.5f, 0.52f), ["Grey"] = C(0.88f, 0.88f, 0.86f), ["Red"] = C(0.3f, 0.16f, 0.1f) } },
-            new() { Id = "hernan", SkinTone = 0.4f, Hair = C(0.7f, 0.7f, 0.68f), Height = 0.93f, Badge = true, // portero mayor: saco azul de uniforme
+            new() { Id = "carlos", SkinTone = 0.45f, Hair = C(0.12f, 0.08f, 0.06f), Height = 0.96f,   // chef: chaqueta blanca cerrada, pantalón negro
                 Head = M("Adventurer", "Head"), Body = M("Suit", "Body"), Legs = M("Suit", "Legs"), Feet = M("Suit", "Feet"),
-                Colors = { ["Suit"] = C(0.17f, 0.22f, 0.33f), ["Tie"] = C(0.32f, 0.34f, 0.38f), ["White"] = C(0.78f, 0.8f, 0.82f), ["Black"] = C(0.06f, 0.06f, 0.06f) } },
-            new() { Id = "andres", SkinTone = 0.6f, Hair = C(0.07f, 0.06f, 0.05f), Height = 0.95f, Cap = true, CapColor = C(0.3f, 0.31f, 0.33f), // mantenimiento: overol gris
+                Colors = { ["Body:Suit"] = C(0.93f, 0.91f, 0.85f), ["Body:White"] = C(0.84f, 0.83f, 0.78f), ["Body:Tie"] = C(0.93f, 0.91f, 0.85f),
+                           ["Legs:Suit"] = C(0.15f, 0.15f, 0.17f), ["Feet:Black"] = C(0.11f, 0.09f, 0.08f) },
+                Fabrics = { ["Body:Suit"] = Fabric.Cotton, ["Body:Tie"] = Fabric.Cotton, ["Legs:Suit"] = Fabric.Cotton } },
+            new() { Id = "laura", Female = true, SkinTone = 0.3f, Hair = C(0.3f, 0.16f, 0.1f), Height = 0.94f,  // enfermera: uniforme verde azulado, zuecos blancos
+                Head = W("Formal", "Head"), Body = W("Casual", "Body"), Legs = W("Casual", "Legs"), Feet = W("Casual", "Feet"),
+                Colors = { ["Body:White"] = C(0.42f, 0.68f, 0.7f), ["Legs:Orange"] = C(0.36f, 0.6f, 0.63f), ["Feet:Grey"] = C(0.92f, 0.92f, 0.9f),
+                           ["Head:Red"] = C(0.3f, 0.16f, 0.1f) } },
+            new() { Id = "hernan", SkinTone = 0.4f, Hair = C(0.7f, 0.7f, 0.68f), Height = 0.93f, Badge = true, // portero: saco azul de uniforme, corbata vino
+                Head = M("Adventurer", "Head"), Body = M("Suit", "Body"), Legs = M("Suit", "Legs"), Feet = M("Suit", "Feet"),
+                Colors = { ["Body:Suit"] = C(0.15f, 0.22f, 0.4f), ["Body:White"] = C(0.78f, 0.84f, 0.92f), ["Body:Tie"] = C(0.45f, 0.1f, 0.13f),
+                           ["Legs:Suit"] = C(0.12f, 0.17f, 0.31f), ["Feet:Black"] = C(0.08f, 0.07f, 0.07f) },
+                Fabrics = { ["Suit"] = Fabric.Wool } },
+            new() { Id = "andres", SkinTone = 0.6f, Hair = C(0.07f, 0.06f, 0.05f), Height = 0.95f, Cap = true, CapColor = C(0.32f, 0.33f, 0.35f), // mantenimiento: overol gris (guion), camisa azul, botas
                 Head = M("Casual2", "Head"), Body = M("Farmer", "Body"), Legs = M("Farmer", "Pants"), Feet = M("Worker", "Feet"),
-                Colors = { ["LightBlue"] = C(0.4f, 0.42f, 0.45f), ["Beige"] = C(0.62f, 0.6f, 0.55f), ["Brown"] = C(0.3f, 0.3f, 0.32f), ["Grey"] = C(0.22f, 0.16f, 0.1f), ["Black"] = C(0.18f, 0.13f, 0.09f) } },
+                Colors = { ["LightBlue"] = C(0.46f, 0.48f, 0.5f), ["Body:Brown"] = C(0.17f, 0.24f, 0.37f), ["Body:Beige"] = C(0.23f, 0.3f, 0.43f),
+                           ["Feet:Grey"] = C(0.33f, 0.21f, 0.12f), ["Feet:Black"] = C(0.09f, 0.08f, 0.07f) },
+                Fabrics = { ["LightBlue"] = Fabric.Denim } },
             // Caso 2
             new() { Id = "sebastian", SkinTone = 0.25f, Hair = C(0.05f, 0.04f, 0.04f), Height = 0.95f,  // ingeniero joven: buzo verde, jean, tenis blancos
                 Head = M("Suit", "Head"), Body = M("Casual", "Body"), Legs = M("Casual2", "Legs"), Feet = M("Casual", "Feet"),
-                Colors = { ["Purple"] = C(0.16f, 0.27f, 0.21f), ["LightBlue"] = C(0.2f, 0.27f, 0.4f), ["White"] = C(0.92f, 0.92f, 0.92f) } },
-            new() { Id = "valeria", Female = true, SkinTone = 0.12f, Hair = C(0.62f, 0.55f, 0.43f), Height = 0.95f, // directora: traje oscuro
+                Colors = { ["Body:Purple"] = C(0.2f, 0.37f, 0.27f), ["Legs:LightBlue"] = C(0.24f, 0.34f, 0.52f),
+                           ["Feet:White"] = C(0.93f, 0.93f, 0.92f), ["Feet:Purple"] = C(0.2f, 0.37f, 0.27f) },
+                Fabrics = { ["Legs:LightBlue"] = Fabric.Denim, ["Feet:White"] = Fabric.Cotton, ["Feet:Purple"] = Fabric.Cotton } },
+            new() { Id = "valeria", Female = true, SkinTone = 0.12f, Hair = C(0.62f, 0.55f, 0.43f), Height = 0.95f, // directora: traje gris carbón, blusa vino
                 Head = W("Suit", "Head"), Body = W("Suit", "Body"), Legs = W("Suit", "Legs"), Feet = W("Suit", "Feet"),
-                Colors = { ["Black"] = C(0.13f, 0.13f, 0.15f), ["White"] = C(0.85f, 0.85f, 0.86f) } },
-            new() { Id = "ines", Female = true, SkinTone = 0.85f, Hair = C(0.05f, 0.04f, 0.04f), Height = 0.95f, Badge = true, // guardia nocturna: saco azul marino
+                Colors = { ["Body:Black"] = C(0.27f, 0.27f, 0.3f), ["Body:White"] = C(0.5f, 0.1f, 0.17f), ["Legs:Black"] = C(0.22f, 0.22f, 0.25f),
+                           ["Feet:Black"] = C(0.07f, 0.06f, 0.06f) },
+                Fabrics = { ["Body:Black"] = Fabric.Wool, ["Legs:Black"] = Fabric.Wool } },
+            new() { Id = "ines", Female = true, SkinTone = 0.85f, Hair = C(0.05f, 0.04f, 0.04f), Height = 0.95f, Badge = true, // vigilante: saco azul marino, camisa celeste
                 Head = W("Soldier", "Head"), Body = W("Suit", "Body"), Legs = W("Suit", "Legs"), Feet = W("Suit", "Feet"),
-                Colors = { ["Black"] = C(0.11f, 0.15f, 0.27f), ["White"] = C(0.72f, 0.78f, 0.86f) } },
-            new() { Id = "elena", Female = true, SkinTone = 0.5f, Hair = C(0.07f, 0.05f, 0.05f), Height = 0.94f,  // periodista: camiseta oliva, jean, botines
-                Head = W("Casual", "Head"), Body = W("Casual", "Body"), Legs = W("Casual", "Legs"), Feet = W("Adventurer", "Feet"),
-                Colors = { ["White"] = C(0.38f, 0.36f, 0.22f), ["Orange"] = C(0.2f, 0.27f, 0.42f), ["Brown_02"] = C(0.3f, 0.2f, 0.12f), ["Brown2"] = C(0.22f, 0.15f, 0.09f) } },
+                Colors = { ["Body:Black"] = C(0.13f, 0.17f, 0.29f), ["Body:White"] = C(0.68f, 0.77f, 0.87f), ["Legs:Black"] = C(0.1f, 0.12f, 0.2f),
+                           ["Feet:Black"] = C(0.07f, 0.06f, 0.06f) },
+                Fabrics = { ["Body:Black"] = Fabric.Wool, ["Legs:Black"] = Fabric.Wool } },
+            new() { Id = "elena", Female = true, SkinTone = 0.5f, Hair = C(0.07f, 0.05f, 0.05f), Height = 0.94f,  // periodista: chaqueta de mezclilla, camiseta oliva, jean oscuro, botines
+                Head = W("Casual", "Head"), Body = W("Suit", "Body"), Legs = W("Casual", "Legs"), Feet = W("Adventurer", "Feet"),
+                Colors = { ["Body:Black"] = C(0.31f, 0.44f, 0.62f), ["Body:White"] = C(0.45f, 0.44f, 0.27f), ["Legs:Orange"] = C(0.14f, 0.18f, 0.3f),
+                           ["Brown_02"] = C(0.33f, 0.21f, 0.12f), ["Brown2"] = C(0.2f, 0.13f, 0.08f) },
+                Fabrics = { ["Body:Black"] = Fabric.Denim, ["Legs:Orange"] = Fabric.Denim } },
         };
 
         static Color C(float r, float g, float b) => new(r, g, b);
@@ -103,6 +121,7 @@ namespace Caso404.EditorTools
             ConfigureImporters();
             EnsureFolder(AnimFolder); EnsureFolder(MatFolder); EnsureFolder(PrefabFolder);
             CleanOldArt();
+            ClothingFabrics.Reset();
             var controller = BuildAnimations();
             foreach (var look in Looks) BuildPrefab(look, controller);
             AssetDatabase.SaveAssets();
@@ -321,7 +340,9 @@ namespace Caso404.EditorTools
             foreach (var smr in root.GetComponentsInChildren<SkinnedMeshRenderer>())
             {
                 smr.updateWhenOffscreen = false;
-                smr.sharedMaterials = smr.sharedMaterials.Select(m => MaterialFor(look, m)).ToArray();
+                string part = PartOf(smr.name);
+                smr.sharedMesh = ClothingFabrics.WithUVs(smr.sharedMesh); // UV para que se vea la tela
+                smr.sharedMaterials = smr.sharedMaterials.Select(m => MaterialFor(look, m, part)).ToArray();
             }
 
             var animator = root.GetComponent<Animator>();
@@ -358,21 +379,39 @@ namespace Caso404.EditorTools
             Object.DestroyImmediate(src);
         }
 
-        /// <summary>Material propio del personaje para cada material del paquete (piel, pelo, ropa), con su color.</summary>
-        static Material MaterialFor(Look look, Material original)
+        /// <summary>Pieza de una malla del paquete: "Suit_Legs" → "Legs" (el pantalón del granjero se llama "Pants").</summary>
+        static string PartOf(string meshName)
+        {
+            string part = meshName.Substring(meshName.LastIndexOf('_') + 1);
+            return part == "Pants" ? "Legs" : part;
+        }
+
+        /// <summary>
+        /// Material propio del personaje para cada material del paquete (piel, pelo, ropa), con su color y su tela.
+        /// Primero busca la clave "Pieza:Material" y luego "Material". La cabeza, la piel y el pelo no llevan tela.
+        /// </summary>
+        static Material MaterialFor(Look look, Material original, string part)
         {
             string name = original != null ? original.name : "Ropa";
             var baseColor = original != null && original.HasProperty("_BaseColor") ? original.GetColor("_BaseColor")
                           : original != null ? original.color : Color.gray;
             float smooth = 0.18f;
+            string key = $"{part}:{name}";
             Color color;
-            if (look.Colors.TryGetValue(name, out var custom)) color = custom;
+            if (look.Colors.TryGetValue(key, out var custom) || look.Colors.TryGetValue(name, out custom)) color = custom;
             else if (name.StartsWith("Skin")) { color = Color.Lerp(SkinLight, SkinDark, look.SkinTone) * (name == "Skin_Darker" ? 0.9f : 1f); smooth = 0.32f; }
             else if (HairMats.Contains(name)) { color = look.Hair; smooth = 0.35f; }
-            else if (name is "Eye" or "Brown") { color = C(0.12f, 0.08f, 0.06f); smooth = 0.6f; }
+            else if (name is "Eye" or "Brown" && part == "Head") { color = C(0.12f, 0.08f, 0.06f); smooth = 0.6f; }
             else color = baseColor;
+            var fabric = Fabric.None;
+            bool clothing = part != "Head" && !name.StartsWith("Skin") && !HairMats.Contains(name);
+            if (clothing)
+                fabric = look.Fabrics.TryGetValue(key, out var f) || look.Fabrics.TryGetValue(name, out f) ? f
+                       : part == "Feet" ? Fabric.Leather : Fabric.Cotton;
             color.a = 1f;
-            return Lit($"M_chr_{look.Id}_{name}", color, smooth);
+            var mat = Lit($"M_chr_{look.Id}_{part}_{name}", color, smooth);
+            ClothingFabrics.Apply(mat, fabric);
+            return mat;
         }
 
         /// <summary>Gorra de trabajo: casquete y visera sobre la cabeza (en la pose original del modelo, que mira a +Z).</summary>
