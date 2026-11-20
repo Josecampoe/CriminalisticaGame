@@ -38,6 +38,16 @@ namespace Caso404.UI
             UIFactory.Stretch(bg.rectTransform);
 
             _page1 = UIFactory.Stretch(UIFactory.Rect("Page1", rt));
+            // Resplandor rojo muy tenue detrás del título: el fondo negro plano se veía vacío.
+            if (_theme.GlowSprite != null)
+            {
+                var glow = UIFactory.Panel(_page1, "Resplandor", UITheme.WithAlpha(_theme.AccentRed, 0.12f));
+                glow.sprite = _theme.GlowSprite;
+                glow.raycastTarget = false;
+                glow.transform.SetAsFirstSibling(); // solo en la página del final, no en "Tres meses después"
+                UIFactory.Place(glow.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 180), new Vector2(1800, 900));
+            }
+
             if (_theme.VignetteSprite != null)
             {
                 var vignette = UIFactory.Panel(rt, "Vineta", new Color(0f, 0f, 0f, 0.9f));
