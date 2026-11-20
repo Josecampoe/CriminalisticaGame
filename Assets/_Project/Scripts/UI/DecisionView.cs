@@ -86,23 +86,9 @@ namespace Caso404.UI
                 t.alignment = TextAlignmentOptions.MidlineLeft;
                 t.fontStyle = FontStyles.Normal;
                 t.rectTransform.offsetMin = new Vector2(36, 6);
-                t.rectTransform.offsetMax = new Vector2(-70, -6);
                 b.interactable = available;
-                // Barra de acento a la izquierda (cian si ALEX la recomienda) y flecha a la derecha: se lee como una
-                // opción que se puede elegir, no como una caja gris.
-                var accent = opt == recommended ? _theme.AlexCyan : _theme.WarningAmber;
-                var bar = UIFactory.Panel(b.transform, "Acento", UITheme.WithAlpha(accent, available ? 0.9f : 0.3f));
-                bar.rectTransform.anchorMin = new Vector2(0, 0);
-                bar.rectTransform.anchorMax = new Vector2(0, 1);
-                bar.rectTransform.pivot = new Vector2(0, 0.5f);
-                bar.rectTransform.offsetMin = new Vector2(0, 14);
-                bar.rectTransform.offsetMax = new Vector2(4, -14);
-                bar.raycastTarget = false;
-                UIFactory.Ignore(bar.gameObject);
-                var arrow = UIFactory.Text(b.transform, "Flecha", "›", _theme.BodyFont, 44, UITheme.WithAlpha(_theme.TextLight, available ? 0.55f : 0.2f), TextAlignmentOptions.Center);
-                UIFactory.Place(arrow.rectTransform, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-24, 4), new Vector2(40, 60));
-                arrow.raycastTarget = false;
-                UIFactory.Ignore(arrow.gameObject);
+                // Barra de acento (cian si ALEX la recomienda) y flecha: se lee como opción elegible, no como caja gris.
+                UIFactory.ChoiceAccent(b, _theme, opt == recommended ? _theme.AlexCyan : _theme.WarningAmber, available);
             }
             _options.gameObject.SetActive(true);
             _confirm.gameObject.SetActive(false);

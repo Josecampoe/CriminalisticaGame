@@ -295,6 +295,28 @@ namespace Caso404.UI
             return b;
         }
 
+        /// <summary>
+        /// Convierte un botón ancho en una opción elegible: barra de acento a la izquierda y flecha "›" a la derecha.
+        /// Sin ellas, una lista de botones grises translúcidos parece deshabilitada. Se usa en decisiones y en "Presentar".
+        /// </summary>
+        public static void ChoiceAccent(Button button, UITheme theme, Color accent, bool enabled = true)
+        {
+            var label = button.GetComponentInChildren<TextMeshProUGUI>();
+            if (label != null) label.rectTransform.offsetMax = new Vector2(-70, label.rectTransform.offsetMax.y);
+            var bar = Panel(button.transform, "Acento", UITheme.WithAlpha(accent, enabled ? 0.9f : 0.3f));
+            bar.rectTransform.anchorMin = new Vector2(0, 0);
+            bar.rectTransform.anchorMax = new Vector2(0, 1);
+            bar.rectTransform.pivot = new Vector2(0, 0.5f);
+            bar.rectTransform.offsetMin = new Vector2(0, 12);
+            bar.rectTransform.offsetMax = new Vector2(4, -12);
+            bar.raycastTarget = false;
+            Ignore(bar.gameObject);
+            var arrow = Text(button.transform, "Flecha", "›", theme.BodyFont, 44, UITheme.WithAlpha(theme.TextLight, enabled ? 0.55f : 0.2f), TextAlignmentOptions.Center);
+            Place(arrow.rectTransform, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-24, 4), new Vector2(40, 60));
+            arrow.raycastTarget = false;
+            Ignore(arrow.gameObject);
+        }
+
         /// <summary>Cambia el texto de un botón creado con <see cref="Button"/>.</summary>
         public static void SetLabel(Button button, string label)
         {
