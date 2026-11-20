@@ -43,7 +43,7 @@ namespace Caso404.UI
             var close = UIFactory.Ghost(rt, "Cerrar   Esc", _theme, _theme.Muted, Close, 48);
             UIFactory.Place((RectTransform)close.transform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-60, -40), new Vector2(200, 48));
 
-            var board = UIFactory.AsPaper(UIFactory.Panel(rt, "Board", _theme.Paper), _theme);
+            var board = UIFactory.AsPaper(UIFactory.Panel(rt, "Board", _theme.Paper), _theme, wide: true);
             UIFactory.Region(board.rectTransform, new Vector2(0.06f, 0.15f), new Vector2(0.94f, 0.86f));
             _content = UIFactory.ScrollList(board.transform, "Questions", 12, 44);
             UIFactory.Stretch((RectTransform)_content.parent.parent);
@@ -109,7 +109,9 @@ namespace Caso404.UI
             var row = UIFactory.Rect($"Row_{q.Id}", _content);
             UIFactory.HLayout(row.gameObject, 16, 0, false);
             UIFactory.Layout(row.gameObject, preferredHeight: 50);
-            var answer = UIFactory.Button(row, svc.IsAnswered(q) ? "Actualizar respuesta" : "Responder", _theme, _theme.Ink, _theme.Paper, () => Submit(q), 48);
+            // Sin selección el botón dice qué falta, en vez de verse gris sin explicación.
+            string answerLabel = selected.Count == 0 ? "Elige una opción" : svc.IsAnswered(q) ? "Actualizar respuesta" : "Responder";
+            var answer = UIFactory.Button(row, answerLabel, _theme, _theme.Ink, _theme.Paper, () => Submit(q), 48);
             UIFactory.Layout(answer.gameObject, minHeight: 48, preferredHeight: 48, preferredWidth: 260);
             answer.interactable = selected.Count > 0;
             var state = UIFactory.Text(row, "State", svc.IsAnswered(q) ? "RESPUESTA REGISTRADA" : "", _theme.MonoFont, _theme.SizeS, Color.Lerp(_theme.AlexCyan, Color.black, 0.5f), TextAlignmentOptions.MidlineLeft);

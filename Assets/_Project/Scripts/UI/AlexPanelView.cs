@@ -73,7 +73,8 @@ namespace Caso404.UI
 
             // Historial de la conversación con ALEX.
             var logBox = UIFactory.Round(UIFactory.Panel(content, "Conversacion", UITheme.WithAlpha(_theme.AlexCyan, 0.05f)), _theme);
-            UIFactory.Layout(logBox.gameObject, flexibleHeight: 1.3f, minHeight: 220);
+            // Menos alto que las observaciones: las tarjetas con Aceptar/Cuestionar son la acción principal del panel.
+            UIFactory.Layout(logBox.gameObject, flexibleHeight: 0.8f, minHeight: 180);
             UIFactory.Frame(logBox.transform, _theme, UITheme.WithAlpha(_theme.AlexCyan, 0.18f));
             var logHolder = UIFactory.Rect("Lista", logBox.transform);
             UIFactory.Stretch(logHolder, 6, 6, 6, 6);
@@ -108,7 +109,7 @@ namespace Caso404.UI
 
             _claimsTitle = UIFactory.Kicker(content, "Observaciones de ALEX", _theme, UITheme.WithAlpha(_theme.TextLight, 0.55f));
             var claimsHolder = UIFactory.Rect("Observaciones", content);
-            UIFactory.Layout(claimsHolder.gameObject, flexibleHeight: 1, minHeight: 180);
+            UIFactory.Layout(claimsHolder.gameObject, flexibleHeight: 1.4f, minHeight: 220);
             _claims = UIFactory.ScrollList(claimsHolder, "Tarjetas", 10, 0);
             UIFactory.Stretch((RectTransform)_claims.parent.parent);
 
@@ -321,7 +322,9 @@ namespace Caso404.UI
             bool refuted = alex.IsRefuted(claim);
             bool accepted = alex.IsAccepted(claim);
             var accent = refuted ? _theme.AccentRed : accepted ? _theme.AlexCyan : _theme.WarningAmber;
-            var card = UIFactory.Round(UIFactory.Panel(_claims, $"Tarjeta_{claim.Id}", UITheme.WithAlpha(accent, 0.08f)), _theme);
+            // Fondo oscuro neutro con un toque del acento: el ámbar translúcido sobre la pantalla cian se veía color barro.
+            var card = UIFactory.Round(UIFactory.Panel(_claims, $"Tarjeta_{claim.Id}", Color.Lerp(_theme.BgDark, accent, 0.07f)), _theme);
+            UIFactory.Frame(card.transform, _theme, UITheme.WithAlpha(accent, 0.3f));
             var v = UIFactory.VLayout(card.gameObject, 8, 0);
             v.padding = new RectOffset(22, 14, 14, 14);
             var bar = UIFactory.Panel(card.transform, "Acento", accent);

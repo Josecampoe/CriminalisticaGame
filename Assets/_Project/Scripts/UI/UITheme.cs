@@ -31,6 +31,8 @@ namespace Caso404.UI
         [SerializeField] private TMP_FontAsset _titleFont;
         [Tooltip("Textura de papel para la carta y las fichas del expediente.")]
         [SerializeField] private Sprite _paperSprite;
+        [Tooltip("Papel apaisado para tableros anchos (el papel vertical estirado convierte las fibras en rayas).")]
+        [SerializeField] private Sprite _paperWideSprite;
         [Tooltip("Fondo de pantalla con líneas de barrido para el panel de ALEX.")]
         [SerializeField] private Sprite _screenSprite;
         [Tooltip("Interfaz y diálogos (ideal: Inter o IBM Plex Sans)")]
@@ -84,6 +86,8 @@ namespace Caso404.UI
         public TMP_FontAsset BodyFont { get => _bodyFont != null ? _bodyFont : TMP_Settings.defaultFontAsset; internal set => _bodyFont = value; }
         /// <summary>Papel envejecido (puede ser null: entonces se usa el color plano).</summary>
         public Sprite PaperSprite { get => _paperSprite; internal set => _paperSprite = value; }
+        /// <summary>Papel apaisado para tableros anchos; si falta, se usa el vertical.</summary>
+        public Sprite PaperWideSprite { get => _paperWideSprite != null ? _paperWideSprite : _paperSprite; internal set => _paperWideSprite = value; }
         /// <summary>Pantalla con líneas de barrido (puede ser null).</summary>
         public Sprite ScreenSprite { get => _screenSprite; internal set => _screenSprite = value; }
         public TMP_FontAsset MonoFont { get => _monoFont != null ? _monoFont : BodyFont; internal set => _monoFont = value; }

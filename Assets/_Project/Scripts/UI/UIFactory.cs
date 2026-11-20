@@ -159,11 +159,12 @@ namespace Caso404.UI
         }
 
         /// <summary>Convierte un panel en una hoja de papel: textura envejecida y sombra (parece un objeto sobre la mesa).</summary>
-        public static Image AsPaper(Image img, UITheme theme)
+        public static Image AsPaper(Image img, UITheme theme, bool wide = false)
         {
-            if (theme.PaperSprite != null)
+            var sprite = wide ? theme.PaperWideSprite : theme.PaperSprite;
+            if (sprite != null)
             {
-                img.sprite = theme.PaperSprite;
+                img.sprite = sprite;
                 // Sliced sin bordes se dibuja igual que Simple, pero no impone el tamaño de la textura como altura
                 // mínima: así las hojas que se ajustan a su texto (intros, pausa) no quedan con espacio vacío.
                 img.type = Image.Type.Sliced;
