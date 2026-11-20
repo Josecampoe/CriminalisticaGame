@@ -46,7 +46,6 @@ namespace Caso404.EditorTools
             theme.FrameSprite = UiSprite("ui_marco", 64, 64, (x, y, w, h) => RoundPixel(x, y, w, h, true), 20);
             theme.GradientSprite = UiSprite("ui_degradado", 8, 256, GradientPixel);
             theme.VignetteSprite = UiSprite("ui_vineta", 256, 256, VignettePixel);
-            theme.GlowSprite = UiSprite("ui_resplandor", 256, 256, GlowPixel);
             theme.CheckSprite = UiSprite("ui_check", 64, 64, CheckPixel);
             EditorUtility.SetDirty(theme);
 
@@ -148,14 +147,6 @@ namespace Caso404.EditorTools
             float u = x / (float)(w - 1) * 2f - 1f, v = y / (float)(h - 1) * 2f - 1f;
             float d = Mathf.Clamp01((Mathf.Sqrt(u * u + v * v) - 0.45f) / 0.95f);
             return new Color(1f, 1f, 1f, d * d);
-        }
-
-        /// <summary>Resplandor: blanco opaco en el centro que se desvanece suave hasta el borde (curva cuadrática).</summary>
-        static Color GlowPixel(int x, int y, int w, int h)
-        {
-            float u = x / (float)(w - 1) * 2f - 1f, v = y / (float)(h - 1) * 2f - 1f;
-            float a = Mathf.Clamp01(1f - Mathf.Sqrt(u * u + v * v));
-            return new Color(1f, 1f, 1f, a * a);
         }
 
         /// <summary>Marca de verificación blanca, trazo de 7 px.</summary>
