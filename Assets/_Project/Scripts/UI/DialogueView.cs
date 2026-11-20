@@ -240,6 +240,7 @@ namespace Caso404.UI
                 var t = b.GetComponentInChildren<TextMeshProUGUI>();
                 t.alignment = TextAlignmentOptions.MidlineLeft;
                 t.rectTransform.offsetMin = new Vector2(24, 4);
+                UIFactory.ChoiceAccent(b, _theme, color);
             }
             _chooser.gameObject.SetActive(true);
         }
