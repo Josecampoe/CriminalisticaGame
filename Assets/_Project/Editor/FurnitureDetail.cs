@@ -56,6 +56,7 @@ namespace Caso404.EditorTools
                 else if (n == "Barra") Bar(r);
                 else if (n.StartsWith("Cuerpo cubierto")) CoveredBody(r);
                 else if (n == "Cinta policial") TapePosts(r);
+                else if (n.StartsWith("Pizarra")) Whiteboard(r);
                 else if (IsDesk(n)) Desk(r);
                 else if (IsTable(n)) Table(r);
                 else if (n == "Sofá base") SofaBase(r);
@@ -226,6 +227,61 @@ namespace Caso404.EditorTools
                 var end = along * k * (length / 2f);
                 Cyl(t, "Base del poste", end + Vector3.up * (floor + 0.02f), 0.3f, 0.04f, dark);
                 Cyl(t, "Poste de la cinta", end + Vector3.up * (floor + (-floor + 0.05f) / 2f), 0.05f, -floor + 0.05f, orange);
+            }
+            _count++;
+        }
+
+        /// <summary>
+        /// Pizarra de oficina: marco de aluminio, bandeja para marcadores y un diagrama de trazos (dos recuadros azules
+        /// unidos por una flecha roja, título subrayado y renglones de "texto"). Solo decoración: no agrega pistas.
+        /// </summary>
+        static void Whiteboard(MeshRenderer box)
+        {
+            var t = box.transform;
+            var s = Size(t);
+            bool thinX = s.x < s.z;
+            float depth = thinX ? s.x : s.z, width = thinX ? s.z : s.x, height = s.y;
+            if (depth > 0.1f || width < 0.8f) return;
+            var wallDir = NearestWallDirection(box.bounds.center, depth + 0.02f);
+            var local = t.InverseTransformDirection(-wallDir);
+            var front = thinX ? new Vector3(Mathf.Sign(local.x), 0, 0) : new Vector3(0, 0, Mathf.Sign(local.z));
+            var along = thinX ? Vector3.forward : Vector3.right;
+            var metal = SceneKit.Mat("metal");
+            var black = SceneKit.Mat("marcador_negro", new Color(0.08f, 0.08f, 0.09f), 0.3f);
+            var blue = SceneKit.Mat("marcador_azul", new Color(0.12f, 0.28f, 0.7f), 0.3f);
+            var red = SceneKit.Mat("marcador_rojo", new Color(0.72f, 0.1f, 0.08f), 0.3f);
+            var face = front * (depth / 2f + 0.002f);
+
+            // Marco y bandeja.
+            foreach (float k in new[] { -1f, 1f })
+            {
+                Part(t, "Marco de la pizarra", front * 0.005f + Vector3.up * k * (height / 2f + 0.015f), Thin(front, depth + 0.02f, 0.03f, width + 0.06f), metal, false);
+                Part(t, "Marco de la pizarra", front * 0.005f + along * k * (width / 2f + 0.015f), Thin(front, depth + 0.02f, height + 0.06f, 0.03f), metal, false);
+            }
+            Part(t, "Bandeja de marcadores", front * (depth / 2f + 0.03f) + Vector3.up * (-height / 2f - 0.03f), Thin(front, 0.06f, 0.015f, width * 0.6f), metal, false);
+
+            void Stroke(float y, float x, float h, float len, Material mat) =>
+                Part(t, "Trazo", face + Vector3.up * y + along * x, Thin(front, 0.003f, h, len), mat, false);
+            void Frame(float y, float x, float w, float h, Material mat)
+            {
+                Stroke(y + h / 2f, x, 0.012f, w, mat);
+                Stroke(y - h / 2f, x, 0.012f, w, mat);
+                Stroke(y, x - w / 2f, h, 0.012f, mat);
+                Stroke(y, x + w / 2f, h, 0.012f, mat);
+            }
+            float W = width / 1.8f, H = height; // escala del diagrama respecto a una pizarra de 1.8 x 1 m
+            Stroke(0.38f * H, -0.35f * W, 0.012f, 0.7f * W, black);             // título subrayado
+            Stroke(0.42f * H, -0.42f * W, 0.03f, 0.5f * W, black);
+            Frame(0.14f * H, -0.48f * W, 0.42f * W, 0.22f * H, blue);           // recuadro izquierdo
+            Frame(0.14f * H, 0.42f * W, 0.42f * W, 0.22f * H, blue);            // recuadro derecho
+            Stroke(0.14f * H, -0.03f * W, 0.014f, 0.48f * W, red);              // flecha entre recuadros
+            Stroke(0.165f * H, 0.17f * W, 0.04f * H, 0.014f, red);
+            Stroke(0.115f * H, 0.17f * W, 0.04f * H, 0.014f, red);
+            float[] lens = { 0.36f, 0.28f, 0.32f, 0.22f };
+            for (int i = 0; i < 4; i++)                                         // renglones de "texto"
+            {
+                Stroke((-0.08f - i * 0.075f) * H, (-0.48f - (0.36f - lens[i]) / 2f) * W, 0.01f, lens[i] * W, black);
+                Stroke((-0.08f - i * 0.075f) * H, (0.42f - (0.36f - lens[3 - i]) / 2f) * W, 0.01f, lens[3 - i] * W, black);
             }
             _count++;
         }
