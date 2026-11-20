@@ -350,14 +350,14 @@ namespace Caso404.EditorTools
             {
                 Ambience.Overcast => new Color(0.33f, 0.34f, 0.36f),
                 Ambience.Fluorescent => new Color(0.19f, 0.21f, 0.21f),
-                _ => new Color(0.1f, 0.11f, 0.15f),
+                _ => new Color(0.14f, 0.15f, 0.19f), // antes 0.1: interrogatorio y oficinas quedaban en negro
             };
         }
 
         /// <summary>Luces puntuales de los cuartos (las del builder, en la raíz de la escena; no las de la ciudad).</summary>
         static List<Light> RoomLights() =>
             Object.FindObjectsByType<Light>(FindObjectsInactive.Exclude, FindObjectsSortMode.None)
-                .Where(l => l.type == LightType.Point && l.transform.parent == null)
+                .Where(l => (l.type == LightType.Point || l.type == LightType.Spot) && l.transform.parent == null)
                 .OrderBy(l => l.name).ToList();
 
         static bool IsTube(Light l) => l.name.Contains("Fluorescente") || l.name.Contains("Parqueadero") || l.name.Contains("racks")
@@ -407,7 +407,17 @@ namespace Caso404.EditorTools
                     cone.transform.SetParent(lamp.transform, true);
                     var bulb = Part(group, "Bombillo", PrimitiveType.Sphere, new Vector3(p.x, bulbY - 0.01f, p.z), Vector3.one * 0.11f, bulbMat);
                     bulb.transform.SetParent(lamp.transform, true);
-                    l.transform.position = new Vector3(p.x, bulbY - 0.12f, p.z);
+                    // Foco hacia abajo, como una lámpara con pantalla: la luz puntual (sin sombra) también iluminaba el
+                    // techo y dejaba un óvalo blanco gigante sobre cada lámpara, que una pantalla opaca no permite.
+                    // El techo ya no rebota luz al cuarto: +35 % para compensar. Solo al convertirla (una luz que ya es
+                    // foco no se toca), así repetir el paso no la sigue subiendo.
+                    if (l.type == LightType.Point) l.intensity *= 1.35f;
+                    l.type = LightType.Spot;
+                    l.transform.SetPositionAndRotation(new Vector3(p.x, bulbY - 0.04f, p.z), Quaternion.Euler(90f, 0f, 0f));
+                    // Casi media esfera hacia abajo (170°, pleno hasta 150°): paredes, mesa y piso quedan como antes; solo
+                    // el techo deja de recibir luz directa. Con 130°/60° las paredes y los rincones quedaban negros.
+                    l.spotAngle = 170f;
+                    l.innerSpotAngle = 150f;
                 }
             }
         }
