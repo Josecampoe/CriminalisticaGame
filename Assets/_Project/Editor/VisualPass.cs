@@ -147,7 +147,7 @@ namespace Caso404.EditorTools
                 SceneKit.Set(atmosphere, "_volume", volume);
                 SceneKit.Set(atmosphere, "_nightProfile", Profile(Ambience.Night));
             }
-            int bevels = BevelBoxes.Apply(); // al final: también redondea la utilería y los muebles armados
+            int bevels = BevelBoxes.Apply(sceneName); // al final: también redondea la utilería y los muebles armados
             Debug.Log($"[Caso404] Paso visual en {sceneName}: {lights.Count} luces con lámpara visible, {boxes} cubos con UV en metros, {props} piezas de utilería, {furniture} muebles armados, {bevels} cubos con bordes redondeados.");
             // Modelo 3D de cada evidencia para el laboratorio (también lo usa la inspección).
             int models = EvidenceModels.CaptureOpenScene();
