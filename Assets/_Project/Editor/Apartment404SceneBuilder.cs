@@ -247,6 +247,13 @@ namespace Caso404.EditorTools
             var colilla = Pickup(root, "ev_c1_colilla", new Vector3(1.2f, 0.05f, 10.2f), new Vector3(0.25f, 0.12f, 0.25f));
             var butt = Cylinder("Colilla", colilla.transform, new Vector3(1.2f, 0.01f, 10.2f), new Vector3(0.012f, 0.025f, 0.012f), "paper");
             butt.transform.rotation = Quaternion.Euler(0, 30, 90);
+            // Filtro naranja en un extremo y punta quemada en el otro: sin ellos la colilla parecía un tubo blanco.
+            Mat("filtro", new Color(0.86f, 0.52f, 0.22f), 0.25f);
+            var axis = butt.transform.up;
+            var filter = Cylinder("Filtro", colilla.transform, butt.transform.position + axis * 0.016f, new Vector3(0.0125f, 0.0095f, 0.0125f), "filtro");
+            filter.transform.rotation = butt.transform.rotation;
+            var ash = Cylinder("Punta quemada", colilla.transform, butt.transform.position - axis * 0.0235f, new Vector3(0.0118f, 0.0025f, 0.0118f), "dark");
+            ash.transform.rotation = butt.transform.rotation;
 
             // 5. Sala: teléfono de Laura bajo el sofá
             var telefono = Pickup(root, "ev_c1_telefono", new Vector3(-4.9f, 0.05f, 4.1f), new Vector3(0.3f, 0.12f, 0.3f));
