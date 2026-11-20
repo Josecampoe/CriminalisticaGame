@@ -782,9 +782,14 @@ namespace Caso404.EditorTools
                 t.transform.position = signPos + Vector3.right * 0.02f;
                 t.transform.rotation = Quaternion.Euler(0f, -90f, 0f);
                 t.text = "VIGILANCIA";
-                t.fontSize = 2.2f;
+                // Una sola línea que se encoge para caber en la placa (con tamaño fijo se partía en "VIGILANC / A").
+                t.textWrappingMode = TextWrappingModes.NoWrap;
+                t.enableAutoSizing = true;
+                t.fontSizeMax = 2.2f;
+                t.fontSizeMin = 0.6f;
+                t.margin = new Vector4(0.08f, 0f, 0.08f, 0f);
                 t.fontStyle = FontStyles.Bold;
-                t.characterSpacing = 8f;
+                t.characterSpacing = 6f;
                 t.alignment = TextAlignmentOptions.Center;
                 t.color = new Color(0.95f, 0.8f, 0.2f);
                 t.rectTransform.sizeDelta = new Vector2(1.4f, 0.3f);
