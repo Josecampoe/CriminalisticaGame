@@ -22,8 +22,14 @@ namespace Caso404.EditorTools
 
         static readonly string[] SkipNameParts = { "Pared", "Piso", "Techo", "Muro", "Losa", "Columna", "Viga", "Escal", "Huella" };
 
-        /// <summary>Redondea los cubos de la escena abierta. Devuelve cuántos cambió.</summary>
-        public static int Apply()
+        const string MeshFolder = "Assets/_Project/Art/Meshes/Generadas";
+
+        /// <summary>
+        /// Redondea los cubos de la escena abierta. Devuelve cuántos cambió.
+        /// Las mallas se guardan en un archivo aparte por escena (<see cref="MeshFolder"/>) y no dentro de la escena:
+        /// dentro de la escena la hacían pesar más de 70 MB (GitHub rechaza archivos de más de 100 MB).
+        /// </summary>
+        public static int Apply(string sceneName)
         {
             var cube = Resources.GetBuiltinResource<Mesh>("Cube.fbx");
             var cache = new Dictionary<(Vector3Int size, int radius, bool meters), Mesh>();
@@ -55,7 +61,28 @@ namespace Caso404.EditorTools
                 mf.sharedMesh = bevel;
                 count++;
             }
+            Save(cache.Values, sceneName);
             return count;
+        }
+
+        /// <summary>
+        /// Guarda las mallas en Art/Meshes/Generadas/&lt;escena&gt;_bordes.asset. Se borra el archivo anterior solo después
+        /// de asignar las mallas nuevas (las viejas ya no las usa nadie), así el paso se puede repetir.
+        /// </summary>
+        static void Save(IEnumerable<Mesh> meshes, string scene)
+        {
+            // El nombre llega de VisualPass: los builders crean la escena sin guardarla y GetActiveScene().name está vacío.
+            if (string.IsNullOrEmpty(scene)) return;
+            SharedAssetsBuilder.EnsureFolder(MeshFolder);
+            var path = $"{MeshFolder}/{scene}_bordes.asset";
+            AssetDatabase.DeleteAsset(path);
+            Mesh container = null;
+            foreach (var mesh in meshes)
+            {
+                if (container == null) { AssetDatabase.CreateAsset(mesh, path); container = mesh; }
+                else AssetDatabase.AddObjectToAsset(mesh, container);
+            }
+            AssetDatabase.SaveAssets();
         }
 
         static bool Skip(GameObject go, Material mat)
@@ -131,7 +158,8 @@ namespace Caso404.EditorTools
             mesh.SetNormals(normals);
             mesh.SetUVs(0, uvs);
             mesh.SetTriangles(tris, 0);
-            mesh.RecalculateTangents();
+            // Tangentes solo con textura (mapa de normales); en los colores lisos sobran y pesan.
+            if (meters) mesh.RecalculateTangents();
             mesh.RecalculateBounds();
             Unwrapping.GenerateSecondaryUVSet(mesh); // UV2 para el horneado de luz
             return mesh;
@@ -141,7 +169,8 @@ namespace Caso404.EditorTools
         static float[] Coords(float half, float r)
         {
             if (half - r <= r * 0.5f) return new[] { -half, -half + r * 0.35f, 0f, half - r * 0.35f, half };
-            return new[] { -half, -half + r * 0.3f, -half + r * 0.65f, -half + r, half - r, half - r * 0.65f, half - r * 0.3f, half };
+            // Tres puntos por curva bastan para un radio de 3 cm como máximo (antes eran cuatro: 64 vértices por cara).
+            return new[] { -half, -half + r * 0.45f, -half + r, half - r, half - r * 0.45f, half };
         }
 
         /// <summary>UV en metros (igual que ProceduralMaterials.BoxMesh): la textura no se estira en piezas largas.</summary>
