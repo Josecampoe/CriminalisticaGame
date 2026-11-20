@@ -49,8 +49,6 @@ namespace Caso404.UI
         [SerializeField] private Sprite _gradientSprite;
         [Tooltip("Viñeta radial para oscurecer los bordes detrás de los paneles.")]
         [SerializeField] private Sprite _vignetteSprite;
-        [Tooltip("Resplandor radial (opaco en el centro, transparente afuera) para destacar el objeto inspeccionado.")]
-        [SerializeField] private Sprite _glowSprite;
         [Tooltip("Marca de verificación para casillas.")]
         [SerializeField] private Sprite _checkSprite;
 
@@ -98,8 +96,6 @@ namespace Caso404.UI
         public Sprite GradientSprite { get => _gradientSprite; internal set => _gradientSprite = value; }
         public Sprite VignetteSprite { get => _vignetteSprite; internal set => _vignetteSprite = value; }
         public Sprite CheckSprite { get => _checkSprite; internal set => _checkSprite = value; }
-        /// <summary>Resplandor radial suave (puede ser null).</summary>
-        public Sprite GlowSprite { get => _glowSprite; internal set => _glowSprite = value; }
 
         /// <summary>Color en hexadecimal para etiquetas de texto enriquecido (&lt;color=#...&gt;).</summary>
         public static string Hex(Color c) => "#" + ColorUtility.ToHtmlStringRGBA(c);

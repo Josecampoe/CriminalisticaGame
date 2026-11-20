@@ -369,7 +369,6 @@ namespace Caso404.UI
                 t.rectTransform.offsetMin = new Vector2(24, 4);
                 t.textWrappingMode = TextWrappingModes.Normal;
                 t.overflowMode = TextOverflowModes.Ellipsis;
-                UIFactory.ChoiceAccent(b, _theme, _theme.AccentRed); // rojo: refutar a ALEX
             }
             _chooser.gameObject.SetActive(true);
         }
