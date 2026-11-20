@@ -107,6 +107,9 @@ namespace Caso404.UI
                 var t = b.GetComponentInChildren<TextMeshProUGUI>();
                 t.fontStyle = FontStyles.Normal;
                 t.overflowMode = TextOverflowModes.Ellipsis;
+                t.alignment = TextAlignmentOptions.MidlineLeft;
+                t.rectTransform.offsetMin = new Vector2(96, 4);
+                Monogram(b.transform, s.DisplayName, chosen);
             }
 
             UIFactory.Clear(_proofs);
@@ -129,6 +132,28 @@ namespace Caso404.UI
             _status.text = $"<color={UITheme.Hex(UITheme.WithAlpha(_theme.TextLight, 0.55f))}>CULPABLE</color>  <color={Ok(suspect != null)}>{(suspect != null ? suspect.DisplayName : "sin elegir")}</color>" +
                            $"        <color={UITheme.Hex(UITheme.WithAlpha(_theme.TextLight, 0.55f))}>PRUEBAS</color>  <color={Ok(_selected.Count == need)}>{_selected.Count} de {need}</color>";
             _present.interactable = suspect != null && _selected.Count == need;
+        }
+
+        /// <summary>Círculo con las iniciales del sospechoso, como la foto de una ficha policial.</summary>
+        void Monogram(Transform card, string name, bool chosen)
+        {
+            var circle = UIFactory.Round(UIFactory.Panel(card, "Iniciales",
+                chosen ? UITheme.WithAlpha(_theme.TextLight, 0.18f) : UITheme.WithAlpha(_theme.Ink, 0.85f)), _theme, 2.3f);
+            UIFactory.Place(circle.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(22, 0), new Vector2(58, 58));
+            circle.raycastTarget = false;
+            UIFactory.Ignore(circle.gameObject);
+            var text = UIFactory.Text(circle.transform, "Texto", Initials(name), _theme.TitleFont, 24, chosen ? _theme.TextLight : _theme.Paper, TextAlignmentOptions.Center);
+            UIFactory.Stretch(text.rectTransform);
+            text.raycastTarget = false;
+        }
+
+        /// <summary>Iniciales del nombre y el apellido, sin tratamientos ("Don Hernán Gómez" → "HG").</summary>
+        static string Initials(string name)
+        {
+            var words = name.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Where(w => w != "Don" && w != "Doña" && char.IsLetter(w[0])).ToList();
+            if (words.Count == 0) return "?";
+            return words.Count == 1 ? words[0].Substring(0, 1).ToUpper() : $"{char.ToUpper(words[0][0])}{char.ToUpper(words[^1][0])}";
         }
 
         void ToggleProof(string id)

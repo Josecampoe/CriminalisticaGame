@@ -87,6 +87,8 @@ namespace Caso404.UI
                 t.fontStyle = FontStyles.Normal;
                 t.rectTransform.offsetMin = new Vector2(36, 6);
                 b.interactable = available;
+                // Barra de acento (cian si ALEX la recomienda) y flecha: se lee como opción elegible, no como caja gris.
+                UIFactory.ChoiceAccent(b, _theme, opt == recommended ? _theme.AlexCyan : _theme.WarningAmber, available);
             }
             _options.gameObject.SetActive(true);
             _confirm.gameObject.SetActive(false);
