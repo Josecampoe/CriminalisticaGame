@@ -147,7 +147,7 @@ namespace Caso404.EditorTools
                 SceneKit.Set(atmosphere, "_volume", volume);
                 SceneKit.Set(atmosphere, "_nightProfile", Profile(Ambience.Night));
             }
-            int bevels = BevelBoxes.Apply(sceneName); // al final: también redondea la utilería y los muebles armados
+            int bevels = BevelBoxes.Apply(); // al final: también redondea la utilería y los muebles armados
             Debug.Log($"[Caso404] Paso visual en {sceneName}: {lights.Count} luces con lámpara visible, {boxes} cubos con UV en metros, {props} piezas de utilería, {furniture} muebles armados, {bevels} cubos con bordes redondeados.");
             // Modelo 3D de cada evidencia para el laboratorio (también lo usa la inspección).
             int models = EvidenceModels.CaptureOpenScene();
@@ -281,27 +281,6 @@ namespace Caso404.EditorTools
             mud.SetOverrideTag("RenderType", "TransparentCutout");
             mud.renderQueue = (int)RenderQueue.AlphaTest;
             EditorUtility.SetDirty(mud);
-
-            // Solo la cara de arriba: en un cubo de 4 mm las caras laterales repiten la textura en una franja finísima
-            // y al girar la huella en la inspección se veían como una raya oscura que la cruzaba.
-            Mesh top = null;
-            foreach (var mf in Object.FindObjectsByType<MeshFilter>(FindObjectsInactive.Include, FindObjectsSortMode.None))
-            {
-                var r = mf.GetComponent<MeshRenderer>();
-                if (r == null || r.sharedMaterial != mud) continue;
-                if (top == null)
-                {
-                    top = new Mesh { name = "HuellaArriba" };
-                    top.SetVertices(new[] { new Vector3(-0.5f, 0.5f, -0.5f), new Vector3(-0.5f, 0.5f, 0.5f), new Vector3(0.5f, 0.5f, 0.5f), new Vector3(0.5f, 0.5f, -0.5f) });
-                    top.SetNormals(new[] { Vector3.up, Vector3.up, Vector3.up, Vector3.up });
-                    top.SetUVs(0, new[] { new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1), new Vector2(1, 0) });
-                    top.SetTriangles(new[] { 0, 1, 2, 0, 2, 3 }, 0);
-                    top.RecalculateTangents();
-                    top.RecalculateBounds();
-                    Unwrapping.GenerateSecondaryUVSet(top);
-                }
-                mf.sharedMesh = top;
-            }
         }
 
         static float Sq(float x) => x * x;
@@ -449,16 +428,8 @@ namespace Caso404.EditorTools
 
             foreach (var stand in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None).Where(r => r.name == "Lámpara de pie"))
             {
-                // Con el transform y no con los bounds: el poste original queda con el renderer apagado y así el paso se
-                // puede repetir. El poste cuadrado de 12 cm se cambia por un tubo delgado con base redonda.
-                var st = stand.transform;
-                float h = Mathf.Abs(st.lossyScale.y);
-                var top = st.position + Vector3.up * (h / 2f);
-                var floorPos = st.position - Vector3.up * (h / 2f);
-                stand.enabled = false;
-                var metal = SceneKit.Mat("metal");
-                Part(group, "Tubo de la lámpara de pie", PrimitiveType.Cylinder, st.position, new Vector3(0.03f, h / 2f, 0.03f), metal);
-                Part(group, "Base de la lámpara de pie", PrimitiveType.Cylinder, floorPos + Vector3.up * 0.015f, new Vector3(0.3f, 0.015f, 0.3f), metal);
+                var b = stand.bounds;
+                var top = new Vector3(b.center.x, b.max.y, b.center.z);
                 Part(group, "Pantalla de la lámpara de pie", PrimitiveType.Cylinder, top + Vector3.up * 0.12f, new Vector3(0.38f, 0.14f, 0.38f), shade);
                 Part(group, "Bombillo", PrimitiveType.Sphere, top + Vector3.up * 0.05f, Vector3.one * 0.08f, warm);
                 var l = new GameObject("Luz de la lámpara de pie").AddComponent<Light>();
