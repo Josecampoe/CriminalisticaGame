@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: VP_Dialogo
   m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.VolumeProfile
   components:
-  - {fileID: 1272217830633886766}
-  - {fileID: 9196655719071675092}
---- !u!114 &1272217830633886766
+  - {fileID: 1443000541045696635}
+  - {fileID: 9105747272945888588}
+--- !u!114 &1443000541045696635
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -61,7 +61,7 @@ MonoBehaviour:
   bladeRotation:
     m_OverrideState: 1
     m_Value: 0
---- !u!114 &9196655719071675092
+--- !u!114 &9105747272945888588
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
