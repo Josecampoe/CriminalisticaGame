@@ -66,12 +66,30 @@ namespace Caso404.UI
             _summary = UIFactory.Text(sumBg.transform, "Summary", "", _theme.BodyFont, _theme.SizeBody, _theme.TextLight);
             _summary.lineSpacing = 12f;
             UIFactory.Button(card, "Continuar", _theme, _theme.Paper, _theme.Ink, ShowClosing, 58);
+            Stamp(card);
 
             _page2 = UIFactory.Stretch(UIFactory.Rect("Page2", rt));
             _closing = UIFactory.Text(_page2, "Closing", "", _theme.TitleFont, _theme.SizeXL, _theme.TextLight, TextAlignmentOptions.Center);
             UIFactory.Stretch(_closing.rectTransform, 100, 200, 100, 200);
             var next = UIFactory.Ghost(_page2, "Continuar", _theme, _theme.TextLight, Finish, 56);
             UIFactory.Place((RectTransform)next.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 80), new Vector2(300, 56));
+        }
+
+        /// <summary>
+        /// Sello rojo inclinado "CASO CERRADO" en la esquina del informe, como el de un expediente archivado.
+        /// Va fuera del layout para no mover el resto de la tarjeta.
+        /// </summary>
+        void Stamp(RectTransform card)
+        {
+            var stamp = UIFactory.Rect("Sello", card);
+            UIFactory.Ignore(stamp.gameObject);
+            UIFactory.Place(stamp, new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-40, -20), new Vector2(300, 74));
+            stamp.localRotation = Quaternion.Euler(0f, 0f, -12f);
+            UIFactory.Frame(stamp, _theme, UITheme.WithAlpha(_theme.AccentRed, 0.85f));
+            var text = UIFactory.Text(stamp, "Texto", "CASO CERRADO", _theme.TitleFont, 34, UITheme.WithAlpha(_theme.AccentRed, 0.85f), TextAlignmentOptions.Center);
+            UIFactory.Stretch(text.rectTransform);
+            text.characterSpacing = 6f;
+            text.raycastTarget = false;
         }
 
         /// <summary>Muestra el final y llama a onFinished después de "Tres meses después...".</summary>

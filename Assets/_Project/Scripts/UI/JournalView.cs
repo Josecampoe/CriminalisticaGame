@@ -75,7 +75,8 @@ namespace Caso404.UI
             UIFactory.Kicker(head, "Laboratorio forense  ·  Unidad de Criminalística de Valdora", _theme, Blue);
             _header = UIFactory.Text(head, "Titulo", "", _theme.BodyFont, 38, Ink);
             _header.fontStyle = FontStyles.Bold;
-            var close = UIFactory.Button(rt, "Cerrar   Esc", _theme, _theme.LabPanel, Blue, Close, 48);
+            // Azul claro en vez de blanco: el blanco con el tinte de reposo del botón quedaba gris y parecía deshabilitado.
+            var close = UIFactory.Button(rt, "Cerrar   Esc", _theme, _theme.LabBlueLight, Blue, Close, 48);
             UIFactory.Frame(close.transform, _theme, UITheme.WithAlpha(Blue, 0.6f));
             UIFactory.Place((RectTransform)close.transform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-60, -40), new Vector2(200, 48));
 
@@ -163,10 +164,11 @@ namespace Caso404.UI
             UIFactory.Frame(viewer.transform, _theme, UITheme.WithAlpha(Blue, 0.25f));
             foreach (var corner in new[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(0, 1), new Vector2(1, 1) })
                 Corner(viewer.transform, corner);
-            var hint = UIFactory.Text(viewer.transform, "Ayuda", "Arrastra para girar", _theme.MonoFont, _theme.SizeS - 2, _theme.LabMuted, TextAlignmentOptions.BottomRight);
+            var hint = UIFactory.Text(viewer.transform, "Ayuda", "Arrastra para girar", _theme.MonoFont, _theme.SizeS - 2, _theme.LabMuted, TextAlignmentOptions.Bottom);
             hint.characterSpacing = 2f;
             hint.raycastTarget = false;
-            UIFactory.Place(hint.rectTransform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-56, 14), new Vector2(300, 22));
+            // Centrado abajo, entre las esquinas de mira (en la esquina derecha quedaba encima del trazo azul).
+            UIFactory.Place(hint.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 16), new Vector2(300, 22));
             var band = UIFactory.Panel(viewer.transform, "Escaner", UITheme.WithAlpha(Blue, 0.18f));
             band.raycastTarget = false;
             _scanBand = band.rectTransform;

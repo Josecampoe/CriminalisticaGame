@@ -29,6 +29,7 @@ MonoBehaviour:
   _labGreen: {r: 0.13725491, g: 0.5254902, b: 0.41568628, a: 1}
   _titleFont: {fileID: 11400000, guid: ebbee7f715086e94db3e908654f17894, type: 2}
   _paperSprite: {fileID: 21300000, guid: 5ff8f2c23d7787f4b80f04d67127c5a0, type: 3}
+  _paperWideSprite: {fileID: 21300000, guid: 0aa08678d3fd3554d8720e8defa5715f, type: 3}
   _screenSprite: {fileID: 21300000, guid: 6c1ac79d603f4b6448d1d41d21a3a54b, type: 3}
   _bodyFont: {fileID: 11400000, guid: ce7bbaf0edead67479ae2911fb09476d, type: 2}
   _monoFont: {fileID: 11400000, guid: 88ce0018d947e2f459ea4ee1ec349dcd, type: 2}
