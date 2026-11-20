@@ -37,7 +37,6 @@ MonoBehaviour:
   _frameSprite: {fileID: 21300000, guid: 7cda3d9f3f3408247af796722700ac10, type: 3}
   _gradientSprite: {fileID: 21300000, guid: 371518644cdbe7f46b0daa7c3d7fd626, type: 3}
   _vignetteSprite: {fileID: 21300000, guid: 6b65b84497b130045887bb39821e024c, type: 3}
-  _glowSprite: {fileID: 21300000, guid: 0c5eb02d5efc153418891f6697f19ed2, type: 3}
   _checkSprite: {fileID: 21300000, guid: f2356cb54a3269e4abbfb72a15bbf441, type: 3}
   _sizeXL: 48
   _sizeL: 32
