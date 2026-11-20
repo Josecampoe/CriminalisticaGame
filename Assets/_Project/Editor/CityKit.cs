@@ -489,17 +489,27 @@ namespace Caso404.EditorTools
                 list.Add(new CombineInstance { mesh = mesh, transform = m, subMeshIndex = subMesh });
             }
 
-            /// <summary>Agrega un carro del paquete (cada parte con su material: pintura, vidrio, llantas...).</summary>
+            /// <summary>
+            /// Agrega un carro del paquete como instancia del modelo (cada parte con su material: pintura, vidrio,
+            /// llantas...). No se fusiona: fusionado, cada carro copiaba sus vértices dentro de la escena (~45 MB en el
+            /// apartamento). Como instancia la escena solo guarda la referencia, y Unity los agrupa igual al compilar
+            /// el juego porque son estáticos (static batching).
+            /// </summary>
             public void Car(string model, Matrix4x4 m, Color paint)
             {
                 var src = AssetDatabase.LoadAssetAtPath<GameObject>(CarModels.PathOf(model));
                 if (src == null) return;
-                foreach (var mf in src.GetComponentsInChildren<MeshFilter>())
+                var car = (GameObject)PrefabUtility.InstantiatePrefab(src);
+                car.name = $"Carro ({model})";
+                car.transform.SetParent(_root, false);
+                car.transform.SetPositionAndRotation(m.GetPosition(), m.rotation);
+                car.transform.localScale = m.lossyScale; // igual que antes: la matriz reemplaza la transformación de la raíz
+                foreach (var r in car.GetComponentsInChildren<MeshRenderer>())
                 {
-                    var mats = CarModels.Remap(mf.GetComponent<MeshRenderer>(), model, paint);
-                    var local = m * src.transform.worldToLocalMatrix * mf.transform.localToWorldMatrix;
-                    for (int i = 0; i < mf.sharedMesh.subMeshCount && i < mats.Length; i++) Add(mats[i], mf.sharedMesh, local, i);
+                    r.sharedMaterials = CarModels.Remap(r, model, paint);
+                    r.shadowCastingMode = ShadowCastingMode.Off;
                 }
+                Static(car);
             }
 
             public void Box(Material mat, Vector3 pos, Vector3 size, Quaternion rot) => Add(mat, _cube ??= Prim(PrimitiveType.Cube), Matrix4x4.TRS(pos, rot, size));
