@@ -134,6 +134,7 @@ namespace Caso404.EditorTools
             Dust(root, lights, ambience);
             CharacterFill(ambience);
             int props = SceneDressing.Apply(root, sceneName, ambience);
+            int furniture = FurnitureDetail.Apply(root);
             ServerRacks(root);
             Windows(root, ambience);
             if (ambience == Ambience.Night) WetStreets();
@@ -146,7 +147,8 @@ namespace Caso404.EditorTools
                 SceneKit.Set(atmosphere, "_volume", volume);
                 SceneKit.Set(atmosphere, "_nightProfile", Profile(Ambience.Night));
             }
-            Debug.Log($"[Caso404] Paso visual en {sceneName}: {lights.Count} luces con lámpara visible, {boxes} cubos con UV en metros, {props} piezas de utilería.");
+            int bevels = BevelBoxes.Apply(); // al final: también redondea la utilería y los muebles armados
+            Debug.Log($"[Caso404] Paso visual en {sceneName}: {lights.Count} luces con lámpara visible, {boxes} cubos con UV en metros, {props} piezas de utilería, {furniture} muebles armados, {bevels} cubos con bordes redondeados.");
             // Modelo 3D de cada evidencia para el laboratorio (también lo usa la inspección).
             int models = EvidenceModels.CaptureOpenScene();
             Debug.Log($"[Caso404] {models} modelos de evidencia guardados para el laboratorio.");
@@ -358,11 +360,14 @@ namespace Caso404.EditorTools
                 var p = l.transform.position;
                 if (IsTube(l))
                 {
-                    var tubeMat = Emissive("emit_tubo", new Color(0.86f, 0.94f, 1f), 3.2f);
+                    // Emisión moderada: con 3.2 el tubo pasaba el umbral del bloom y "quemaba" el techo en una mancha blanca.
+                    var tubeMat = Emissive("emit_tubo", new Color(0.86f, 0.94f, 1f), 2.0f);
                     var t = Part(group, $"Fluorescente ({l.name})", PrimitiveType.Cube, new Vector3(p.x, ceiling - 0.05f, p.z), new Vector3(1.25f, 0.05f, 0.18f), housing);
                     var tube = Part(group, "Tubo", PrimitiveType.Cube, new Vector3(p.x, ceiling - 0.085f, p.z), new Vector3(1.18f, 0.03f, 0.1f), tubeMat);
                     tube.transform.SetParent(t.transform, true);
-                    l.transform.position = new Vector3(p.x, ceiling - 0.25f, p.z);
+                    // La luz baja a 50 cm del techo: a 25 cm el techo recibía ~4 veces más luz (cae con la distancia al
+                    // cuadrado) y se veía un óvalo blanco alrededor de cada tubo. El piso casi no cambia.
+                    l.transform.position = new Vector3(p.x, ceiling - 0.5f, p.z);
                     if (l.name.Contains("Parqueadero"))
                     {
                         // Los parqueaderos son grandes: más luz por tubo (valores fijos para poder repetir el paso).
@@ -475,7 +480,7 @@ namespace Caso404.EditorTools
             var group = new GameObject("Tubos del parqueadero").transform;
             group.SetParent(root, false);
             var housing = SceneKit.Mat("dark");
-            var tubeMat = Emissive("emit_tubo", new Color(0.86f, 0.94f, 1f), 3.2f);
+            var tubeMat = Emissive("emit_tubo", new Color(0.86f, 0.94f, 1f), 2.0f); // mismo material que Fixtures
             foreach (var f in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None).Where(r => r.name.StartsWith("Parqueadero") && r.name.EndsWith(" piso")))
             {
                 var b = f.bounds;
@@ -492,7 +497,7 @@ namespace Caso404.EditorTools
                         if (!withLight) continue;
                         var l = new GameObject("Luz del tubo").AddComponent<Light>();
                         l.transform.SetParent(t.transform, false);
-                        l.transform.position = p + Vector3.down * 0.3f;
+                        l.transform.position = p + Vector3.down * 0.5f;
                         l.type = LightType.Point;
                         l.color = new Color(0.85f, 0.92f, 1f);
                         l.intensity = 2.2f;
@@ -911,7 +916,7 @@ namespace Caso404.EditorTools
             tm.mode.Override(TonemappingMode.ACES);
 
             var bl = Add<Bloom>(profile);
-            bl.threshold.Override(0.95f);
+            bl.threshold.Override(1.1f); // solo brillan las fuentes de luz, no las paredes muy iluminadas
             bl.intensity.Override(bloom);
             bl.scatter.Override(0.7f);
             bl.highQualityFiltering.Override(false);
