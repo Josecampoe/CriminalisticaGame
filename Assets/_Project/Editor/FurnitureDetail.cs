@@ -52,11 +52,6 @@ namespace Caso404.EditorTools
             {
                 string n = r.name;
                 if (n.StartsWith("Silla")) Chair(r);
-                else if (n.StartsWith("Butaco")) Stool(r);
-                else if (n == "Barra") Bar(r);
-                else if (n.StartsWith("Cuerpo cubierto")) CoveredBody(r);
-                else if (n == "Cinta policial") TapePosts(r);
-                else if (n.StartsWith("Pizarra")) Whiteboard(r);
                 else if (IsDesk(n)) Desk(r);
                 else if (IsTable(n)) Table(r);
                 else if (n == "Sofá base") SofaBase(r);
@@ -69,7 +64,7 @@ namespace Caso404.EditorTools
             return _count;
         }
 
-        static bool IsFurniture(string n) => n.StartsWith("Silla") || n.StartsWith("Butaco") || n == "Barra" || n.StartsWith("Cuerpo cubierto") || IsDesk(n) || IsTable(n)
+        static bool IsFurniture(string n) => n.StartsWith("Silla") || IsDesk(n) || IsTable(n)
             || n is "Sofá base" or "Sofá de espera" or "Cama" or "Almohadas" or "Armario" or "Mueble del televisor"
                  or "Gabinetes altos" or "Encimera" or "Mesa de noche" or "Archivador" or "Caseta mostrador" or "Banco de trabajo";
 
@@ -108,198 +103,6 @@ namespace Caso404.EditorTools
                     Thin(back, 0.035f, postH, 0.035f), legMat);
             Part(t, "Espaldar", backPos + Vector3.up * (seatTop + postH - 0.11f), Thin(back, 0.025f, 0.18f, halfAlong * 2f - 0.02f), mat);
             _count++;
-        }
-
-        // ================= Café: taburetes y barra =================
-
-        /// <summary>
-        /// Taburete de bar: base redonda, tubo metálico, aro para los pies y plato bajo el asiento. El cojín de cuero lo
-        /// pone SceneDressing encima del cilindro original (a su misma altura), así que aquí solo va la estructura.
-        /// </summary>
-        static void Stool(MeshRenderer box)
-        {
-            var t = box.transform;
-            var s = Size(t);
-            float h = s.y * 2f, d = s.x; // el cilindro primitivo mide 2 de alto con escala 1
-            if (h < 0.5f || h > 0.9f) return;
-            var metal = SceneKit.Mat("metal");
-            var dark = SceneKit.Mat("dark");
-            Hide(box);
-            float bottom = -h / 2f, top = h / 2f;
-            Cyl(t, "Base", new Vector3(0, bottom + 0.012f, 0), d * 1.05f, 0.024f, dark);
-            Cyl(t, "Tubo", new Vector3(0, (bottom + top) / 2f, 0), 0.05f, h - 0.03f, metal);
-            Cyl(t, "Aro para los pies", new Vector3(0, bottom + h * 0.36f, 0), d * 0.85f, 0.018f, metal, false);
-            Cyl(t, "Plato", new Vector3(0, top - 0.02f, 0), d * 0.7f, 0.03f, dark);
-            _count++;
-        }
-
-        /// <summary>
-        /// Barra de bar: cuerpo de madera, cubierta oscura y brillante con vuelo hacia los clientes, listones verticales
-        /// al frente, zócalo negro y un tubo metálico para apoyar los pies. El frente es el lado de los taburetes.
-        /// </summary>
-        static void Bar(MeshRenderer box)
-        {
-            var t = box.transform;
-            var s = Size(t);
-            if (s.y < 0.8f || s.y > 1.3f) return;
-            var center = box.bounds.center;
-            // Frente: hacia el taburete más cercano; si no hay (cocina del apartamento), el lado contrario a la pared.
-            var stool = Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None)
-                // Posición del transform: un taburete ya armado tiene el renderer apagado y sus bounds no sirven.
-                .Where(r => r.name.StartsWith("Butaco") && (r.transform.position - center).sqrMagnitude < 9f)
-                .OrderBy(r => (r.transform.position - center).sqrMagnitude).FirstOrDefault();
-            var world = stool != null ? stool.transform.position - center : -NearestWallDirection(center, Mathf.Max(s.x, s.z) + 0.2f);
-            world.y = 0;
-            var local = t.InverseTransformDirection(world);
-            // El frente es perpendicular al lado largo.
-            var front = s.x >= s.z ? new Vector3(0, 0, Mathf.Sign(local.z)) : new Vector3(Mathf.Sign(local.x), 0, 0);
-            float length = s.x >= s.z ? s.x : s.z, depth = s.x >= s.z ? s.z : s.x;
-
-            var wood = box.sharedMaterial;
-            var top = SceneKit.Mat("cubierta_barra", new Color(0.09f, 0.075f, 0.065f), 0.8f);
-            var slat = SceneKit.Mat("madera_oscura", new Color(0.38f, 0.23f, 0.13f), 0.4f); // más clara que el cuerpo: los listones se notan en la penumbra
-            var dark = SceneKit.Mat("dark");
-            var metal = SceneKit.Mat("metal");
-            Hide(box);
-            float bottom = -s.y / 2f, topY = s.y / 2f;
-            var axis = new Vector3(front.z, 0, front.x); // a lo largo de la barra
-
-            // Cuerpo un poco hundido para que el zócalo y los listones tengan sombra propia.
-            Part(t, "Cuerpo de la barra", -front * 0.03f + Vector3.up * 0.04f, Along(axis, length, s.y - 0.13f, depth - 0.06f), wood);
-            Part(t, "Zócalo", front * (depth / 2f - 0.09f) + Vector3.up * (bottom + 0.05f), Along(axis, length - 0.02f, 0.1f, 0.06f), dark);
-            Part(t, "Cubierta", front * 0.06f + Vector3.up * (topY - 0.025f), Along(axis, length + 0.08f, 0.05f, depth + 0.14f), top);
-            int slats = Mathf.Max(2, Mathf.FloorToInt(length / 0.28f));
-            for (int i = 0; i < slats; i++)
-            {
-                float k = -length / 2f + (i + 0.5f) * length / slats;
-                Part(t, "Listón", front * (depth / 2f - 0.02f) + axis * k + Vector3.up * 0.04f, Along(axis, 0.07f, s.y - 0.25f, 0.025f), slat);
-            }
-            if (stool == null) { _count++; return; } // en la cocina no va tubo para los pies
-
-            // Tubo para los pies con soportes cada metro y medio.
-            var rail = Cyl(t, "Tubo para los pies", front * (depth / 2f + 0.16f) + Vector3.up * (bottom + 0.22f), 0.045f, length - 0.3f, metal);
-            rail.transform.rotation = t.rotation * Quaternion.FromToRotation(Vector3.up, axis);
-            int brackets = Mathf.Max(2, Mathf.CeilToInt(length / 1.5f));
-            for (int i = 0; i < brackets; i++)
-            {
-                float k = -length / 2f + 0.3f + i * (length - 0.6f) / (brackets - 1);
-                Part(t, "Soporte del tubo", front * (depth / 2f + 0.07f) + axis * k + Vector3.up * (bottom + 0.22f), Thin(front, 0.18f, 0.025f, 0.025f), metal, false);
-            }
-            _count++;
-        }
-
-        // ================= Escena del crimen =================
-
-        /// <summary>
-        /// Cuerpo bajo una sábana: tela que cae hasta el piso con el bulto de la cabeza, el torso y las piernas, en vez
-        /// de una caja blanca. La cabeza va hacia +z del bloque (el lado largo). El collider original se conserva.
-        /// </summary>
-        static void CoveredBody(MeshRenderer box)
-        {
-            var t = box.transform;
-            var s = Size(t);
-            if (s.z < 1.2f || s.y > 0.5f) return;
-            var sheet = SceneKit.Mat("sabana", new Color(0.8f, 0.81f, 0.8f), 0.12f);
-            Hide(box);
-            float floor = -s.y / 2f, len = s.z;
-            // Tela ceñida al cuerpo; los bultos son más anchos que altos para que se fundan con ella y no parezcan cojines.
-            Part(t, "Sábana (borde)", new Vector3(0, floor + 0.01f, 0), new Vector3(s.x + 0.06f, 0.02f, len + 0.08f), sheet);
-            Prim(PrimitiveType.Capsule, t, "Sábana (piernas)", new Vector3(0, floor + 0.06f, -len * 0.2f), new Vector3(0.5f, len * 0.25f, 0.14f), sheet, 90f);
-            Prim(PrimitiveType.Capsule, t, "Sábana (torso)", new Vector3(0, floor + 0.08f, len * 0.14f), new Vector3(0.58f, len * 0.17f, 0.2f), sheet, 90f);
-            Prim(PrimitiveType.Sphere, t, "Sábana (cabeza)", new Vector3(0, floor + 0.08f, len * 0.41f), new Vector3(0.26f, 0.16f, 0.28f), sheet);
-            foreach (float k in new[] { -1f, 1f })
-                Prim(PrimitiveType.Sphere, t, "Sábana (pie)", new Vector3(k * 0.1f, floor + 0.08f, -len * 0.46f), new Vector3(0.13f, 0.16f, 0.12f), sheet);
-            _count++;
-        }
-
-        /// <summary>Postes de cono vial en los extremos de la cinta policial, que antes flotaba en el aire.</summary>
-        static void TapePosts(MeshRenderer tape)
-        {
-            var t = tape.transform;
-            var s = Size(t);
-            float length = Mathf.Max(s.x, s.z);
-            var along = s.x >= s.z ? Vector3.right : Vector3.forward;
-            var orange = SceneKit.Mat("cono", new Color(0.95f, 0.38f, 0.08f), 0.4f);
-            var dark = SceneKit.Mat("dark");
-            float floor = -t.position.y;
-            foreach (float k in new[] { -1f, 1f })
-            {
-                var end = along * k * (length / 2f);
-                Cyl(t, "Base del poste", end + Vector3.up * (floor + 0.02f), 0.3f, 0.04f, dark);
-                Cyl(t, "Poste de la cinta", end + Vector3.up * (floor + (-floor + 0.05f) / 2f), 0.05f, -floor + 0.05f, orange);
-            }
-            _count++;
-        }
-
-        /// <summary>
-        /// Pizarra de oficina: marco de aluminio, bandeja para marcadores y un diagrama de trazos (dos recuadros azules
-        /// unidos por una flecha roja, título subrayado y renglones de "texto"). Solo decoración: no agrega pistas.
-        /// </summary>
-        static void Whiteboard(MeshRenderer box)
-        {
-            var t = box.transform;
-            var s = Size(t);
-            bool thinX = s.x < s.z;
-            float depth = thinX ? s.x : s.z, width = thinX ? s.z : s.x, height = s.y;
-            if (depth > 0.1f || width < 0.8f) return;
-            var wallDir = NearestWallDirection(box.bounds.center, depth + 0.02f);
-            var local = t.InverseTransformDirection(-wallDir);
-            var front = thinX ? new Vector3(Mathf.Sign(local.x), 0, 0) : new Vector3(0, 0, Mathf.Sign(local.z));
-            var along = thinX ? Vector3.forward : Vector3.right;
-            var metal = SceneKit.Mat("metal");
-            var black = SceneKit.Mat("marcador_negro", new Color(0.08f, 0.08f, 0.09f), 0.3f);
-            var blue = SceneKit.Mat("marcador_azul", new Color(0.12f, 0.28f, 0.7f), 0.3f);
-            var red = SceneKit.Mat("marcador_rojo", new Color(0.72f, 0.1f, 0.08f), 0.3f);
-            var face = front * (depth / 2f + 0.002f);
-
-            // Marco y bandeja.
-            foreach (float k in new[] { -1f, 1f })
-            {
-                Part(t, "Marco de la pizarra", front * 0.005f + Vector3.up * k * (height / 2f + 0.015f), Thin(front, depth + 0.02f, 0.03f, width + 0.06f), metal, false);
-                Part(t, "Marco de la pizarra", front * 0.005f + along * k * (width / 2f + 0.015f), Thin(front, depth + 0.02f, height + 0.06f, 0.03f), metal, false);
-            }
-            Part(t, "Bandeja de marcadores", front * (depth / 2f + 0.03f) + Vector3.up * (-height / 2f - 0.03f), Thin(front, 0.06f, 0.015f, width * 0.6f), metal, false);
-
-            void Stroke(float y, float x, float h, float len, Material mat) =>
-                Part(t, "Trazo", face + Vector3.up * y + along * x, Thin(front, 0.003f, h, len), mat, false);
-            void Frame(float y, float x, float w, float h, Material mat)
-            {
-                Stroke(y + h / 2f, x, 0.012f, w, mat);
-                Stroke(y - h / 2f, x, 0.012f, w, mat);
-                Stroke(y, x - w / 2f, h, 0.012f, mat);
-                Stroke(y, x + w / 2f, h, 0.012f, mat);
-            }
-            float W = width / 1.8f, H = height; // escala del diagrama respecto a una pizarra de 1.8 x 1 m
-            Stroke(0.38f * H, -0.35f * W, 0.012f, 0.7f * W, black);             // título subrayado
-            Stroke(0.42f * H, -0.42f * W, 0.03f, 0.5f * W, black);
-            Frame(0.14f * H, -0.48f * W, 0.42f * W, 0.22f * H, blue);           // recuadro izquierdo
-            Frame(0.14f * H, 0.42f * W, 0.42f * W, 0.22f * H, blue);            // recuadro derecho
-            Stroke(0.14f * H, -0.03f * W, 0.014f, 0.48f * W, red);              // flecha entre recuadros
-            Stroke(0.165f * H, 0.17f * W, 0.04f * H, 0.014f, red);
-            Stroke(0.115f * H, 0.17f * W, 0.04f * H, 0.014f, red);
-            float[] lens = { 0.36f, 0.28f, 0.32f, 0.22f };
-            for (int i = 0; i < 4; i++)                                         // renglones de "texto"
-            {
-                Stroke((-0.08f - i * 0.075f) * H, (-0.48f - (0.36f - lens[i]) / 2f) * W, 0.01f, lens[i] * W, black);
-                Stroke((-0.08f - i * 0.075f) * H, (0.42f - (0.36f - lens[3 - i]) / 2f) * W, 0.01f, lens[3 - i] * W, black);
-            }
-            _count++;
-        }
-
-        /// <summary>Primitiva sin collider en el espacio del bloque, con giro opcional en x (las cápsulas quedan acostadas).</summary>
-        static GameObject Prim(PrimitiveType type, Transform box, string name, Vector3 localMeters, Vector3 scale, Material mat, float rotX = 0f)
-        {
-            var go = GameObject.CreatePrimitive(type);
-            go.name = name;
-            Object.DestroyImmediate(go.GetComponent<Collider>());
-            go.transform.SetParent(_group, false);
-            var rot = box.rotation * Quaternion.Euler(rotX, 0f, 0f);
-            go.transform.SetPositionAndRotation(box.position + box.rotation * localMeters, rot);
-            go.transform.localScale = scale;
-            Setup(go, mat, true);
-            // Formas curvas: se iluminan con las sondas de luz en vez de entrar al horneado (no necesitan UV2).
-            GameObjectUtility.SetStaticEditorFlags(go, StaticEditorFlags.BatchingStatic);
-            return go;
         }
 
         /// <summary>Dirección (en el espacio del bloque, x o z) donde va el espaldar: opuesta a la mesa más cercana o hacia la pared.</summary>
@@ -609,20 +412,6 @@ namespace Caso404.EditorTools
             var rot = box.rotation;
             go.transform.SetPositionAndRotation(box.position + rot * localMeters, rot);
             go.transform.localScale = size;
-            Setup(go, mat, shadows);
-            return go;
-        }
-
-        /// <summary>Cilindro en el espacio del bloque: diámetro y alto en metros (el primitivo mide 2 de alto con escala 1).</summary>
-        static GameObject Cyl(Transform box, string name, Vector3 localMeters, float diameter, float height, Material mat, bool shadows = true)
-        {
-            var go = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            go.name = name;
-            Object.DestroyImmediate(go.GetComponent<Collider>());
-            go.transform.SetParent(_group, false);
-            var rot = box.rotation;
-            go.transform.SetPositionAndRotation(box.position + rot * localMeters, rot);
-            go.transform.localScale = new Vector3(diameter, height / 2f, diameter);
             Setup(go, mat, shadows);
             return go;
         }
